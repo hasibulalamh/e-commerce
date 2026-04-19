@@ -62,30 +62,31 @@
                     <div class="latest-items latest-items2">
                         <div class="row">
                             @foreach($products as $product)
-                            <div class="col-xl-4 col-lg-6 col-md-6 col-sm-6">
+                            <div class="col-lg-3 col-md-4 col-sm-6">
                                 <div class="properties pb-30">
                                     <div class="properties-card">
                                         <div class="properties-img">
-                                            <a href="{{ route('product.details', $product->id) }}">
-                                                <div style="height: 200px; overflow: hidden; position: relative; background: #f5f5f5;">
+                                            <a href="{{route('product.details',$product->id)}}">
+                                                <div style="height: 250px; overflow: hidden; position: relative; background: #f5f5f5;">
                                                     @if($product->image)
                                                         <img src="{{ asset('upload/products/' . $product->image) }}" 
                                                              alt="{{ $product->name }}"
-                                                             style="width:100%; height:200px; object-fit:cover;">
+                                                             style="width:100%; height:100%; object-fit:cover;">
                                                     @else
-                                                        <div style="height:200px; display:flex; align-items:center; justify-content:center; color:#ccc; font-size:3rem;">
-                                                            📦
+                                                        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f0f0f0; color:#999;">
+                                                            <span>No Image</span>
                                                         </div>
                                                     @endif
 
                                                     {{-- Action Buttons --}}
-                                                    <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: row; align-items: center; gap: 6px; white-space: nowrap; justify-content: center;">
-                                                        <a href="{{ route('addto.cart', $product->id) }}" title="Add to Cart" style="background:#e44d26; color:white; padding:7px 14px; border-radius:4px; text-decoration:none; font-size:13px; font-weight:600; display:inline-block;">
+                                                    <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: row; align-items: center; gap: 6px; white-space: nowrap;">
+                                                        <a href="{{ route('addto.cart', $product->id) }}" title="Add to Cart" style="background:#e44d26; color:white; padding:8px 16px; border-radius:4px; text-decoration:none; font-size:13px; font-weight:600; display:inline-block;">
                                                             🛒 Add to Cart
                                                         </a>
-                                                        <a href="#" title="Add to Wishlist" 
+                                                        {{-- Wishlist --}}
+                                                        <a href="#" title="Add to Wishlist"
                                                            onclick="
-                                                             if(this.dataset.liked==='true'){
+                                                             if(this.dataset.liked === 'true') {
                                                                this.dataset.liked='false';
                                                                this.style.background='white';
                                                                this.style.color='#e44d26';
@@ -98,7 +99,17 @@
                                                              }
                                                              return false;"
                                                            data-liked="false"
-                                                           style="background:white; color:#e44d26; padding:7px 12px; border-radius:4px; text-decoration:none; font-size:16px; font-weight:bold; display:inline-block; border:2px solid #e44d26; line-height:1;">
+                                                           style="background:white; 
+                                                                  color:#e44d26;
+                                                                  padding:8px 12px; 
+                                                                  border-radius:4px;
+                                                                  text-decoration:none; 
+                                                                  font-size:18px;
+                                                                  font-weight:bold;
+                                                                  display:inline-block;
+                                                                  border: 2px solid #e44d26;
+                                                                  line-height:1;
+                                                                  cursor:pointer;">
                                                             ♡
                                                         </a>
                                                     </div>
@@ -106,19 +117,13 @@
                                             </a>
                                         </div>
                                         <div class="properties-caption properties-caption2">
-                                            <h3><a href="{{ route('product.details', $product->id) }}">{{ $product->name }}</a></h3>
-                                            <div class="properties-footer">
+                                            <h3><a href="{{route('product.details',$product->id)}}"><span>{{$product->name}}</span></a></h3>
+                                            <div class="properties-footerproduct.view">
                                                 <div class="price">
+                                                    <span>৳{{ number_format($product->final_price, 2) }}</span>
                                                     @if($product->discount > 0)
-                                                        <span class="text-muted" style="text-decoration: line-through; font-size: 0.8rem;">
-                                                            ৳{{ number_format($product->price, 2) }}
-                                                        </span>
-                                                        <span class="badge bg-danger text-white ml-1" style="font-size: 0.6rem;">{{ $product->discount }}% OFF</span>
-                                                        <br>
+                                                        <span style="text-decoration: line-through; color: #888; margin-left: 10px; font-size: 0.9em;">৳{{ number_format($product->price, 2) }}</span>
                                                     @endif
-                                                    <span class="text-primary font-weight-bold" style="font-size: 1.1rem;">
-                                                        ৳{{ number_format($product->final_price, 2) }}
-                                                    </span>
                                                 </div>
                                             </div>
                                         </div>

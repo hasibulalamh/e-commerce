@@ -1,64 +1,108 @@
 @extends('frontend.master')
 @section('content')
 
-<html>
-
-<head>
-    <title>SpaceSaver Furnishings - Marketing Page</title>
-    <link href="https://cdn.tailwindcss.com/3.4.1/tailwind.min.css" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        * {
-            font-family: Avenir, Montserrat, Corbel, 'URW Gothic', source-sans-pro, sans-serif;
-            font-weight: normal;
-        }
-
-        a {
-            color: blue;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-semibold mb-8">{{ $mybrand->first()->brand->name }} Products</h1>
-
-        @php
-            $categorizedProducts = $mybrand->groupBy('category.name');
-        @endphp
-
-        @foreach($categorizedProducts as $categoryName => $products)
-        <div class="mb-12">
-            <!-- Category Card -->
-            <div class="bg-white p-6 shadow-md mb-6">
-                <h2 class="text-2xl font-semibold">{{ $categoryName }}</h2>
-            </div>
-
-            <!-- Products Grid for this Category -->
-            <div class="grid grid-cols-3 md:grid-cols-9 gap-6">
-                @foreach($products as $product)
-                <div class="bg-white p-4 shadow-md">
-                    <div class="aspect-square w-full mb-4">
-                        <img src="{{('/uploads/products/'.$product->image) }}" 
-                             alt="{{ $product->name }}" 
-                             class="object-cover w-full h-full">
-                    </div>
-                    <h3 class="text-xl font-semibold mb-2">{{ $product->name }}</h3>
-                    <p class="text-blue-600 font-semibold mb-4">BDT{{ $product->price }}</p>
-                    <a href="{{route('product.details',$product->id)}}" class="text-blue-500 hover:underline">View Details</a>
-                </div>
-                @endforeach
-            </div>
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-4 border-bottom pb-3">
+                @if($mybrand->count() > 0)
+                    {{ $mybrand->first()->brand->name }} Products
+                @else
+                    Brand Products
+                @endif
+            </h1>
         </div>
-        @endforeach
     </div>
-</body>
 
-</html>
+    @forelse($mybrand->groupBy('category.name') as $categoryName => $products)
+    <div class="mb-5">
+        <div class="bg-light p-3 mb-4 rounded border-left" style="border-left: 5px solid #e44d26 !important;">
+            <h2 class="h4 mb-0 text-dark">{{ $categoryName }}</h2>
+        </div>
 
+        <div class="row">
+            @foreach($products as $product)
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="properties pb-30">
+                    <div class="properties-card">
+                        <div class="properties-img">
+                            <a href="{{route('product.details',$product->id)}}">
+                                <div style="height: 250px; overflow: hidden; position: relative; background: #f5f5f5;">
+                                    @if($product->image)
+                                        <img src="{{ asset('upload/products/' . $product->image) }}" 
+                                             alt="{{ $product->name }}"
+                                             style="width:100%; height:100%; object-fit:cover;">
+                                    @else
+                                        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f0f0f0; color:#999;">
+                                            <span>No Image</span>
+                                        </div>
+                                    @endif
+
+                                    {{-- Action Buttons --}}
+                                    <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: row; align-items: center; gap: 6px; white-space: nowrap;">
+                                        <a href="{{ route('addto.cart', $product->id) }}" title="Add to Cart" style="background:#e44d26; color:white; padding:8px 16px; border-radius:4px; text-decoration:none; font-size:13px; font-weight:600; display:inline-block;">
+                                            🛒 Add to Cart
+                                        </a>
+                                        {{-- Wishlist --}}
+                                        <a href="#" title="Add to Wishlist"
+                                           onclick="
+                                             if(this.dataset.liked === 'true') {
+                                               this.dataset.liked='false';
+                                               this.style.background='white';
+                                               this.style.color='#e44d26';
+                                               this.innerHTML='♡';
+                                             } else {
+                                               this.dataset.liked='true';
+                                               this.style.background='#e44d26';
+                                               this.style.color='white';
+                                               this.innerHTML='♥';
+                                             }
+                                             return false;"
+                                           data-liked="false"
+                                           style="background:white; 
+                                                  color:#e44d26;
+                                                  padding:8px 12px; 
+                                                  border-radius:4px;
+                                                  text-decoration:none; 
+                                                  font-size:18px;
+                                                  font-weight:bold;
+                                                  display:inline-block;
+                                                  border: 2px solid #e44d26;
+                                                  line-height:1;
+                                                  cursor:pointer;">
+                                            ♡
+                                        </a>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="properties-caption properties-caption2">
+                            <h3><a href="{{route('product.details',$product->id)}}"><span>{{$product->name}}</span></a></h3>
+                            <div class="properties-footerproduct.view">
+                                <div class="price">
+                                    <span>৳{{ number_format($product->final_price, 2) }}</span>
+                                    @if($product->discount > 0)
+                                        <span style="text-decoration: line-through; color: #888; margin-left: 10px; font-size: 0.9em;">৳{{ number_format($product->price, 2) }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @empty
+    <div class="text-center py-5">
+        <div style="font-size: 5rem; color: #eee;">🔍</div>
+        <h3 class="text-muted">No products found for this brand.</h3>
+        <a href="{{ route('product.listview') }}" class="btn btn-outline-primary mt-3">Browse All Products</a>
+    </div>
+    @endforelse
+</div>
 
 @endsection
-
 <!-- <table class="table">
     <thead>
         <tr>
