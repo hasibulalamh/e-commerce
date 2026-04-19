@@ -16,6 +16,7 @@
             <!-- Brand List Table -->
             <div class="container mt-5">
                 <h2 class="mb-4">Brand List</h2>
+
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
@@ -39,7 +40,13 @@
                                             <td>{{ $brands->name }}</td>
                                             <td>{{ $brands->description }}</td>
                                             <td>
-                                                <img src="{{ asset('uploads/brands/' . ($brands->logo ?? 'default.png')) }}" alt="Brand Logo" style="width: 50px; height: 50px; border-radius: 5px;">
+                                                @if($brands->logo)
+                                                    <img src="{{ asset('upload/brands/' . $brands->logo) }}" 
+                                                         alt="{{ $brands->name }}"
+                                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                                @else
+                                                    <span class="badge bg-secondary">No Logo</span>
+                                                @endif
                                             </td>
                                             <td>
                                                 @if($brands->status == 'active')
@@ -49,13 +56,16 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <a class="btn btn-warning btn-sm" href="">
+                                                <a class="btn btn-warning btn-sm" href="{{ route('brand.edit', $brands->id) }}">
                                                     <i class="fas fa-edit"></i> Edit
                                                 </a>
-                                                <a class="btn btn-danger btn-sm" href=""
-                                                    onclick="return confirm('Are you sure you want to delete this brand?');">
-                                                    <i class="fas fa-trash"></i> Delete
-                                                </a>
+                                                <form action="{{ route('brand.delete', $brands->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this brand?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-sm">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </button>
+                                                </form>
                                             </td>
                                         </tr>
                                         @endforeach

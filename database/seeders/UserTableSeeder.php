@@ -22,9 +22,11 @@ class UserTableSeeder extends Seeder
                 'name' => 'hasib',
                 'email' => 'hasib@gmail.com',
                 'password' => bcrypt('123456'),
-                
+                'role' => 'admin',
             ]);
-            
+        } else {
+            // Ensure existing user has admin role
+            $user->update(['role' => 'admin']);
         }
     }
 }

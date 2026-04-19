@@ -63,6 +63,28 @@
                 </form>
             </div>
 
+            <hr class="my-4">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0 text-white">
+                        <i class="fas fa-file-excel"></i> Bulk Import Brands (CSV/Excel)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        Upload a CSV or Excel file to import multiple brands at once. <br>
+                        <strong>Required columns:</strong> <code>name, description, status</code>
+                    </p>
+                    <form action="{{ route('brand.import') }}" method="POST" enctype="multipart/form-data" class="d-flex gap-2 align-items-center">
+                        @csrf
+                        <input type="file" name="file" class="form-control" accept=".xlsx,.xls,.csv" style="max-width: 350px;" required>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-upload"></i> Import Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

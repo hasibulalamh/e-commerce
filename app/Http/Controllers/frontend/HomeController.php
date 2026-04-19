@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 class HomeController extends Controller
 {
     public function index(){
-        $product= Product ::all();
-        return view('frontend.main',compact('product'));
+        $trendingProducts = Product::where('status', 'active')->latest()->take(8)->get();
+        $youMayLike = Product::where('status', 'active')->inRandomOrder()->take(6)->get();
+
+        return view('frontend.main', compact('trendingProducts', 'youMayLike'));
     }
 }

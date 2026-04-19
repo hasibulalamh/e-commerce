@@ -1,0 +1,7 @@
+name,category_name,brand_name,description,price,discount,stock,status,image_url
+Samsung Galaxy S24,Electronics,Samsung,Latest flagship phone,95000,10,30,active,https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400
+iPhone 15 Pro,Electronics,Apple,Titanium design flagship,150000,5,20,active,https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400
+Nike Air Max 270,Sports,Nike,Comfortable running shoes,12000,15,50,active,https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400
+Nike Dri-FIT T-Shirt,Fashion,Nike,Moisture wicking t-shirt,2500,0,100,active,https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400
+Samsung 55 4K TV,Electronics,Samsung,Crystal clear smart TV,75000,8,10,active,https://images.unsplash.com/photo-1593359677879-a4bb92f4834c?w=400
+IKEA KALLAX Shelf,Home & Living,IKEA,Versatile storage shelf,8500,20,15,active,https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400

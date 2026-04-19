@@ -19,9 +19,9 @@
                                     </div>
                                     <div class="card-body text-center">
 
-                                        <img src="{{ '/uploads/products/' . $product->image }}"
+                                        <img src="{{ asset('upload/products/' . $product->image) }}"
                                             alt="{{ $product->name }}"
-                                            class="img-fluid" style="max-height: 300px;">
+                                            class="img-fluid" style="max-height: 300px; border-radius: 8px; border: 1px solid #ddd;">
 
                                     </div>
                                 </div>
@@ -30,7 +30,7 @@
                                         <h4>Actions</h4>
                                     </div>
                                     <div class="card-body">
-                                        <a href="#" class="btn btn-primary btn-block mb-2">Edit Product</a>
+                                        <a href="{{ route('product.edit', $product->id) }}" class="btn btn-primary btn-block mb-2">Edit Product</a>
                                     </div>
                                 </div>
                             </div>
@@ -57,11 +57,14 @@
                                         <td>{{ number_format($product->price, 2) }}</td>
                                     </tr>
                                     <tr>
-                                        <th>discount</th>
-                                        @if($product->discount >0)
-                                        <td>{{ number_format($product->discount, 2) }} BDT</td>
+                                        <th>Discount</th>
+                                        @if($product->discount > 0)
+                                            <td>
+                                                <span class="text-danger font-weight-bold">{{ $product->discount }}%</span>
+                                                <small class="text-muted ml-1">(৳{{ number_format($product->discount_amount, 2) }} off)</small>
+                                            </td>
                                         @else
-                                        <td> No Discount</td>
+                                            <td><span class="badge bg-secondary">No Discount</span></td>
                                         @endif
                                     </tr>
                                     <tr>

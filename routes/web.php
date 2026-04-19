@@ -27,7 +27,7 @@ Route::get('/', [HomeController::class, 'index'])->name('Home');
 Route::get('/customer/register', [CustomerController::class, 'register'])->name('customer.register');
 Route::post('/customer/store', [CustomerController::class, 'store'])->name('customer.store');
 Route::get('/customer/login', [CustomerController::class, 'login'])->name('customer.login');
-Route::post('/customer/login/submit', [CustomerController::class, 'loginSubmit'])->name('customer.login.submit');
+Route::post('/customer/login/submit', [CustomerController::class, 'loginSubmit'])->name('customer.login.submit')->middleware('throttle:5,1');
 
 // Frontend pages
 Route::get('/Brand', [FrontendBrandController::class, 'brand'])->name('customer.brand');
@@ -39,17 +39,26 @@ Route::get('/product/details/{id}', [FrontendProductController::class, 'view'])-
 // Product list page
 Route::get('/product/list', [FrontendProductController::class, 'listview'])->name('product.listview');
 
-// Add to cart
-Route::get('/addtocart/{product}', [OrderController::class, 'addtocart'])->name('addto.cart');
-
 // Customer protected routes
 Route::group(['middleware' => 'customerg'], function () {
+    Route::get('/addtocart/{product}', [OrderController::class, 'addtocart'])->name('addto.cart');
+    Route::get('/cart/remove/{id}', [OrderController::class, 'removecart'])->name('cart.remove');
+    Route::post('/cart/update', [OrderController::class, 'updatecart'])->name('cart.update');
     Route::post('/customer/logout', [CustomerController::class, 'logout'])->name('customer.logout');
     Route::get('/cart/view', [OrderController::class, 'view'])->name('cart.view');
     Route::get('cart/checkout', [OrderController::class, 'checkout'])->name('cart.checkout');
+    
+    // Customer Profile & Orders
     Route::get('/customer/profile', [CustomerController::class, 'profile'])->name('customer.profile');
+    Route::post('/customer/profile/update', [CustomerController::class, 'profileupdate'])->name('customer.profile.update');
+    Route::get('/customer/orders', [OrderController::class, 'myorders'])->name('customer.orders');
+    Route::get('/customer/orders/{id}', [OrderController::class, 'orderdetail'])->name('customer.order.detail');
+    
     Route::post('/placeorder/store', [OrderController::class, 'storeaddorder'])->name('placeorder.store');
 });
+
+// Public Search
+Route::get('/search', [FrontendProductController::class, 'search'])->name('product.search');
 
 /*
 |--------------------------------------------------------------------------
@@ -59,13 +68,13 @@ Route::group(['middleware' => 'customerg'], function () {
 
  // Admin Authentication
     Route::get('/login', [AuthController::class, 'login'])->name('login');
-     Route::post('/submit', [AuthController::class, 'loginsubmit'])->name('login.submit');
+     Route::post('/submit', [AuthController::class, 'loginsubmit'])->name('login.submit')->middleware('throttle:5,1');
 
  Route::prefix('admin')->group(function () {
 
     // Protected routes
-    Route::middleware(['auth'])->group(function () {
-        Route::get('/logout', [AuthController::class, 'logout'])->name('admin.logout');
+    Route::middleware(['auth', 'admin'])->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
         // Dashboard Routes - Multiple routes for same dashboard
         Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
 
@@ -80,9 +89,10 @@ Route::group(['middleware' => 'customerg'], function () {
             Route::get('/', [CategoryController::class, 'list'])->name('category.list');
             Route::get('/create', [CategoryController::class, 'create'])->name('category.create');
             Route::post('/store', [CategoryController::class, 'store'])->name('category.store');
-            Route::get('/delete/{id}', [CategoryController::class, 'delete'])->name('category.delete');
+            Route::delete('/delete/{id}', [CategoryController::class, 'delete'])->name('category.delete');
             Route::get('/edit/{id}', [CategoryController::class, 'edit'])->name('category.edit');
             Route::post('/update/{id}', [CategoryController::class, 'update'])->name('category.update');
+            Route::post('/import', [CategoryController::class, 'import'])->name('category.import');
         });
 
         // Product Routes
@@ -90,10 +100,11 @@ Route::group(['middleware' => 'customerg'], function () {
             Route::get('/', [ProductController::class, 'list'])->name('product.list');
             Route::get('/create', [ProductController::class, 'create'])->name('product.create');
             Route::post('/store', [ProductController::class, 'store'])->name('product.store');
-            Route::get('/delete/{id}', [ProductController::class, 'delete'])->name('product.delete');
+            Route::delete('/delete/{id}', [ProductController::class, 'delete'])->name('product.delete');
             Route::get('/view/{id}', [ProductController::class, 'view'])->name('product.view');
             Route::get('/edit/{id}', [ProductController::class, 'edit'])->name('product.edit');
             Route::post('/update/{id}', [ProductController::class, 'update'])->name('product.update');
+            Route::post('/import', [ProductController::class, 'import'])->name('product.import');
         });
 
         // Brand Routes
@@ -101,16 +112,17 @@ Route::group(['middleware' => 'customerg'], function () {
             Route::get('/', [BrandController::class, 'list'])->name('brand.list');
             Route::get('/create', [BrandController::class, 'create'])->name('brand.create');
             Route::post('/store', [BrandController::class, 'store'])->name('brand.store');
-            Route::get('/delete/{id}', [BrandController::class, 'delete'])->name('brand.delete');
+            Route::delete('/delete/{id}', [BrandController::class, 'delete'])->name('brand.delete');
             Route::get('/edit/{id}', [BrandController::class, 'edit'])->name('brand.edit');
             Route::post('/update/{id}', [BrandController::class, 'update'])->name('brand.update');
+            Route::post('/import', [BrandController::class, 'import'])->name('brand.import');
         });
 
         // Order Management Routes
         Route::prefix('orders')->group(function () {
             Route::get('/', [OrderListController::class, 'list'])->name('orders.list');
             Route::get('/view/{id}', [OrderListController::class, 'show'])->name('order.view');
-            Route::get('/status/update/{id}/{status}', [OrderListController::class, 'updateStatus'])->name('orders.status.update');
+            Route::post('/status/update/{id}/{status}', [OrderListController::class, 'updateStatus'])->name('orders.status.update');
             Route::post('/{order}/status-history', [OrderListController::class, 'statusHistory'])->name('orders.status.history');
             Route::post('/{order}/confirm', [OrderListController::class, 'confirm'])->name('orders.confirm');
             Route::post('/{order}/cancel', [OrderListController::class, 'cancel'])->name('orders.cancel');

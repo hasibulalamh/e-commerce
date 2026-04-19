@@ -16,9 +16,9 @@ class AuthController extends Controller
 
     public function loginsubmit(Request $request)
     {
-        //validation
         $validator=Validator::make($request->all(), [
             'email' => 'required|email',
+            'password' => 'required|string|min:6',
              ]);
         if ($validator->fails()) {
             notify()->error($validator->getMessageBag());

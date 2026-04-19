@@ -8,6 +8,7 @@
             <div class="container mt-5">
                 <h2>Product List</h2>
                 <a href="{{ route('product.create') }}" class="btn btn-success mb-3">Create New Product</a>
+
                 <table class="table table-bordered table-striped">
                     <thead class="thead-dark">
                         <tr>
@@ -26,16 +27,38 @@
                         <tr>
                             <td>{{$products->id}}</td>
                             <td>
-                                <img src="{{('/uploads/products/' . $products->image) }}" alt="{{ $products->name }}"
-                                    style="max-width: 50px; max-height: 50px;">
+                                @if($products->image)
+                                    <img src="{{ asset('upload/products/' . $products->image) }}" 
+                                         alt="{{ $products->name }}"
+                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                @else
+                                    <span class="badge bg-secondary">No Image</span>
+                                @endif
                             </td>
                             <td>{{$products->name}}</td>
-                            <td>{{$products->category->name}}</td>
-                            <td>{{$products->brand->name}}</td>
-                            <td>{{ $products->price }}</td>
-                            <td>{{ $products->status }}</td>
+                            <td>{{$products->category->name ?? 'N/A'}}</td>
+                            <td>{{$products->brand->name ?? 'N/A'}}</td>
                             <td>
-                                <a href="{{ route('product.delete', $products->id) }}" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this product?')">Delete</a>
+                                {{ number_format($products->price, 2) }} BDT
+                                @if($products->discount > 0)
+                                    <br><small class="text-danger">
+                                        {{ $products->discount }}% off 
+                                        → {{ number_format($products->final_price, 2) }} BDT
+                                    </small>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="badge {{ $products->status == 'active' ? 'bg-success' : 'bg-danger' }}">
+                                    {{ ucfirst($products->status) }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ route('product.edit', $products->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                <form action="{{ route('product.delete', $products->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this product?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
                                 <a href="{{ route('product.view', $products->id) }}" class="btn btn-sm btn-info">View</a>
                             </td>
                         </tr>

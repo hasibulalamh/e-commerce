@@ -24,14 +24,14 @@ class DashboardController extends Controller
             $totalBrands = Brand::count();
             
             // Recent orders
-            $recentOrders = Order::with(['user', 'orderItems.product'])
+            $recentOrders = Order::with(['customer', 'orderDetails.product'])
                 ->latest()
                 ->take(5)
                 ->get();
 
             // Top selling products
-            $topProducts = Product::withCount('orderItems')
-                ->orderBy('order_items_count', 'desc')
+            $topProducts = Product::withCount('orderDetails')
+                ->orderBy('order_details_count', 'desc')
                 ->take(5)
                 ->get();
 

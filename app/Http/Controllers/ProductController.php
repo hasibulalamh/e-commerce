@@ -8,6 +8,8 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\ProductsImport;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class ProductController extends Controller
@@ -29,27 +31,24 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
-        //product form validation
-        $validation = Validator::make($request->all(),[
-            'name' => 'Required|string|max:55' ,
-            
-            'description' => 'Required|string|max:555' ,
-            'price' =>'Required' ,
-            'stock' => 'Required',
-            'image' => 'Required|file|max:1024'
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|integer|exists:categories,id',
+            'brand_id' => 'required|integer|exists:brands,id',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'discount' => 'nullable|integer|min:0|max:100',
+            'status' => 'required|in:active,inactive',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
-            if($validation->fails()){
-                toastr()->title('product form')->success($validation->getMessageBag());
-                return redirect()->back();
-            }
 
-
-            //file upload
-        if($request->hasFile('image')){
-            $file=$request->file('image');
-            $fileName = date('YmdHis').'.'. $file->getClientOriginalExtension();
-            $file->storeAs('/products',$fileName);
+        //file upload
+        $fileName = null;
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $fileName = date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('upload/products'), $fileName);
         }
 
         //eloquent orm model create method
@@ -60,18 +59,86 @@ class ProductController extends Controller
             "description" => $request->description,
             "price" => $request->price,
             "stock" => $request->stock,
-            "discount" =>$request->discount,
+            "discount" => $request->discount,
             "status" => $request->status,
-            "image" => $fileName 
-
+            "image" => $fileName
         ]);
+
+        toastr()->title('Product')->success('Product created successfully');
         return redirect()->route('product.list');
     }
 
+    public function edit($id)
+    {
+        $product = Product::findOrFail($id);
+        $category = Category::all();
+        $brand = Brand::all();
+        return view('backend.features.product.edit', compact('product', 'category', 'brand'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+
+        $request->validate([
+            'name' => 'required|string|max:55',
+            'category_id' => 'required|integer|exists:categories,id',
+            'brand_id' => 'required|integer|exists:brands,id',
+            'description' => 'required|string|max:555',
+            'price' => 'required|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'discount' => 'nullable|integer|min:0|max:100',
+            'status' => 'required|string|in:active,inactive',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+        ]);
+
+        $fileName = $product->image;
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $fileName = date('YmdHis') . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('upload/products'), $fileName);
+        }
+
+        $product->update([
+            "name" => $request->name,
+            "category_id" => $request->category_id,
+            "brand_id" => $request->brand_id,
+            "description" => $request->description,
+            "price" => $request->price,
+            "stock" => $request->stock,
+            "discount" => $request->discount,
+            "status" => $request->status,
+            "image" => $fileName
+        ]);
+
+        toastr()->title('Product')->success('Product updated successfully');
+        return redirect()->route('product.list');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048'
+        ]);
+
+        Excel::import(new ProductsImport, $request->file('file'));
+
+        toastr()->title('Product')->success('Products imported successfully!');
+        return redirect()->route('product.list');
+    }
 
     public function delete($id)
     {
-        Product::find($id)->delete();
+        $product = Product::findOrFail($id);
+        
+        // Delete image file if exists
+        $imagePath = public_path('upload/products/' . $product->image);
+        if ($product->image && file_exists($imagePath)) {
+            unlink($imagePath);
+        }
+        
+        $product->delete();
+        toastr()->title('Product')->success('Product deleted successfully');
         return redirect()->back();
     }
 
@@ -84,7 +151,6 @@ class ProductController extends Controller
             return redirect()->back()->with('error', 'Product not found');
         }
     }
-
 }
 
 

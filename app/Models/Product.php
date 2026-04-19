@@ -11,7 +11,17 @@ class Product extends Model
 {
     use SoftDeletes;
     
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'category_id',
+        'brand_id',
+        'description',
+        'price',
+        'stock',
+        'discount',
+        'image',
+        'status',
+    ];
     
     /**
      * The attributes that should be cast.
@@ -46,5 +56,21 @@ class Product extends Model
     public function orderDetails(): HasMany
     {
         return $this->hasMany(OrderDetail::class);
+    }
+
+    /**
+     * Calculate the discount amount in BDT.
+     */
+    public function getDiscountAmountAttribute(): float
+    {
+        return round($this->price * ($this->discount ?? 0) / 100, 2);
+    }
+
+    /**
+     * Calculate the final price after discount.
+     */
+    public function getFinalPriceAttribute(): float
+    {
+        return round($this->price - $this->discount_amount, 2);
     }
 }

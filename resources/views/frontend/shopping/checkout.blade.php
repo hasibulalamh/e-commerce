@@ -37,8 +37,8 @@
                         <form class="row contact_form" action="{{route('placeorder.store')}}" method="post" novalidate="novalidate">
                             @csrf
                             <div class="col-md-6 form-group p_star">
-                                <input type="text" value="auth('customerg')->user()->name" class="form-control" id="first" name="name" />
-                                <span class="placeholder" data-placeholder=""></span>
+                                <input type="text" value="{{ auth('customerg')->user()->name }}" class="form-control" id="first" name="name" placeholder="Full Name" />
+                                @error('name') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                             <!-- <div class="col-md-6 form-group p_star">
                                     <input type="text" class="form-control" id="last" name="name" />
@@ -48,22 +48,26 @@
                                     <input type="text" class="form-control" id="company" name="company" placeholder="Company name" />
                                 </div> -->
                             <div class="col-md-6 form-group p_star">
-                                <input type="number" value="" class="form-control" id="number" name="number" />
-                                <span class="placeholder" data-placeholder=""></span>
+                                <input type="number" value="{{ old('number') }}" class="form-control" id="number" name="number" placeholder="Phone Number" />
+                                @error('number') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                             <div class="col-md-6 form-group p_star">
-                                <input type="email" value="auth('customerg')->user()->email" class="form-control" id="email" name="email" />
-                                <span class="placeholder" data-placeholder=""></span>
+                                <input type="email" value="{{ auth('customerg')->user()->email }}" class="form-control" id="email" name="email" placeholder="Email Address" />
+                                @error('email') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="col-md-12 form-group p_star">
-                                <input type="text" class="form-control" id="add1" name="address" />
-                                <span class="placeholder" data-placeholder="Address"></span>
+                                <input type="text" class="form-control" id="add1" name="address" value="{{ old('address') }}" placeholder="Address" />
+                                @error('address') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="col-md-12 form-group p_star">
-                                <input type="text" class="form-control" id="city" name="city" />
-                                <span class="placeholder" data-placeholder="Town/City"></span>
+                                <input type="text" class="form-control" id="city" name="city" value="{{ old('city') }}" placeholder="Town/City" />
+                                @error('city') <span class="text-danger">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="col-md-12 form-group">
+                                <input type="text" class="form-control" id="zip" name="zip_code" placeholder="Postcode/ZIP" value="{{ old('zip_code') }}" />
+                                @error('zip_code') <span class="text-danger">{{ $message }}</span> @enderror
                             </div>
                             <!-- <div class="col-md-12 form-group p_star">
                                     <select class="country_select">
@@ -143,20 +147,21 @@
                             </ul>
                             <div class="payment_item">
                                 <div class="radion_btn">
-                                    <input type="radio" id="f-option5" value="CASH" name="pay" />
+                                    <input type="radio" id="f-option5" value="CASH" name="pay" {{ old('pay') == 'CASH' ? 'checked' : '' }} />
                                     <label for="f-option5">CASH</label>
                                     <div class="check"></div>
                                 </div>
-                                <p> Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode. </p>
+                                <p> Pay with cash upon delivery. </p>
                             </div>
                             <div class="payment_item active">
                                 <div class="radion_btn">
-                                    <input type="radio" id="f-option6" value="SSL" name="pay" />
+                                    <input type="radio" id="f-option6" value="SSL" name="pay" {{ old('pay') == 'SSL' ? 'checked' : '' }} />
                                     <label for="f-option6">SSL </label>
                                     <img src="assets/img/gallery/card.jpg" alt="" />
                                     <div class="check"></div>
                                 </div>
-                                <p> Please send a check to Store Name, Store Street, Store Town, Store State / County, Store Postcode. </p>
+                                <p> Secure payment via SSLCommerz. </p>
+                                @error('pay') <span class="text-danger d-block mt-2">{{ $message }}</span> @enderror
                             </div>
                             <div class="creat_account checkout-cap">
                                 <input type="checkbox" id="f-option8" name="selector" />

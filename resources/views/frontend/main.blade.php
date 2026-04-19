@@ -110,14 +110,26 @@
                     <div class="latest-items-active">
                         <!-- Single -->
                         
-                        @foreach($product as $products)
+                        @foreach($trendingProducts as $products)
 
                         <div class="properties pb-30">
                             <div class="properties-card">
 
                                 <div class="properties-img">
 
-                                    <a href="{{route('product.details',$products->id)}}"><img src="{{'/uploads/products/'.$products->image}}" alt=""></a>
+                                    <a href="{{route('product.details',$products->id)}}">
+                                        <div style="height: 250px; overflow: hidden; background: #f5f5f5;">
+                                            @if($products->image)
+                                                <img src="{{ asset('upload/products/' . $products->image) }}" 
+                                                     alt="{{ $products->name }}"
+                                                     style="width:100%; height:100%; object-fit:cover;">
+                                            @else
+                                                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f0f0f0; color:#999;">
+                                                    <span>No Image</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </a>
                                     <div class="socal_icon">
                                         <a href="{{route('addto.cart',$products->id)}}"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-cart-check-fill" viewBox="0 0 16 16">
                                                 <path d="M.5 1a.5.5 0 0 0 0 1h1.11l.401 1.607 1.498 7.985A.5.5 0 0 0 4 12h1a2 2 0 1 0 0 4 2 2 0 0 0 0-4h7a2 2 0 1 0 0 4 2 2 0 0 0 0-4h1a.5.5 0 0 0 .491-.408l1.5-8A.5.5 0 0 0 14.5 3H2.89l-.405-1.621A.5.5 0 0 0 2 1zM6 14a1 1 0 1 1-2 0 1 1 0 0 1 2 0m7 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-1.646-7.646-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L8 8.293l2.646-2.647a.5.5 0 0 1 .708.708" />
@@ -134,12 +146,12 @@
                                     </div>
                                 </div>
                                 <div class="properties-caption properties-caption2">
-                                    <h3><a href="{{route('addto.cart',$products->id)}}"><span>{{$products->name}}</span></a></h3>
+                                    <h3><a href="{{route('product.details',$products->id)}}"><span>{{$products->name}}</span></a></h3>
                                     <div class="properties-footerproduct.view">
                                         <div class="price">
-                                            <span>{{$products->price}}</span>
-                                            @if($products->discount >0)
-                                            <span>{{$products->discount}}</span>
+                                            <span>৳{{ number_format($products->final_price, 2) }}</span>
+                                            @if($products->discount > 0)
+                                                <span style="text-decoration: line-through; color: #888; margin-left: 10px; font-size: 0.9em;">৳{{ number_format($products->price, 2) }}</span>
                                             @endif
                                         </div>
                                     </div>
@@ -608,192 +620,49 @@
         </div>
         <div class="container">
             <div class="latest-items-active">
+                @foreach($youMayLike as $item)
                 <!-- Single -->
                 <div class="properties pb-30">
                     <div class="properties-card">
                         <div class="properties-img">
-                            <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest5.jpg.webp" alt=""></a>
+                            <a href="{{ route('product.details', $item->id) }}">
+                                <div style="height: 250px; overflow: hidden; background: #f5f5f5;">
+                                    @if($item->image)
+                                        <img src="{{ asset('upload/products/' . $item->image) }}" 
+                                             alt="{{ $item->name }}"
+                                             style="width:100%; height:100%; object-fit:cover;">
+                                    @else
+                                        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f0f0f0; color:#999;">
+                                            <span>No Image</span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </a>
                             <div class="socal_icon">
-                                <a href="#"><i class="ti-shopping-cart"></i></a>
+                                <a href="{{ route('addto.cart', $item->id) }}"><i class="ti-shopping-cart"></i></a>
                                 <a href="#"><i class="ti-heart"></i></a>
-                                <a href="#"><i class="ti-zoom-in"></i></a>
+                                <a href="{{ route('product.details', $item->id) }}"><i class="ti-zoom-in"></i></a>
                             </div>
                         </div>
                         <div class="properties-caption properties-caption2">
-                            <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
+                            <h3><a href="{{ route('product.details', $item->id) }}">{{ $item->name }}</a></h3>
                             <div class="properties-footer">
                                 <div class="price">
-                                    <span>$98.00 <span>$120.00</span></span>
+                                    <span>৳{{ number_format($item->final_price, 2) }}</span>
+                                    @if($item->discount > 0)
+                                        <span style="text-decoration: line-through; color: #888; font-size: 0.8em;">৳{{ number_format($item->price, 2) }}</span>
+                                    @endif
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Single -->
-                <div class="properties pb-30">
-                    <div class="properties-card">
-                        <div class="properties-img">
-                            <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest6.jpg.webp" alt=""></a>
-                            <div class="socal_icon">
-                                <a href="#"><i class="ti-shopping-cart"></i></a>
-                                <a href="#"><i class="ti-heart"></i></a>
-                                <a href="#"><i class="ti-zoom-in"></i></a>
-                            </div>
-                        </div>
-                        <div class="properties-caption properties-caption2">
-                            <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                            <div class="properties-footer">
-                                <div class="price">
-                                    <span>$98.00 <span>$120.00</span></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Single -->
-                <div class="properties pb-30">
-                    <div class="properties-card">
-                        <div class="properties-img">
-                            <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest7.jpg.webp" alt=""></a>
-                            <div class="socal_icon">
-                                <a href="#"><i class="ti-shopping-cart"></i></a>
-                                <a href="#"><i class="ti-heart"></i></a>
-                                <a href="#"><i class="ti-zoom-in"></i></a>
-                            </div>
-                        </div>
-                        <div class="properties-caption properties-caption2">
-                            <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                            <div class="properties-footer">
-                                <div class="price">
-                                    <span>$98.00 <span>$120.00</span></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Single -->
-                <div class="properties pb-30">
-                    <div class="properties-card">
-                        <div class="properties-img">
-                            <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest8.jpg.webp" alt=""></a>
-                            <div class="socal_icon">
-                                <a href="#"><i class="ti-shopping-cart"></i></a>
-                                <a href="#"><i class="ti-heart"></i></a>
-                                <a href="#"><i class="ti-zoom-in"></i></a>
-                            </div>
-                        </div>
-                        <div class="properties-caption properties-caption2">
-                            <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                            <div class="properties-footer">
-                                <div class="price">
-                                    <span>$98.00 <span>$120.00</span></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Single -->
-                <div class="properties pb-30">
-                    <div class="properties-card">
-                        <div class="properties-img">
-                            <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest6.jpg.webp" alt=""></a>
-                            <div class="socal_icon">
-                                <a href="#"><i class="ti-shopping-cart"></i></a>
-                                <a href="#"><i class="ti-heart"></i></a>
-                                <a href="#"><i class="ti-zoom-in"></i></a>
-                            </div>
-                        </div>
-                        <div class="properties-caption properties-caption2">
-                            <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                            <div class="properties-footer">
-                                <div class="price">
-                                    <span>$98.00 <span>$120.00</span></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Single -->
-                <div class="properties pb-30">
-                    <div class="properties-card">
-                        <div class="properties-img">
-                            <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest7.jpg.webp" alt=""></a>
-                            <div class="socal_icon">
-                                <a href="#"><i class="ti-shopping-cart"></i></a>
-                                <a href="#"><i class="ti-heart"></i></a>
-                                <a href="#"><i class="ti-zoom-in"></i></a>
-                            </div>
-                        </div>
-                        <div class="properties-caption properties-caption2">
-                            <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                            <div class="properties-footer">
-                                <div class="price">
-                                    <span>$98.00 <span>$120.00</span></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
     <!-- Latest-items End -->
-    <!-- Home Blog Start -->
-    <section class="home-blog">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="cl-xl-7 col-lg-8 col-md-10">
-                    <!-- Section Tittle -->
-                    <div class="section-tittle text-center mb-40">
-                        <h2>Latest News</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="single-blogs mb-30">
-                        <div class="blog-img">
-                            <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/blog1.jpg.webp" alt=""></a>
-                        </div>
-                        <div class="blogs-cap">
-                            <span>Fashion Tips</span>
-                            <h5><a href="pro-details.html">What Curling Irons Are The Best Ones</a></h5>
-                            <p>Consectetur adipisicing elit. Laborum fuga incidunt laboriosam voluptas iure, delectus..</p>
-                            <a href="pro-details.html" class="red-btn">Read More</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="single-blogs mb-30">
-                        <div class="blog-img">
-                            <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/blog2.jpg.webp" alt=""></a>
-                        </div>
-                        <div class="blogs-cap">
-                            <span>Fashion Tips</span>
-                            <h5><a href="pro-details.html">Vogue's Ultimate Guide To Autumn/
-                                    Winter 2019 Shoes</a></h5>
-                            <p>Consectetur adipisicing elit. Laborum fuga incidunt laboriosam voluptas iure, delectus..</p>
-                            <a href="pro-details.html" class="red-btn">Read More</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 col-sm-6">
-                    <div class="single-blogs mb-30">
-                        <div class="blog-img">
-                            <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/blog3.jpg.webp" alt=""></a>
-                        </div>
-                        <div class="blogs-cap">
-                            <span>Fashion Tips</span>
-                            <h5><a href="pro-details.html">What Curling Irons Are The Best Ones</a></h5>
-                            <p>Consectetur adipisicing elit. Laborum fuga incidunt laboriosam voluptas iure, delectus..</p>
-                            <a href="pro-details.html" class="red-btn">Read More</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- Home Blog End -->
+
     <!-- Services Area Start -->
     <div class="categories-area">
         <div class="container">

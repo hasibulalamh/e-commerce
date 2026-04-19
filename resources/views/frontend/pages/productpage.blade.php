@@ -28,7 +28,25 @@
             <div class="row">
                 <!-- Left sidebar filters -->
                 <div class="col-xl-3 col-lg-4 col-md-4">
-                    <!-- Add your filter components here -->
+                    <div class="category-listing mb-50">
+                        <div class="single-listing">
+                            <div class="select-job-items2 mb-30">
+                                <div class="select-categories">
+                                    <h4 class="mb-20">Category</h4>
+                                    <div class="list-group">
+                                        <a href="{{ route('product.listview') }}" class="list-group-item list-group-item-action {{ !request('category') ? 'active' : '' }}">
+                                            All Categories
+                                        </a>
+                                        @foreach($categories as $cat)
+                                        <a href="{{ route('product.listview', ['category' => $cat->id]) }}" class="list-group-item list-group-item-action {{ request('category') == $cat->id ? 'active' : '' }}">
+                                            {{ $cat->name }}
+                                        </a>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!--Products grid -->
@@ -61,10 +79,15 @@
                                             <h3><a href="{{ route('product.details', $product->id) }}">{{ $product->name }}</a></h3>
                                             <div class="properties-footer">
                                                 <div class="price">
-                                                    <span>${{ number_format($product->price, 2) }}
-                                                        @if(!empty($product->original_price))
-                                                        <span class="original-price"><del>{{ number_format($product->original_price, 2) }} BDT</del></span>
-                                                        @endif
+                                                    @if($product->discount > 0)
+                                                        <span class="text-muted" style="text-decoration: line-through; font-size: 0.9rem;">
+                                                            {{ number_format($product->price, 2) }} BDT
+                                                        </span>
+                                                        <span class="badge bg-danger text-white ml-1" style="font-size: 0.7rem;">{{ $product->discount }}% OFF</span>
+                                                        <br>
+                                                    @endif
+                                                    <span class="text-primary font-weight-bold" style="font-size: 1.1rem;">
+                                                        {{ number_format($product->final_price, 2) }} BDT
                                                     </span>
                                                 </div>
                                             </div>

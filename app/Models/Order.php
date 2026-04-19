@@ -9,7 +9,29 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 class Order extends Model
 {
     protected $table = 'orders';
-    protected $guarded = [];
+    protected $fillable = [
+        'customer_id',
+        'user_id',
+        'receiver_name',
+        'receiver_email',
+        'receiver_mobile',
+        'receiver_address',
+        'receiver_city',
+        'name',
+        'email',
+        'phone',
+        'address',
+        'city',
+        'postal_code',
+        'subtotal',
+        'shipping_cost',
+        'tax',
+        'total',
+        'payment_method',
+        'payment_status',
+        'transaction_id',
+        'status',
+    ];
 
     /**
      * The attributes that should be cast.
@@ -62,6 +84,14 @@ class Order extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the customer that placed the order.
+     */
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 
     /**

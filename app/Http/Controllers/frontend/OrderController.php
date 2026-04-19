@@ -4,7 +4,7 @@ namespace App\Http\Controllers\frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\orderdetail;
+use App\Models\OrderDetail;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -13,59 +13,34 @@ class OrderController extends Controller
 {
     public function addtocart($product_id)
     {
-
-
-       //dd($product);
-       $mycart = Session::get('cart');
-
-
-        if(empty($mycart)){
-            $product = Product::find($product_id);
-
-            //jodi cart empty hoy tahole ekta array banabo
-                $cart[$product_id] = [
-                    'id'=>$product->id,
-                    'name'=>$product->name,
-                    'price'=>$product->price,
-                    'quantity'=>1,
-                    'image'=>$product->image,
-                    'subtotal'=>$product->price*1,
-                ];
-
-                Session::put('cart',$cart);
-                toastr()->title('add cart')->success('add item in cart');
-                return redirect()->back();
-            }
-
-            if(array_key_exists($product_id,$mycart)){
-                //[quantity *1], [price * quantity]
-                $mycart[$product_id]['quantity']= $mycart[$product_id]['quantity'] + 1;
-                $mycart[$product_id]['subtotal'] = $mycart[$product_id]['price'] * $mycart[$product_id]['quantity'];
-
-             Session::put('cart',$mycart);
-            toastr()->title('add cart')->success('add quantity in cart');
+        $product = Product::find($product_id);
+        if (!$product) {
+            toastr()->error('Product not found');
             return redirect()->back();
         }
 
+        $mycart = Session::get('cart', []);
 
-            else
-            $product=product::find($product_id);
-
-            $mycart[$product_id] =[
-                'id'=>$product->id,
-                'name'=>$product->name,
-                'price'=>$product->price,
-                'quantity'=>1,
-                'image'=>$product->image,
-                'subtotal'=>$product->price*1,
+        if (array_key_exists($product_id, $mycart)) {
+            $mycart[$product_id]['quantity'] += 1;
+            $mycart[$product_id]['subtotal'] = $mycart[$product_id]['price'] * $mycart[$product_id]['quantity'];
+        } else {
+            $mycart[$product_id] = [
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->final_price,
+                'original_price' => $product->price,
+                'discount' => $product->discount,
+                'quantity' => 1,
+                'image' => $product->image,
+                'subtotal' => $product->final_price,
             ];
+        }
 
-            Session::put('cart',$mycart);
-             toastr()->title('add cart')->success('add new item in cart');
-            return redirect()->back();
-
-
-   }
+        Session::put('cart', $mycart);
+        toastr()->title('Cart')->success('Item added to cart successfully');
+        return redirect()->back();
+    }
 
     public function view(){
         $mycart = Session::get('cart') ?? [];
@@ -82,41 +57,106 @@ class OrderController extends Controller
 
     }
 
-        public function storeaddorder(Request $request){
+    public function storeaddorder(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'number' => 'required|string|max:20',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:100',
+            'zip_code' => 'nullable|string|max:20',
+            'pay' => 'required|in:CASH,SSL',
+        ]);
 
-            //dd($request)->all();
-
-            $myorder = Order::create([
-                'customer_id'=>auth('customerg')->user()->id,
-                'receiver_name'=>$request->name,
-                'receiver_email'=>$request->email,
-                'receiver_mobile'=>$request->number,
-                'receiver_address'=>$request->address,
-                'receiver_city'=>$request->city,
-                'subtotal'=>$request->total_amount,
-                'total'=>$request->total_amount +1 ,
-                'payment_method'=>$request->pay,
-
-
-            ]);
         $mycart = Session::get('cart');
+        if (empty($mycart)) {
+            toastr()->title('Order Error')->error('Your cart is empty!');
+            return redirect()->back();
+        }
+
+        // Server-side calculation to prevent price manipulation
+        $subtotal = 0;
+        foreach ($mycart as $item) {
+            $subtotal += $item['price'] * $item['quantity'];
+        }
+        $shipping_cost = 100;
+        $total = $subtotal + $shipping_cost;
+
+        $myorder = Order::create([
+            'customer_id' => auth('customerg')->user()->id,
+            'receiver_name' => $request->name,
+            'receiver_email' => $request->email,
+            'receiver_mobile' => $request->number,
+            'receiver_address' => $request->address,
+            'receiver_city' => $request->city,
+            'subtotal' => $subtotal,
+            'total' => $total,
+            'payment_method' => $request->pay,
+        ]);
 
         foreach ($mycart as $cartdata) {
-            orderdetail::create([
-
+            OrderDetail::create([
                 'order_id' => $myorder->id,
                 'product_id' => $cartdata['id'],
-                'pro_quentity' => $cartdata['quantity'],
-                'unit_price' => $cartdata['price'],
-                'subtotal' => $cartdata['subtotal'],
+                'quantity' => $cartdata['quantity'],
+                'price' => $cartdata['price'],
             ]);
         }
 
-        toastr()->title('Place Order')->success(' Place Order successfully!');
-        $mycart = Session::forget('cart');
+        toastr()->title('Place Order')->success('Place Order successfully!');
+        Session::forget('cart');
         return redirect()->route('Home');
+    }
 
+    public function removecart($id)
+    {
+        $cart = Session::get('cart', []);
+        if (isset($cart[$id])) {
+            unset($cart[$id]);
+            Session::put('cart', $cart);
+            toastr()->success('Item removed from cart');
+        }
+        return redirect()->route('cart.view');
+    }
+
+    public function updatecart(Request $request)
+    {
+        $request->validate([
+            'quantities' => 'required|array',
+            'quantities.*' => 'integer|min:1|max:100',
+        ]);
+
+        $cart = Session::get('cart', []);
+        foreach ($request->quantities as $productId => $quantity) {
+            if (isset($cart[$productId])) {
+                $cart[$productId]['quantity'] = $quantity;
+                $cart[$productId]['subtotal'] = $cart[$productId]['price'] * $quantity;
+            }
+        }
+        Session::put('cart', $cart);
+        toastr()->success('Cart updated successfully');
+        return redirect()->route('cart.view');
+    public function myorders()
+    {
+        $orders = Order::where('customer_id', auth('customerg')->user()->id)
+            ->with('orderDetails')
+            ->latest()
+            ->paginate(10);
+        return view('frontend.pages.myorders', compact('orders'));
+    }
+
+    public function orderdetail($id)
+    {
+        $order = Order::where('id', $id)
+            ->where('customer_id', auth('customerg')->user()->id)
+            ->with(['orderDetails.product', 'statusHistories'])
+            ->first();
+
+        if (!$order) {
+            abort(403, 'Unauthorized access.');
         }
 
-
+        return view('frontend.pages.orderdetail', compact('order'));
+    }
 }

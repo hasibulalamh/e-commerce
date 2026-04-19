@@ -35,8 +35,8 @@ class CustomerController extends Controller
             "password" => bcrypt($request->password),
         ]);
 
-        toastr()->success('Registration successful! Please login.');
-        return redirect()->route('customer.login');
+        toastr()->success('Registration successful! Welcome.');
+        return redirect()->route('Home');
     }
 
     // Show login form
@@ -62,7 +62,7 @@ class CustomerController extends Controller
 
         if(auth('customerg')->attempt($credentials)){
             toastr()->success('Successfully logged in');
-            return redirect()->route('customer.profile');
+            return redirect()->route('Home');
         } else {
             toastr()->error('Invalid email or password');
             return redirect()->back()->withInput();
@@ -75,8 +75,37 @@ class CustomerController extends Controller
         return redirect()->route('Home');
     }
 
-    public function profile(){
-        return view('frontend.customer.profile');
+    public function profile()
+    {
+        return view('frontend.pages.profile');
     }
-    
+
+    public function profileupdate(Request $request)
+    {
+        $customer = auth('customerg')->user();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:customers,email,' . $customer->id,
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500',
+            'password' => 'nullable|string|min:6|confirmed',
+        ]);
+
+        $data = [
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'address' => $request->address,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = bcrypt($request->password);
+        }
+
+        $customer->update($data);
+
+        toastr()->success('Profile updated successfully!');
+        return redirect()->back();
+    }
 }

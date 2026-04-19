@@ -9,7 +9,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class OrderDetail extends Model
 {
     protected $table = 'orderdetails';
-    protected $guarded = [];
+    protected $fillable = [
+        'order_id',
+        'product_id',
+        'quantity',
+        'price',
+        'discount',
+    ];
     public $timestamps = false;
 
     /**

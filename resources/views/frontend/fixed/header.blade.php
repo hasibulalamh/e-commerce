@@ -34,33 +34,47 @@
                         <div class="header-right">
                             <ul class="list-unstyled d-flex align-items-center m-0">
                                 <li class="nav-item me-4">
-                                    <a href="javascript:void(0)" class="nav-link" style="color: #333; font-weight: 500; transition: color 0.3s ease;" onmouseenter="this.style.color='#ff2020'" onmouseleave="this.style.color='#333'">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
-                                        </svg>
-                                    </a>
+                                    <form action="{{ route('product.search') }}" method="GET" class="d-flex align-items-center">
+                                        <input type="text" name="q" placeholder="Search products..." value="{{ request('q') }}" class="form-control form-control-sm" style="border-radius: 20px 0 0 20px; border: 1px solid #eee;">
+                                        <button type="submit" class="btn btn-sm py-0 px-2" style="border-radius: 0 20px 20px 0; background: #eee; border: 1px solid #eee; height: 31px;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                                            </svg>
+                                        </button>
+                                    </form>
                                 </li>
                                 <li class="nav-item me-4">
-                                    <a href="" class="nav-link" style="color: #333; font-weight: 500; transition: color 0.3s ease;" onmouseenter="this.style.color='#ff2020'" onmouseleave="this.style.color='#333'">
+                                    <a href="{{ route('cart.view') }}" class="nav-link" style="color: #333; font-weight: 500; transition: color 0.3s ease;" onmouseenter="this.style.color='#ff2020'" onmouseleave="this.style.color='#333'">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                                             <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
                                         </svg>
-                                        @if(Session::has('cart'))
-                                        {{count(Session::get('cart')) }} items
-                                        @else
-                                        0 items
-                                        @endif
+                                        <span class="badge badge-danger" style="font-size: 10px; vertical-align: top;">{{ Session::has('cart') ? count(Session::get('cart')) : 0 }}</span>
                                     </a>
                                 </li>
+                                @if(auth('customerg')->check())
+                                <li class="nav-item dropdown">
+                                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" style="color: #333; font-weight: 500;">
+                                        {{ auth('customerg')->user()->name }}
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item" href="{{ route('customer.profile') }}">Profile</a>
+                                        <a class="dropdown-item" href="{{ route('customer.orders') }}">My Orders</a>
+                                        <div class="dropdown-divider"></div>
+                                        <form action="{{ route('customer.logout') }}" method="POST">
+                                            @csrf
+                                            <button type="submit" class="dropdown-item">Logout</button>
+                                        </form>
+                                    </div>
+                                </li>
+                                @else
                                 <li class="nav-item">
-                                    <a href="{{route('customer.register')}}" class="nav-link" 
+                                    <a href="{{ route('customer.login') }}" class="nav-link" 
                                         style="color: #333; font-weight: 500; transition: color 0.3s ease; padding: 8px 15px;"
                                         onmouseenter="this.style.color='#ff2020'" onmouseleave="this.style.color='#333'">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
-                                        </svg>
+                                        Login/Register
                                     </a>
                                 </li>
+                                @endif
                             </ul>
                         </div>
                     </div>

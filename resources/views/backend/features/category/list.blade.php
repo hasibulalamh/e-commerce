@@ -14,6 +14,7 @@
 
             <div class="container mt-5">
                 <h2 class="mb-4">Category List</h2>
+
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
@@ -39,8 +40,13 @@
                                                 <td>{{ $cats->name }}</td>
                                                 <td>{{ $cats->description }}</td>
                                                 <td>
-                                                    <img src="{{'/uploads/categories/'.$cats->image}}" alt="Category Image" class="img-thumbnail"
-                                                        style="width: 50px; height: 50px;">
+                                                    @if($cats->image)
+                                                        <img src="{{ asset('upload/categories/' . $cats->image) }}" 
+                                                             alt="{{ $cats->name }}"
+                                                             style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                                    @else
+                                                        <span class="badge bg-secondary">No Image</span>
+                                                    @endif
                                                 </td>
                                                 <td>{{ $cats->display_order }}</td>
                                                 <td>
@@ -51,13 +57,16 @@
                                                     @endif
                                                 </td>
                                                 <td>
-                                                    <a class="btn btn-warning btn-sm" href="#">
+                                                    <a class="btn btn-warning btn-sm" href="{{ route('category.edit', $cats->id) }}">
                                                         <i class="fas fa-edit"></i> Edit
                                                     </a>
-                                                    <a class="btn btn-danger btn-sm"
-                                                        href="{{ route('category.delete', $cats->id) }}">
-                                                        <i class="fas fa-trash"></i> Delete
-                                                    </a>
+                                                    <form action="{{ route('category.delete', $cats->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this category?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger btn-sm">
+                                                            <i class="fas fa-trash"></i> Delete
+                                                        </button>
+                                                    </form>
                                                 </td>
                                             </tr>
                                             @endforeach

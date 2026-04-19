@@ -52,12 +52,20 @@
 
                     <!-- Price Section -->
                     <div class="price-wrapper mb-4">
-                        <h3 class="current-price d-inline-block">{{ number_format($product->price, 2) }} BDT</h3>
-                        @if($product->discount)
-                        <span class="original-price text-muted ml-2">
-                            <del>{{ number_format($product->discount, 2) }} BDT</del>
-                        </span>
+                        @if($product->discount > 0)
+                            <div class="mb-1">
+                                <span class="text-muted" style="text-decoration: line-through; font-size: 1.1rem;">
+                                    {{ number_format($product->price, 2) }} BDT
+                                </span>
+                                <span class="badge bg-danger ml-2">{{ $product->discount }}% OFF</span>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-success">You save: {{ number_format($product->discount_amount, 2) }} BDT</small>
+                            </div>
                         @endif
+                        <h3 class="current-price text-primary font-weight-bold">
+                            {{ number_format($product->final_price, 2) }} BDT
+                        </h3>
                     </div>
 
                     <!-- Description -->
