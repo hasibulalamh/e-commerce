@@ -39,11 +39,7 @@
 <div class="container py-5">
     <!-- Header Section -->
     <header class="text-center mb-5">
-        <h1 class="display-4">Watch Brands List</h1>
-        <h2 class="h4 mb-4"><i>A-Z</i></h2>
-        <button class="btn btn-dark" onclick="window.location.href = '#';">
-            View Full Logo List
-        </button>
+        <h1 class="display-4">Our Brands</h1>
     </header>
 
     <!-- Popular Brands Section -->
@@ -67,13 +63,20 @@
             @foreach($brand as $brands)
             <div class="col-6 col-sm-4 col-md-3 col-lg-2 mb-4">
             <a href="{{ route('customer.brands', $brands->id) }}" class="text-decoration-none">
-                <div class="card h-100 border-0">
-                <img src="{{ '/uploads/brands/'.$brands->logo }}" 
-                    alt="{{ $brands->name }}"
-                    class="card-img-top p-2" 
-                    style="height: 80px; object-fit: contain;">
-                <div class="card-body p-2">
-                    <p class="text-center mb-0 text-dark">{{$brands->name}}</p>
+                <div class="card h-100 border-0 shadow-sm" style="transition: transform 0.3s ease;">
+                <div style="height: 120px; display: flex; align-items: center; justify-content: center; background: #fff;">
+                    @if($brands->logo)
+                        <img src="{{ asset('upload/brands/' . $brands->logo) }}" 
+                            alt="{{ $brands->name }}"
+                            style="width:100%; height:120px; object-fit:contain; padding:10px;">
+                    @else
+                        <div style="height:120px; display:flex; align-items:center; justify-content:center; font-size:2.5rem; color:#ccc; background:#f9f9f9; width:100%;">
+                            🏷️
+                        </div>
+                    @endif
+                </div>
+                <div class="card-body p-2 border-top">
+                    <p class="text-center mb-0 font-weight-bold text-dark">{{$brands->name}}</p>
                 </div>
                 </div>
             </a>

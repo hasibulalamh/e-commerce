@@ -21,7 +21,9 @@ class ProductController extends Controller
             ->when($categoryId, fn($q) => $q->where('category_id', $categoryId))
             ->paginate(12);
 
-        $categories = \App\Models\Category::where('status', 'active')->get();
+        $categories = \App\Models\Category::where('status', 'active')
+            ->orderBy('display_order')
+            ->get();
         return view('frontend.pages.productpage', compact('products', 'categories'));
     }
 
