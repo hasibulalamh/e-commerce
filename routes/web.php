@@ -12,6 +12,7 @@ use App\Http\Controllers\frontend\ProductController as FrontendProductController
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderListController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BannerController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -128,6 +129,16 @@ Route::get('/search', [FrontendProductController::class, 'search'])->name('produ
             Route::post('/{order}/cancel', [OrderListController::class, 'cancel'])->name('orders.cancel');
             Route::post('/bulk-update', [OrderListController::class, 'bulkUpdate'])->name('orders.bulk-update');
             Route::get('/export', [OrderListController::class, 'export'])->name('orders.export');
+        });
+
+        // Banner Routes
+        Route::prefix('banners')->group(function () {
+            Route::get('/', [BannerController::class, 'index'])->name('banner.list');
+            Route::get('/create', [BannerController::class, 'create'])->name('banner.create');
+            Route::post('/store', [BannerController::class, 'store'])->name('banner.store');
+            Route::delete('/delete/{id}', [BannerController::class, 'delete'])->name('banner.delete');
+            Route::get('/edit/{id}', [BannerController::class, 'edit'])->name('banner.edit');
+            Route::post('/update/{id}', [BannerController::class, 'update'])->name('banner.update');
         });
     });
 });

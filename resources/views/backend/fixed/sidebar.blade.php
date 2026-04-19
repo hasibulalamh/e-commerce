@@ -34,6 +34,17 @@
         </li>
 
         <li class="nav-item my-1">
+            <a class="nav-link {{ request()->routeIs('banner.*') ? 'active' : '' }}" href="{{route('banner.list')}}">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+                Banner
+            </a>
+        </li>
+
+        <li class="nav-item my-1">
             <a class="nav-link {{ request()->routeIs('brand.*') ? 'active' : '' }}" href="{{route('brand.list')}}">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>

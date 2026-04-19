@@ -3,78 +3,114 @@
 
 <main>
     <!-- slider Area Start-->
-    <section class="slider-area ">
-        <div class="slider-active">
-            <!-- Single Slider -->
-            <div class="single-slider slider-bg1 slider-height d-flex align-items-center">
-                <div class="container">
-                    <div class="rowr">
-                        <div class="col-xxl-5 col-xl-6 col-lg-7 col-md-8  col-sm-10">
-                            <div class="hero-caption text-center">
-                                <span>Fashion Sale</span>
-                                <h1 data-animation="bounceIn" data-delay="0.2s">Minimal Menz Style</h1>
-                                <p data-animation="fadeInUp" data-delay="0.4s">Consectetur adipisicing elit. Laborum fuga incidunt laboriosam voluptas iure, delectus dignissimos facilis neque nulla earum.</p>
-                                <a href="#" class="btn_1 hero-btn" data-animation="fadeInUp" data-delay="0.7s">Shop Now</a>
-                            </div>
-                        </div>
+    <!-- slider Area Start-->
+    <section class="slider_area">
+        <div id="customSlider" class="owl-carousel owl-theme">
+            @forelse($banners as $banner)
+            <div class="item">
+                <div style="
+                    height: 600px;
+                    position: relative;
+                    overflow: hidden;
+                    display: flex;
+                    align-items: center;
+                    @if($banner->image)
+                        background-image: url('{{ asset('upload/banners/' . $banner->image) }}');
+                        background-size: cover;
+                        background-position: center;
+                    @else
+                        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+                    @endif
+                ">
+                    {{-- Dark overlay --}}
+                    <div style="position:absolute; inset:0; 
+                                background:rgba(0,0,0,0.45);"></div>
+                    
+                    {{-- Content --}}
+                    <div style="position:relative; z-index:2; 
+                                padding-left: 80px; max-width: 650px;">
+                        @if($banner->subtitle)
+                        <p style="color:#FFD700; font-size:1.3rem; 
+                                  font-style:italic; margin-bottom:8px;
+                                  font-family: Georgia, serif;">
+                            {{ $banner->subtitle }}
+                        </p>
+                        @endif
+                        
+                        <h1 style="color:#ffffff; font-size:3.5rem; 
+                                   font-weight:800; line-height:1.2;
+                                   margin-bottom:15px; 
+                                   text-shadow: 2px 2px 8px rgba(0,0,0,0.5);">
+                            {{ $banner->title }}
+                        </h1>
+                        
+                        @if($banner->description)
+                        <p style="color:rgba(255,255,255,0.9); 
+                                  font-size:1.1rem; margin-bottom:35px;
+                                  line-height:1.6;">
+                            {{ $banner->description }}
+                        </p>
+                        @endif
+                        
+                        <a href="{{ $banner->button_url ?? '#' }}"
+                           style="display:inline-block;
+                                  background:#000000; color:#ffffff;
+                                  padding:16px 45px;
+                                  font-size:0.9rem; font-weight:700;
+                                  letter-spacing:3px;
+                                  text-transform:uppercase;
+                                  text-decoration:none;
+                                  transition:all 0.3s ease;
+                                  border: 2px solid #000;">
+                            {{ $banner->button_text ?? 'SHOP NOW' }}
+                        </a>
                     </div>
                 </div>
             </div>
-            <!-- Single Slider -->
-            <div class="single-slider slider-bg2 slider-height d-flex align-items-center">
-                <div class="container">
-                    <div class="row justify-content-end">
-                        <div class="col-xxl-5 col-xl-6 col-lg-7 col-md-8 col-sm-10">
-                            <div class="hero-caption text-center">
-                                <span>Fashion Sale</span>
-                                <h1 data-animation="bounceIn" data-delay="0.2s">Minimal Menz Style</h1>
-                                <p data-animation="fadeInUp" data-delay="0.4s">Consectetur adipisicing elit. Laborum fuga incidunt laboriosam voluptas iure, delectus dignissimos facilis neque nulla earum.</p>
-                                <a href="#" class="btn_1 hero-btn" data-animation="fadeInUp" data-delay="0.7s">Shop Now</a>
-                            </div>
-                        </div>
+            @empty
+            <div class="item">
+                <div style="height:600px; background:linear-gradient(135deg,#667eea,#764ba2);
+                            display:flex; align-items:center; padding-left:80px;">
+                    <div>
+                        <h1 style="color:#fff; font-size:3.5rem; font-weight:800;">
+                            Welcome to Capital Shop
+                        </h1>
+                        <a href="{{ route('product.listview') }}"
+                           style="display:inline-block; background:#000; color:#fff;
+                                  padding:16px 45px; text-decoration:none;
+                                  text-transform:uppercase; font-weight:700;
+                                  letter-spacing:3px; margin-top:20px;">
+                            SHOP NOW
+                        </a>
                     </div>
                 </div>
             </div>
+            @endforelse
         </div>
     </section>
+    <!-- slider Area End-->
     <!-- slider Area End-->
     <!-- items Product 1  Start-->
     <section class="items-product1 pt-30">
         <div class="container">
             <div class="row">
+                @foreach($featuredCategories as $cat)
                 <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
                     <div class="single-items mb-20">
-                        <div class="items-img">
-                            <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/items1.jpg.webp" alt="">
+                        <div class="items-img" style="height: 300px; overflow: hidden; background: #f5f5f5;">
+                            @if($cat->image)
+                                <img src="{{ asset('upload/categories/' . $cat->image) }}" alt="{{ $cat->name }}" style="width:100%; height:100%; object-fit:cover;">
+                            @else
+                                <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/items1.jpg.webp" alt="{{ $cat->name }}" style="width:100%; height:100%; object-fit:cover;">
+                            @endif
                         </div>
                         <div class="items-details">
-                            <h4><a href="pro-details.html">Men's Fashion</a></h4>
-                            <a href="pro-details.html" class="browse-btn">Shop Now</a>
+                            <h4 style="color:white; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);"><a href="{{ route('product.listview', ['category' => $cat->id]) }}">{{ $cat->name }}</a></h4>
+                            <a href="{{ route('product.listview', ['category' => $cat->id]) }}" class="browse-btn">Shop Now</a>
                         </div>
                     </div>
                 </div>
-                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
-                    <div class="single-items mb-20">
-                        <div class="items-img">
-                            <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/items2.jpg.webp" alt="">
-                        </div>
-                        <div class="items-details">
-                            <h4><a href="pro-details.html">Women's Fashion</a></h4>
-                            <a href="pro-details.html" class="browse-btn">Shop Now</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
-                    <div class="single-items mb-20">
-                        <div class="items-img">
-                            <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/items3.jpg.webp" alt="">
-                        </div>
-                        <div class="items-details">
-                            <h4><a href="pro-details.html">Baby Fashion</a></h4>
-                            <a href="pro-details.html" class="browse-btn">Shop Now</a>
-                        </div>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
     </section>
@@ -91,10 +127,10 @@
                                 <h2>Trending This Week</h2>
                             </div>
                             <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                                <a class="nav-link active" id="nav-one-tab" data-bs-toggle="tab" href="#nav-one" role="tab" aria-controls="nav-one" aria-selected="true">Men</a>
-                                <a class="nav-link" id="nav-two-tab" data-bs-toggle="tab" href="#nav-two" role="tab" aria-controls="nav-two" aria-selected="false">Women</a>
-                                <a class="nav-link" id="nav-three-tab" data-bs-toggle="tab" href="#nav-three" role="tab" aria-controls="nav-three" aria-selected="false">Baby</a>
-                                <a class="nav-link" id="nav-four-tab" data-bs-toggle="tab" href="#nav-four" role="tab" aria-controls="nav-four" aria-selected="false">Fashion</a>
+                                <a class="nav-link active" href="{{ route('product.listview') }}">All</a>
+                                @foreach($featuredCategories as $cat)
+                                    <a class="nav-link" href="{{ route('product.listview', ['category' => $cat->id]) }}">{{ $cat->name }}</a>
+                                @endforeach
                             </div>
                         </nav>
                         <!--End Nav Button  -->
@@ -162,399 +198,7 @@
 
                     </div>
                 </div>
-                <div class="tab-pane fade" id="nav-two" role="tabpanel" aria-labelledby="nav-two-tab">
-                    <!-- Tab 2 -->
-                    <div class="latest-items-active">
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest1.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest2.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest3.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest4.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest2.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest4.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="nav-three" role="tabpanel" aria-labelledby="nav-three-tab">
-                    <!-- Tab 3 -->
-                    <div class="latest-items-active">
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest1.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest2.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest3.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest4.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest2.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest4.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="tab-pane fade" id="nav-four" role="tabpanel" aria-labelledby="nav-four-tab">
-                    <!-- Tab 4 -->
-                    <div class="latest-items-active">
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest1.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest2.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest3.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest4.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest2.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Single -->
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-                                <div class="properties-img">
-                                    <a href="pro-details.html"><img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/latest4.jpg.webp" alt=""></a>
-                                    <div class="socal_icon">
-                                        <a href="#"><i class="ti-shopping-cart"></i></a>
-                                        <a href="#"><i class="ti-heart"></i></a>
-                                        <a href="#"><i class="ti-zoom-in"></i></a>
-                                    </div>
-                                </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="pro-details.html">Cashmere Tank + Bag</a></h3>
-                                    <div class="properties-footer">
-                                        <div class="price">
-                                            <span>$98.00 <span>$120.00</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                {{-- Secondary tabs removed to maintain clean dynamic state. Only nav-one (dynamic) is used. --}}
             </div>
         </div>
     </div>
@@ -717,3 +361,33 @@
     <!-- Services Area End -->
 </main>
 @endsection
+
+@push('js')
+<!-- Owl Carousel Assets -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+
+<script>
+    $(window).on('load', function() {
+        if (typeof $.fn.owlCarousel !== 'undefined') {
+            $("#customSlider").owlCarousel({
+                loop: true,
+                margin: 0,
+                nav: true,
+                dots: true,
+                autoplay: true,
+                autoplayTimeout: 4000,
+                autoplayHoverPause: true,
+                items: 1,
+                navText: [
+                    '<i class="ti-angle-left" style="color:#fff;font-size:20px;"></i>',
+                    '<i class="ti-angle-right" style="color:#fff;font-size:20px;"></i>'
+                ]
+            });
+        } else {
+            console.error('OwlCarousel not loaded!');
+        }
+    });
+</script>
+@endpush
