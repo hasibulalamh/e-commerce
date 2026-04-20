@@ -171,6 +171,40 @@
                         </form>
                     </div>
 
+                    {{-- Two-Factor Authentication Box --}}
+                    <div style="background: white; padding: 35px; box-shadow: 0 5px 20px rgba(0,0,0,0.03); border-radius: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                            <div>
+                                <h5 style="font-size: 18px; font-weight: 700; color: #222; margin-bottom: 5px;">Two-Factor Authentication (2FA)</h5>
+                                <p style="color: #888; font-size: 14px; margin: 0;">Add an extra layer of security. A verification code will be sent to your email on each login.</p>
+                            </div>
+                            <form action="{{ route('customer.profile.update') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="two_factor_enabled" value="{{ auth('customerg')->user()->two_factor_enabled ? '0' : '1' }}">
+                                @if(auth('customerg')->user()->two_factor_enabled)
+                                    <button type="submit" 
+                                            style="background: #dc3545; color: white; border: none; padding: 12px 25px; 
+                                                   border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.3s;"
+                                            onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                                        🔓 Disable 2FA
+                                    </button>
+                                @else
+                                    <button type="submit" 
+                                            style="background: #28a745; color: white; border: none; padding: 12px 25px; 
+                                                   border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.3s;"
+                                            onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
+                                        🔒 Enable 2FA
+                                    </button>
+                                @endif
+                            </form>
+                        </div>
+                        @if(auth('customerg')->user()->two_factor_enabled)
+                            <div style="margin-top: 15px; background: rgba(40,167,69,0.08); padding: 12px 18px; border-radius: 8px; border-left: 4px solid #28a745;">
+                                <span style="color: #28a745; font-weight: 700; font-size: 14px;">✅ 2FA is currently ENABLED</span>
+                            </div>
+                        @endif
+                    </div>
+
                 </div>
             </div>
         </div>

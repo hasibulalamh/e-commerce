@@ -8,7 +8,9 @@ use App\Http\Controllers\frontend\BrandController as FrontendBrandController;
 use App\Http\Controllers\frontend\CustomerController;
 use App\Http\Controllers\frontend\HomeController;
 use App\Http\Controllers\frontend\OrderController;  // ✅ ADD THIS LINE
+use App\Http\Controllers\frontend\PasswordResetController;
 use App\Http\Controllers\frontend\ProductController as FrontendProductController;
+use App\Http\Controllers\frontend\SocialAuthController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderListController;
 use App\Http\Controllers\ProfileController;
@@ -26,9 +28,30 @@ Route::get('/', [HomeController::class, 'index'])->name('Home');
 
 // Customer auth
 Route::get('/customer/register', [CustomerController::class, 'register'])->name('customer.register');
-Route::post('/customer/store', [CustomerController::class, 'store'])->name('customer.store');
+Route::post('/customer/store', [CustomerController::class, 'store'])->name('customer.store')->middleware('throttle:3,1');
 Route::get('/customer/login', [CustomerController::class, 'login'])->name('customer.login');
 Route::post('/customer/login/submit', [CustomerController::class, 'loginSubmit'])->name('customer.login.submit')->middleware('throttle:5,1');
+
+// OTP Verification
+Route::get('/customer/verify-otp', [CustomerController::class, 'showOtpForm'])->name('customer.verify.otp');
+Route::post('/customer/verify-otp', [CustomerController::class, 'verifyOtp'])->name('customer.verify.otp.submit');
+Route::get('/customer/resend-otp', [CustomerController::class, 'resendOtp'])->name('customer.resend.otp');
+
+// 2FA Verification
+Route::get('/customer/two-factor', [CustomerController::class, 'show2faForm'])->name('customer.2fa.verify');
+Route::post('/customer/two-factor', [CustomerController::class, 'verify2fa'])->name('customer.2fa.verify.submit');
+
+// Forgot / Reset Password
+Route::get('/customer/password/forgot', [PasswordResetController::class, 'showForgotForm'])->name('customer.password.forgot');
+Route::post('/customer/password/send', [PasswordResetController::class, 'sendResetLink'])->name('customer.password.send');
+Route::get('/customer/password/reset/{token}', [PasswordResetController::class, 'showResetForm'])->name('customer.password.reset');
+Route::post('/customer/password/update', [PasswordResetController::class, 'resetPassword'])->name('customer.password.update');
+
+// Social Login
+Route::get('/customer/auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('customer.auth.google');
+Route::get('/customer/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
+// Route::get('/customer/auth/facebook', [SocialAuthController::class, 'redirectToFacebook'])->name('customer.auth.facebook');
+// Route::get('/customer/auth/facebook/callback', [SocialAuthController::class, 'handleFacebookCallback']);
 
 // Frontend pages
 Route::get('/Brand', [FrontendBrandController::class, 'brand'])->name('customer.brand');

@@ -8,6 +8,7 @@ use App\Models\OrderDetail;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -104,46 +105,65 @@ class OrderController extends Controller
             return redirect()->back();
         }
 
-        // Server-side calculation to prevent price manipulation
-        $subtotal = 0;
-        foreach ($mycart as $item) {
-            $subtotal += $item['price'] * $item['quantity'];
-        }
-        $shipping_cost = 100;
-        $total = $subtotal + $shipping_cost;
+        DB::beginTransaction();
+        try {
+            // Server-side calculation to prevent price manipulation
+            $subtotal = 0;
+            foreach ($mycart as $item) {
+                $subtotal += $item['price'] * $item['quantity'];
+            }
+            $shipping_cost = 100;
+            $total = $subtotal + $shipping_cost;
 
-        $myorder = Order::create([
-            'customer_id'      => auth('customerg')->user()->id,
-            'name'             => $request->name,
-            'email'            => $request->email,
-            'phone'            => $request->number,
-            'address'          => $request->address,
-            'city'             => $request->city,
-            'receiver_name'    => $request->name,
-            'receiver_email'   => $request->email,
-            'receiver_mobile'  => $request->number,
-            'receiver_address' => $request->address,
-            'receiver_city'    => $request->city,
-            'subtotal'         => $subtotal,
-            'shipping_cost'    => $shipping_cost,
-            'tax'              => 0,
-            'total'            => $total,
-            'payment_method'   => $request->pay,
-            'status'           => 'pending',
-        ]);
-
-        foreach ($mycart as $cartdata) {
-            OrderDetail::create([
-                'order_id' => $myorder->id,
-                'product_id' => $cartdata['id'],
-                'quantity' => $cartdata['quantity'],
-                'price' => $cartdata['price'],
+            $myorder = Order::create([
+                'customer_id'      => auth('customerg')->user()->id,
+                'name'             => $request->name,
+                'email'            => $request->email,
+                'phone'            => $request->number,
+                'address'          => $request->address,
+                'city'             => $request->city,
+                'receiver_name'    => $request->name,
+                'receiver_email'   => $request->email,
+                'receiver_mobile'  => $request->number,
+                'receiver_address' => $request->address,
+                'receiver_city'    => $request->city,
+                'subtotal'         => $subtotal,
+                'shipping_cost'    => $shipping_cost,
+                'tax'              => 0,
+                'total'            => $total,
+                'payment_method'   => $request->pay,
+                'status'           => 'pending',
             ]);
-        }
 
-        toastr()->title('Place Order')->success('Place Order successfully!');
-        Session::forget('cart');
-        return redirect()->route('Home');
+            foreach ($mycart as $cartdata) {
+                $product = Product::find($cartdata['id']);
+                
+                // Final stock check
+                if (!$product || $product->stock < $cartdata['quantity']) {
+                    throw new \Exception("Product '{$cartdata['name']}' is out of stock.");
+                }
+
+                // Decrement stock
+                $product->decrement('stock', $cartdata['quantity']);
+
+                OrderDetail::create([
+                    'order_id' => $myorder->id,
+                    'product_id' => $cartdata['id'],
+                    'quantity' => $cartdata['quantity'],
+                    'price' => $cartdata['price'],
+                ]);
+            }
+
+            DB::commit();
+            toastr()->title('Place Order')->success('Order placed successfully!');
+            Session::forget('cart');
+            return redirect()->route('Home');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            toastr()->title('Order Error')->error($e->getMessage());
+            return redirect()->back();
+        }
     }
 
     public function removecart($id)
@@ -167,6 +187,13 @@ class OrderController extends Controller
         $cart = Session::get('cart', []);
         foreach ($request->quantities as $productId => $quantity) {
             if (isset($cart[$productId])) {
+                // Stock validation
+                $product = Product::find($productId);
+                if ($product && $quantity > $product->stock) {
+                    toastr()->error("Not enough stock for '{$product->name}'. Available: {$product->stock}");
+                    continue;
+                }
+
                 $cart[$productId]['quantity'] = $quantity;
                 $cart[$productId]['subtotal'] = $cart[$productId]['price'] * $quantity;
             }

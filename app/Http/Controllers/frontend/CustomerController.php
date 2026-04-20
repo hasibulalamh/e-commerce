@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\frontend;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OtpVerificationMail;
+use App\Mail\TwoFactorCodeMail;
 use App\Models\Customer;
 use App\Models\CustomerAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class CustomerController extends Controller
@@ -16,6 +19,13 @@ class CustomerController extends Controller
     }
 
     public function store(Request $request){
+        // Sanitize input
+        $request->merge([
+            'name' => strip_tags(trim($request->name)),
+            'email' => trim($request->email),
+            'phone' => trim($request->phone),
+        ]);
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:25',
             'email' => 'required|email|unique:customers,email',
@@ -29,15 +39,100 @@ class CustomerController extends Controller
                 ->withInput();
         }
 
-        Customer::create([
+        $customer = Customer::create([
             "name" => $request->name,
             "email" => $request->email,
             "phone" => $request->phone,
             "password" => bcrypt($request->password),
         ]);
 
-        toastr()->success('Registration successful! Welcome.');
+        // Generate and send OTP
+        $otp = $customer->generateOtp();
+        Mail::to($customer->email)->send(new OtpVerificationMail($otp, $customer->name));
+
+        // Store customer ID in session for OTP verification
+        session(['otp_customer_id' => $customer->id]);
+
+        toastr()->success('Registration successful! Please verify your email.');
+        return redirect()->route('customer.verify.otp');
+    }
+
+    // Show OTP verification form
+    public function showOtpForm()
+    {
+        if (!session('otp_customer_id')) {
+            return redirect()->route('customer.login');
+        }
+        $customer = Customer::find(session('otp_customer_id'));
+        return view('frontend.auth.verify-otp', ['email' => $customer ? $customer->email : '']);
+    }
+
+    // Verify OTP
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'otp' => 'required|string|size:6',
+        ]);
+
+        $customerId = session('otp_customer_id');
+        if (!$customerId) {
+            toastr()->error('Session expired. Please register again.');
+            return redirect()->route('customer.login');
+        }
+
+        $customer = Customer::find($customerId);
+
+        if (!$customer) {
+            toastr()->error('Customer not found.');
+            return redirect()->route('customer.login');
+        }
+
+        if ($customer->otp_code !== $request->otp) {
+            toastr()->error('Invalid OTP code.');
+            return redirect()->back();
+        }
+
+        if ($customer->otp_expires_at && now()->isAfter($customer->otp_expires_at)) {
+            toastr()->error('OTP has expired. Please request a new one.');
+            return redirect()->back();
+        }
+
+        // Verify email
+        $customer->update([
+            'email_verified_at' => now(),
+            'otp_code' => null,
+            'otp_expires_at' => null,
+        ]);
+
+        session()->forget('otp_customer_id');
+
+        // Auto login
+        auth('customerg')->login($customer);
+
+        toastr()->success('Email verified successfully! Welcome.');
         return redirect()->route('Home');
+    }
+
+    // Resend OTP
+    public function resendOtp()
+    {
+        $customerId = session('otp_customer_id');
+        if (!$customerId) {
+            toastr()->error('Session expired. Please register again.');
+            return redirect()->route('customer.login');
+        }
+
+        $customer = Customer::find($customerId);
+        if (!$customer) {
+            toastr()->error('Customer not found.');
+            return redirect()->route('customer.login');
+        }
+
+        $otp = $customer->generateOtp();
+        Mail::to($customer->email)->send(new OtpVerificationMail($otp, $customer->name));
+
+        toastr()->success('New OTP sent to your email!');
+        return redirect()->back();
     }
 
     // Show login form
@@ -47,8 +142,13 @@ class CustomerController extends Controller
 
     // Handle login submission
     public function loginSubmit(Request $request){
+        // Sanitize input
+        $request->merge([
+            'login' => strip_tags(trim($request->login)),
+        ]);
+
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'login' => 'required|string',
             'password' => 'required|string'
         ]);
 
@@ -59,15 +159,104 @@ class CustomerController extends Controller
                 ->withInput();
         }
 
-        $credentials = $request->only('email', 'password');
+        $login = $request->input('login');
+        $field = filter_var($login, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+        
+        // Restriction: Phone login only with 2FA enabled
+        if ($field === 'phone') {
+            $customer = Customer::where('phone', $login)->first();
+            if ($customer && !$customer->two_factor_enabled) {
+                toastr()->error('Phone login is only allowed if 2FA is enabled.');
+                return redirect()->back()->withInput();
+            }
+        }
+
+        $credentials = [
+            $field => $login,
+            'password' => $request->password
+        ];
 
         if(auth('customerg')->attempt($credentials)){
-            toastr()->success('Successfully logged in');
-            return redirect()->route('Home');
+            $customer = auth('customerg')->user();
+
+            // Check email verification
+            if (!$customer->isEmailVerified()) {
+                auth('customerg')->logout();
+                $otp = $customer->generateOtp();
+                Mail::to($customer->email)->send(new OtpVerificationMail($otp, $customer->name));
+                session(['otp_customer_id' => $customer->id]);
+                toastr()->warning('Please verify your email first.');
+                return redirect()->route('customer.verify.otp');
+            }
+
+            // Check 2FA
+            if ($customer->two_factor_enabled) {
+                auth('customerg')->logout();
+                $code = $customer->generateTwoFactorCode();
+                Mail::to($customer->email)->send(new TwoFactorCodeMail($code, $customer->name));
+                session(['2fa_customer_id' => $customer->id]);
+                return redirect()->route('customer.2fa.verify');
+            } else {
+                // Mandatory OTP for email login if 2FA is off
+                auth('customerg')->logout();
+                $otp = $customer->generateOtp();
+                Mail::to($customer->email)->send(new OtpVerificationMail($otp, $customer->name));
+                session(['otp_customer_id' => $customer->id]);
+                toastr()->warning('Login OTP sent to your email.');
+                return redirect()->route('customer.verify.otp');
+            }
         } else {
-            toastr()->error('Invalid email or password');
+            toastr()->error('Invalid login credentials');
             return redirect()->back()->withInput();
         }
+    }
+
+    // Show 2FA verification form
+    public function show2faForm()
+    {
+        if (!session('2fa_customer_id')) {
+            return redirect()->route('customer.login');
+        }
+        $customer = Customer::find(session('2fa_customer_id'));
+        return view('frontend.auth.two-factor', ['email' => $customer ? $customer->email : '']);
+    }
+
+    // Verify 2FA code
+    public function verify2fa(Request $request)
+    {
+        $request->validate([
+            'code' => 'required|string|size:6',
+        ]);
+
+        $customerId = session('2fa_customer_id');
+        if (!$customerId) {
+            toastr()->error('Session expired. Please login again.');
+            return redirect()->route('customer.login');
+        }
+
+        $customer = Customer::find($customerId);
+
+        if (!$customer || $customer->two_factor_code !== $request->code) {
+            toastr()->error('Invalid verification code.');
+            return redirect()->back();
+        }
+
+        if ($customer->two_factor_expires_at && now()->isAfter($customer->two_factor_expires_at)) {
+            toastr()->error('Code has expired. Please login again.');
+            return redirect()->route('customer.login');
+        }
+
+        // Clear 2FA code
+        $customer->update([
+            'two_factor_code' => null,
+            'two_factor_expires_at' => null,
+        ]);
+
+        session()->forget('2fa_customer_id');
+        auth('customerg')->login($customer);
+
+        toastr()->success('Successfully logged in');
+        return redirect()->route('Home');
     }
 
     public function logout(){
@@ -95,6 +284,11 @@ class CustomerController extends Controller
 
         $data = [];
         if ($request->has('phone')) $data['phone'] = $request->phone;
+
+        // Handle 2FA toggle
+        if ($request->has('two_factor_enabled')) {
+            $data['two_factor_enabled'] = (bool) $request->two_factor_enabled;
+        }
 
         if ($request->filled('default_address_id')) {
             $customer->addresses()->update(['is_default' => false]);
