@@ -15,30 +15,59 @@ class OrderController extends Controller
     {
         $product = Product::find($product_id);
         if (!$product) {
-            toastr()->error('Product not found');
+            if (request()->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Product not found']);
+            }
+            return redirect()->back();
+        }
+
+        if ($product->stock < 1) {
+            if (request()->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Out of stock!']);
+            }
+            toastr()->error('Out of stock!');
             return redirect()->back();
         }
 
         $mycart = Session::get('cart', []);
+        $currentQty = isset($mycart[$product_id]) ? $mycart[$product_id]['quantity'] : 0;
 
-        if (array_key_exists($product_id, $mycart)) {
-            $mycart[$product_id]['quantity'] += 1;
+        if ($currentQty + 1 > $product->stock) {
+            if (request()->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Not enough stock!']);
+            }
+            toastr()->error('Not enough stock!');
+            return redirect()->back();
+        }
+
+        if (isset($mycart[$product_id])) {
+            $mycart[$product_id]['quantity']++;
             $mycart[$product_id]['subtotal'] = $mycart[$product_id]['price'] * $mycart[$product_id]['quantity'];
         } else {
             $mycart[$product_id] = [
-                'id' => $product->id,
-                'name' => $product->name,
-                'price' => $product->final_price,
+                'id'             => $product->id,
+                'name'           => $product->name,
+                'price'          => $product->final_price,
                 'original_price' => $product->price,
-                'discount' => $product->discount,
-                'quantity' => 1,
-                'image' => $product->image,
-                'subtotal' => $product->final_price,
+                'discount'       => $product->discount,
+                'quantity'       => 1,
+                'image'          => $product->image,
+                'subtotal'       => $product->final_price,
             ];
         }
 
         Session::put('cart', $mycart);
-        toastr()->title('Cart')->success('Item added to cart successfully');
+        $cartCount = count($mycart);
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success'    => true,
+                'message'    => $product->name . ' added to cart!',
+                'cart_count' => $cartCount,
+            ]);
+        }
+
+        toastr()->success('Item added to cart');
         return redirect()->back();
     }
 
@@ -137,6 +166,8 @@ class OrderController extends Controller
         Session::put('cart', $cart);
         toastr()->success('Cart updated successfully');
         return redirect()->route('cart.view');
+    }
+
     public function myorders()
     {
         $orders = Order::where('customer_id', auth('customerg')->user()->id)

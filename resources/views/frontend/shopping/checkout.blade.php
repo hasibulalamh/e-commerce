@@ -1,185 +1,267 @@
 @extends('frontend.master')
 @section('content')
 
-<main>
-    <!-- Hero area Start-->
-    <div class="hero-area section-bg2">
-        <div class="container">
-            <div class="row">
-                <div class="col-xl-12">
-                    <div class="slider-area">
-                        <div class="slider-height2 slider-bg4 d-flex align-items-center justify-content-center">
-                            <div class="hero-caption hero-caption2">
-                                <h2>Checkout</h2>
-                                <nav aria-label="breadcrumb">
-                                    <ol class="breadcrumb justify-content-center">
-                                        <li class="breadcrumb-item"><a href="{{route('Home')}}">Home</a></li>
-                                        <li class="breadcrumb-item"><a href="#">Checkout</a></li>
-                                    </ol>
-                                </nav>
-                            </div>
-                        </div>
+<div style="background:#f8f9fa; min-height:70vh; padding:40px 0;">
+<div class="container">
+
+    <div class="row">
+
+        {{-- LEFT: Billing Form --}}
+        <div class="col-lg-7 mb-4">
+            <div style="background:white; border-radius:12px;
+                        box-shadow:0 2px 15px rgba(0,0,0,0.08); padding:30px;">
+                
+                <h4 style="font-weight:700; margin-bottom:25px; 
+                            padding-bottom:15px; border-bottom:2px solid #f0f0f0;
+                            color:#222;">
+                    📋 Billing Details
+                </h4>
+
+                <form action="{{ route('placeorder.store') }}" method="POST">
+                @csrf
+
+                {{-- Name + Phone --}}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label style="font-weight:600; font-size:13px; 
+                                      color:#555; margin-bottom:6px; display:block;">
+                            Full Name *
+                        </label>
+                        <input type="text" name="name" 
+                               value="{{ auth('customerg')->user()->name }}"
+                               placeholder="Your full name"
+                               style="width:100%; padding:12px 15px; border:2px solid #eee;
+                                      border-radius:8px; font-size:14px; outline:none;
+                                      transition:border 0.2s;"
+                               onfocus="this.style.border='2px solid #e44d26'"
+                               onblur="this.style.border='2px solid #eee'">
+                        @error('name')
+                            <span style="color:#dc3545; font-size:12px;">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label style="font-weight:600; font-size:13px;
+                                      color:#555; margin-bottom:6px; display:block;">
+                            Phone Number *
+                        </label>
+                        <input type="text" name="number"
+                               value="{{ old('number') }}"
+                               placeholder="01XXXXXXXXX"
+                               style="width:100%; padding:12px 15px; border:2px solid #eee;
+                                      border-radius:8px; font-size:14px; outline:none;
+                                      transition:border 0.2s;"
+                               onfocus="this.style.border='2px solid #e44d26'"
+                               onblur="this.style.border='2px solid #eee'">
+                        @error('number')
+                            <span style="color:#dc3545; font-size:12px;">{{ $message }}</span>
+                        @enderror
                     </div>
                 </div>
+
+                {{-- Email --}}
+                <div class="mb-3">
+                    <label style="font-weight:600; font-size:13px;
+                                  color:#555; margin-bottom:6px; display:block;">
+                        Email Address *
+                    </label>
+                    <input type="email" name="email"
+                           value="{{ auth('customerg')->user()->email }}"
+                           placeholder="your@email.com"
+                           style="width:100%; padding:12px 15px; border:2px solid #eee;
+                                  border-radius:8px; font-size:14px; outline:none;
+                                  transition:border 0.2s;"
+                           onfocus="this.style.border='2px solid #e44d26'"
+                           onblur="this.style.border='2px solid #eee'">
+                    @error('email')
+                        <span style="color:#dc3545; font-size:12px;">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Address --}}
+                <div class="mb-3">
+                    <label style="font-weight:600; font-size:13px;
+                                  color:#555; margin-bottom:6px; display:block;">
+                        Street Address *
+                    </label>
+                    <input type="text" name="address"
+                           value="{{ old('address') }}"
+                           placeholder="House no, Road no, Area"
+                           style="width:100%; padding:12px 15px; border:2px solid #eee;
+                                  border-radius:8px; font-size:14px; outline:none;
+                                  transition:border 0.2s;"
+                           onfocus="this.style.border='2px solid #e44d26'"
+                           onblur="this.style.border='2px solid #eee'">
+                    @error('address')
+                        <span style="color:#dc3545; font-size:12px;">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- City + ZIP --}}
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label style="font-weight:600; font-size:13px;
+                                      color:#555; margin-bottom:6px; display:block;">
+                            City *
+                        </label>
+                        <input type="text" name="city"
+                               value="{{ old('city') }}"
+                               placeholder="Dhaka"
+                               style="width:100%; padding:12px 15px; border:2px solid #eee;
+                                      border-radius:8px; font-size:14px; outline:none;
+                                      transition:border 0.2s;"
+                               onfocus="this.style.border='2px solid #e44d26'"
+                               onblur="this.style.border='2px solid #eee'">
+                        @error('city')
+                            <span style="color:#dc3545; font-size:12px;">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <div class="col-md-6">
+                        <label style="font-weight:600; font-size:13px;
+                                      color:#555; margin-bottom:6px; display:block;">
+                            ZIP Code
+                        </label>
+                        <input type="text" name="zip_code"
+                               value="{{ old('zip_code') }}"
+                               placeholder="1200"
+                               style="width:100%; padding:12px 15px; border:2px solid #eee;
+                                      border-radius:8px; font-size:14px; outline:none;
+                                      transition:border 0.2s;"
+                               onfocus="this.style.border='2px solid #e44d26'"
+                               onblur="this.style.border='2px solid #eee'">
+                        @error('zip_code')
+                            <span style="color:#dc3545; font-size:12px;">{{ $message }}</span>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- Payment Method --}}
+                <div style="background:#f8f9fa; border-radius:10px; padding:20px; margin-bottom:20px;">
+                    <h6 style="font-weight:700; margin-bottom:15px; color:#333;">
+                        💳 Payment Method
+                    </h6>
+
+                    <label style="display:flex; align-items:center; gap:12px;
+                                  padding:15px; border:2px solid #eee; border-radius:8px;
+                                  margin-bottom:10px; cursor:pointer; background:white;
+                                  transition:border 0.2s;"
+                           onclick="this.style.border='2px solid #e44d26'">
+                        <input type="radio" name="pay" value="CASH" {{ old('pay') == 'CASH' || !old('pay') ? 'checked' : '' }}
+                               style="width:18px; height:18px; accent-color:#e44d26;">
+                        <div>
+                            <div style="font-weight:600; color:#333;">💵 Cash on Delivery</div>
+                            <div style="font-size:12px; color:#888;">Pay when your order arrives</div>
+                        </div>
+                    </label>
+
+                    <label style="display:flex; align-items:center; gap:12px;
+                                  padding:15px; border:2px solid #eee; border-radius:8px;
+                                  cursor:pointer; background:white; transition:border 0.2s;"
+                           onclick="this.style.border='2px solid #e44d26'">
+                        <input type="radio" name="pay" value="SSL" {{ old('pay') == 'SSL' ? 'checked' : '' }}
+                               style="width:18px; height:18px; accent-color:#e44d26;">
+                        <div>
+                            <div style="font-weight:600; color:#333;">🔒 SSLCommerz</div>
+                            <div style="font-size:12px; color:#888;">Secure online payment</div>
+                        </div>
+                    </label>
+                    @error('pay')
+                        <span style="color:#dc3545; font-size:12px; display:block; mt-2;">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Hidden total --}}
+                <input type="hidden" name="total_amount" 
+                       value="{{ array_sum(array_column(session('cart', []), 'subtotal')) }}">
+
+                {{-- Place Order Button --}}
+                <button type="submit"
+                        style="width:100%; background:#e44d26; color:white;
+                               padding:16px; border:none; border-radius:8px;
+                               font-size:1.1rem; font-weight:700; cursor:pointer;
+                               letter-spacing:0.5px;">
+                    🛍️ Place Order
+                </button>
+
+                </form>
             </div>
         </div>
-    </div>
-    <!--  Hero area End -->
-    <!-- Checkout Area Start-->
-    <section class="checkout_area">
-        <div class="container">
 
+        {{-- RIGHT: Order Summary --}}
+        <div class="col-lg-5">
+            <div style="background:white; border-radius:12px;
+                        box-shadow:0 2px 15px rgba(0,0,0,0.08);
+                        padding:25px; position:sticky; top:20px;">
+                
+                <h5 style="font-weight:700; margin-bottom:20px;
+                            padding-bottom:15px; border-bottom:2px solid #f0f0f0;">
+                    🛒 Your Order
+                </h5>
 
-            <div class="billing_details">
-                <div class="row">
-                    <div class="col-lg-8">
-                        <h3>Billing Details</h3>
-                        <form class="row contact_form" action="{{route('placeorder.store')}}" method="post" novalidate="novalidate">
-                            @csrf
-                            <div class="col-md-6 form-group p_star">
-                                <input type="text" value="{{ auth('customerg')->user()->name }}" class="form-control" id="first" name="name" placeholder="Full Name" />
-                                @error('name') <span class="text-danger">{{ $message }}</span> @enderror
-                            </div>
-                            <!-- <div class="col-md-6 form-group p_star">
-                                    <input type="text" class="form-control" id="last" name="name" />
-                                    <span class="placeholder" data-placeholder=""></span>
-                                </div> -->
-                            <!-- <div class="col-md-12 form-group">
-                                    <input type="text" class="form-control" id="company" name="company" placeholder="Company name" />
-                                </div> -->
-                            <div class="col-md-6 form-group p_star">
-                                <input type="number" value="{{ old('number') }}" class="form-control" id="number" name="number" placeholder="Phone Number" />
-                                @error('number') <span class="text-danger">{{ $message }}</span> @enderror
-                            </div>
-                            <div class="col-md-6 form-group p_star">
-                                <input type="email" value="{{ auth('customerg')->user()->email }}" class="form-control" id="email" name="email" placeholder="Email Address" />
-                                @error('email') <span class="text-danger">{{ $message }}</span> @enderror
-                            </div>
-
-                            <div class="col-md-12 form-group p_star">
-                                <input type="text" class="form-control" id="add1" name="address" value="{{ old('address') }}" placeholder="Address" />
-                                @error('address') <span class="text-danger">{{ $message }}</span> @enderror
-                            </div>
-
-                            <div class="col-md-12 form-group p_star">
-                                <input type="text" class="form-control" id="city" name="city" value="{{ old('city') }}" placeholder="Town/City" />
-                                @error('city') <span class="text-danger">{{ $message }}</span> @enderror
-                            </div>
-                            <div class="col-md-12 form-group">
-                                <input type="text" class="form-control" id="zip" name="zip_code" placeholder="Postcode/ZIP" value="{{ old('zip_code') }}" />
-                                @error('zip_code') <span class="text-danger">{{ $message }}</span> @enderror
-                            </div>
-                            <!-- <div class="col-md-12 form-group p_star">
-                                    <select class="country_select">
-                                        <option value="1">District</option>
-                                        <option value="2">District</option>
-                                        <option value="4">District</option>
-                                    </select>
-                                </div> -->
-                            <!-- <div class="col-md-12 form-group">
-                                    <input type="text" class="form-control" id="zip" name="zip" placeholder="Postcode/ZIP" />
-                                </div> -->
-                            <!-- <div class="col-md-12 form-group">
-                                    <div class="checkout-cap">
-                                        <input type="checkbox" id="fruit1" name="keep-log">
-                                        <label for="fruit1">Create an account?</label>
-                                    </div>
-                                </div> -->
-                            <!-- <div class="col-md-12 form-group">
-                                    <div class="creat_account">
-                                        <h3>Shipping Details</h3>
-                                        <div class="checkout-cap">
-                                            <input type="checkbox" id="f-option3" name="selector" />
-                                            <label for="f-option3">Ship to a different address?</label>
-                                        </div>
-                                    </div>
-                                    <textarea class="form-control" name="message" id="message" rows="1" placeholder="Order Notes"></textarea>
-                                </div> -->
-
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="order_box">
-                            <h2>Your Order</h2>
-                            <ul class="list">
-                                <li>
-                                    <a href="#">Product<span>Total</span>
-                                    </a>
-                                </li>
-                                @if(Session::has('cart'))
-                                @foreach($mycart as $cartData)
-                                <li>
-                                    <!-- <input type="hidden" name="P_name" value="{{$cartData['name']}}">
-                                        <input type="hidden" name="P_name" value="{{$cartData['quantity']}}">
-                                        <input type="hidden" name="P_name" value="{{$cartData['name']}}"> -->
-                                    <a href="#">{{$cartData['name']}}
-                                        <span class="middle">x {{$cartData['quantity']}}</span>
-                                        <span class="last">{{$cartData['subtotal']}}</span>
-                                    </a>
-                                </li>
-                                @endforeach
-                                <!-- <li>
-                                        <a href="#">Fresh Tomatoes
-                                            <span class="middle">x 02</span>
-                                            <span class="last">$720.00</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#">Fresh Brocoli
-                                            <span class="middle">x 02</span>
-                                            <span class="last">$720.00</span>
-                                        </a>
-                                    </li> -->
-                            </ul>
-                            <ul class="list list_2">
-                                <li>
-                                    <a href="#">Subtotal <span>{{array_sum( array_column(Session::get('cart'),'subtotal'))}} BDT</span></a>
-                                </li>
-                                <li>
-                                    <a href="#">Shipping
-                                        <span>Flat rate: 100 BDT</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#">Total<span>{{array_sum( array_column(Session::get('cart'),'subtotal')) + 100 }} BDT</span>
-                                        <input type="hidden" name="total_amount" value="{{array_sum( array_column(Session::get('cart'),'subtotal')) }}">
-                                    </a>
-                                </li>
-                            </ul>
-                            <div class="payment_item">
-                                <div class="radion_btn">
-                                    <input type="radio" id="f-option5" value="CASH" name="pay" {{ old('pay') == 'CASH' ? 'checked' : '' }} />
-                                    <label for="f-option5">CASH</label>
-                                    <div class="check"></div>
-                                </div>
-                                <p> Pay with cash upon delivery. </p>
-                            </div>
-                            <div class="payment_item active">
-                                <div class="radion_btn">
-                                    <input type="radio" id="f-option6" value="SSL" name="pay" {{ old('pay') == 'SSL' ? 'checked' : '' }} />
-                                    <label for="f-option6">SSL </label>
-                                    <img src="assets/img/gallery/card.jpg" alt="" />
-                                    <div class="check"></div>
-                                </div>
-                                <p> Secure payment via SSLCommerz. </p>
-                                @error('pay') <span class="text-danger d-block mt-2">{{ $message }}</span> @enderror
-                            </div>
-                            <div class="creat_account checkout-cap">
-                                <input type="checkbox" id="f-option8" name="selector" />
-                                <label for="f-option8">I’ve read and accept the <a href="#">terms & conditions*</a> </label>
-                            </div>
-                            <button type="submit" class="btn w-100" href="#">Place Order</button>
-                        </div>
-                        </form>
+                {{-- Items --}}
+                @php $subtotal = 0; @endphp
+                @if(session('cart'))
+                @foreach(session('cart') as $item)
+                @php $subtotal += $item['price'] * $item['quantity']; @endphp
+                <div style="display:flex; align-items:center; gap:12px;
+                            margin-bottom:15px; padding-bottom:15px;
+                            border-bottom:1px solid #f5f5f5;">
+                    <div style="width:55px; height:55px; border-radius:8px;
+                                overflow:hidden; background:#f5f5f5; flex-shrink:0;">
+                        @if(isset($item['image']) && $item['image'])
+                            <img src="{{ asset('upload/products/' . $item['image']) }}"
+                                 style="width:100%; height:100%; object-fit:cover;">
                         @else
-                        <h2>No DATA</h2>
+                            <div style="width:100%; height:100%; display:flex;
+                                        align-items:center; justify-content:center;">📦</div>
                         @endif
                     </div>
+                    <div style="flex:1;">
+                        <p style="margin:0; font-weight:600; font-size:0.88rem; color:#333;">
+                            {{ $item['name'] }}
+                        </p>
+                        <p style="margin:0; font-size:12px; color:#888;">
+                            Qty: {{ $item['quantity'] }}
+                        </p>
+                    </div>
+                    <div style="font-weight:700; color:#e44d26; white-space:nowrap;">
+                        ৳{{ number_format($item['price'] * $item['quantity'], 2) }}
+                    </div>
+                </div>
+                @endforeach
+                @endif
+
+                {{-- Totals --}}
+                <div style="border-top:2px solid #f0f0f0; padding-top:15px;">
+                    <div style="display:flex; justify-content:space-between;
+                                margin-bottom:8px; color:#555; font-size:14px;">
+                        <span>Subtotal</span>
+                        <span style="font-weight:600;">৳{{ number_format($subtotal, 2) }}</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;
+                                margin-bottom:15px; color:#555; font-size:14px;">
+                        <span>Shipping (Flat Rate)</span>
+                        <span style="font-weight:600;">৳100.00</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;
+                                padding:15px; background:#fff3f0; border-radius:8px;">
+                        <span style="font-weight:700; font-size:1rem;">Total</span>
+                        <span style="font-weight:700; font-size:1.2rem; color:#e44d26;">
+                            ৳{{ number_format($subtotal + 100, 2) }}
+                        </span>
+                    </div>
+                </div>
+
+                <div style="margin-top:15px; padding:12px; background:#f0fff4;
+                            border-radius:8px; border-left:4px solid #28a745;">
+                    <p style="margin:0; font-size:12px; color:#155724;">
+                        🔒 Your order information is secure and encrypted.
+                    </p>
                 </div>
             </div>
         </div>
-    </section>
-    <!--End Checkout Area -->
-</main>
 
+    </div>
+</div>
+</div>
 
 @endsection

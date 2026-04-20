@@ -93,21 +93,53 @@
     <!-- items Product 1  Start-->
     <section class="items-product1 pt-30">
         <div class="container">
+            @php
+            $catColors = ['#e44d26', '#2c3e50', '#27ae60', '#8e44ad', '#e67e22'];
+            @endphp
             <div class="row">
-                @foreach($featuredCategories as $cat)
-                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6">
-                    <div class="single-items mb-20">
-                        <div class="items-img" style="height: 300px; overflow: hidden; background: #f5f5f5;">
-                            @if($cat->image)
-                                <img src="{{ asset('upload/categories/' . $cat->image) }}" alt="{{ $cat->name }}" style="width:100%; height:100%; object-fit:cover;">
-                            @else
-                                <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/items1.jpg.webp" alt="{{ $cat->name }}" style="width:100%; height:100%; object-fit:cover;">
-                            @endif
+                @foreach($featuredCategories as $index => $cat)
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-4">
+                    <div style="
+                        height: 300px; 
+                        position: relative; 
+                        overflow: hidden;
+                        background: {{ $cat->image ? 'transparent' : $catColors[$index % 5] }};
+                        border-radius: 8px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    ">
+                        @if($cat->image)
+                            <img src="{{ asset('upload/categories/' . $cat->image) }}"
+                                 style="width:100%; height:100%; object-fit:cover;">
+                        @endif
+                        
+                        {{-- Overlay --}}
+                        <div style="position:absolute; inset:0; 
+                                    background:rgba(0,0,0,0.35); transition: background 0.3s ease;"
+                             onmouseenter="this.style.background='rgba(0,0,0,0.2)'"
+                             onmouseleave="this.style.background='rgba(0,0,0,0.35)'">
                         </div>
-                        <div class="items-details">
-                            <h4 style="color:white; text-shadow: 1px 1px 3px rgba(0,0,0,0.5);"><a href="{{ route('product.listview', ['category' => $cat->id]) }}">{{ $cat->name }}</a></h4>
-                            <a href="{{ route('product.listview', ['category' => $cat->id]) }}" class="browse-btn">Shop Now</a>
+
+                        {{-- Details --}}
+                        <div style="position:absolute; bottom:25px; left:25px; right:25px;">
+                            <h5 style="color:white; font-size:1.4rem; 
+                                       font-weight:700; margin:0 0 5px 0;
+                                       text-shadow:1px 1px 4px rgba(0,0,0,0.6);">
+                                {{ $cat->name }}
+                            </h5>
+                            <a href="{{ route('product.listview', ['category' => $cat->id]) }}"
+                               style="color:rgba(255,255,255,0.9); 
+                                      font-size:0.9rem; text-decoration:none;
+                                      display:inline-block; border-bottom:1px solid rgba(255,255,255,0.5);
+                                      padding-bottom:2px; font-weight:500; transition:all 0.3s ease;"
+                               onmouseenter="this.style.color='#fff'; this.style.borderBottomColor='#fff'"
+                               onmouseleave="this.style.color='rgba(255,255,255,0.9)'; this.style.borderBottomColor='rgba(255,255,255,0.5)'">
+                                Shop Now →
+                            </a>
                         </div>
+                        
+                        {{-- Hidden Link for the whole card --}}
+                        <a href="{{ route('product.listview', ['category' => $cat->id]) }}" 
+                           style="position:absolute; inset:0; z-index:1;"></a>
                     </div>
                 </div>
                 @endforeach
@@ -167,7 +199,7 @@
 
                                             {{-- Action Buttons --}}
                                             <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: row; align-items: center; gap: 6px; white-space: nowrap;">
-                                                <a href="{{ route('addto.cart', $products->id) }}" title="Add to Cart" style="background:#e44d26; color:white; padding:8px 16px; border-radius:4px; text-decoration:none; font-size:13px; font-weight:600; display:inline-block;">
+                                                <a href="{{ route('addto.cart', $products->id) }}" class="ajax-cart-btn" title="Add to Cart" style="background:#e44d26; color:white; padding:8px 16px; border-radius:4px; text-decoration:none; font-size:13px; font-weight:600; display:inline-block;">
                                                     🛒 Add to Cart
                                                 </a>
                                                 {{-- Wishlist --}}

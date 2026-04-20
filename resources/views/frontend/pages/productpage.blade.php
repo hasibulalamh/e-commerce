@@ -80,7 +80,7 @@
 
                                                     {{-- Action Buttons --}}
                                                     <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: row; align-items: center; gap: 6px; white-space: nowrap;">
-                                                        <a href="{{ route('addto.cart', $product->id) }}" title="Add to Cart" style="background:#e44d26; color:white; padding:8px 16px; border-radius:4px; text-decoration:none; font-size:13px; font-weight:600; display:inline-block;">
+                                                        <a href="{{ route('addto.cart', $product->id) }}" class="ajax-cart-btn" title="Add to Cart" style="background:#e44d26; color:white; padding:8px 16px; border-radius:4px; text-decoration:none; font-size:13px; font-weight:600; display:inline-block;">
                                                             🛒 Add to Cart
                                                         </a>
                                                         {{-- Wishlist --}}

@@ -25,7 +25,7 @@
                                         <a href="{{route('product.listview')}}" class="nav-link px-3 dropdown-toggle" style="color: #333; font-weight: 500; transition: color 0.3s ease;" onmouseenter="this.style.color='#ff2020'" onmouseleave="this.style.color='#333'">Products</a>
                                         <!-- Dropdown menu remains the same -->
                                     </li>
-                                    <li class="nav-item"><a href="{{route('cart.view')}}" class="nav-link px-3" style="color: #333; font-weight: 500; transition: color 0.3s ease;" onmouseenter="this.style.color='#ff2020'" onmouseleave="this.style.color='#333'">cart</a></li>
+
                                 </ul>
                             </nav>
                         </div>
@@ -43,12 +43,37 @@
                                         </button>
                                     </form>
                                 </li>
+                                @php $cartCount = count(session('cart', [])); @endphp
+
                                 <li class="nav-item me-4">
-                                    <a href="{{ route('cart.view') }}" class="nav-link" style="color: #333; font-weight: 500; transition: color 0.3s ease;" onmouseenter="this.style.color='#ff2020'" onmouseleave="this.style.color='#333'">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                                    <a href="{{ route('cart.view') }}" 
+                                       style="position:relative; display:inline-flex; 
+                                              align-items:center; gap:5px;
+                                              text-decoration:none; color:#333;
+                                              padding:6px 12px; border-radius:20px;
+                                              background:#f8f8f8; border:1px solid #eee;">
+                                        
+                                        {{-- Cart Icon --}}
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" 
+                                             viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="9" cy="21" r="1"></circle>
+                                            <circle cx="20" cy="21" r="1"></circle>
+                                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                                         </svg>
-                                        <span class="badge badge-danger" style="font-size: 10px; vertical-align: top;">{{ Session::has('cart') ? count(Session::get('cart')) : 0 }}</span>
+                                        
+                                        {{-- Count Badge --}}
+                                        @if($cartCount > 0)
+                                            <span class="cart-count-badge" style="background:#e44d26; color:white;
+                                                         border-radius:50%; min-width:20px; height:20px;
+                                                         font-size:11px; font-weight:700;
+                                                         display:inline-flex; align-items:center; 
+                                                         justify-content:center; padding:0 4px;">
+                                                {{ $cartCount }}
+                                            </span>
+                                        @else
+                                            <span class="cart-count-badge" style="color:#999; font-size:13px;">0</span>
+                                        @endif
                                     </a>
                                 </li>
                                 @if(auth('customerg')->check())
