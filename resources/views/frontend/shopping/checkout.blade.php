@@ -20,6 +20,47 @@
                 <form action="{{ route('placeorder.store') }}" method="POST">
                 @csrf
 
+                {{-- Saved Addresses Selector --}}
+                @if($addresses->count() > 0)
+                <div class="mb-4" style="background:#f9f9f9; padding:15px; border-radius:10px; border:1px dashed #ccc;">
+                    <label style="font-weight:700; font-size:12px; color:#e44d26; text-transform:uppercase; margin-bottom:10px; display:block;">
+                        🚀 Quick Select Saved Address
+                    </label>
+                    <select id="saved_address_selector" class="form-control" style="height:45px; border-radius:8px; border:2px solid #eee;">
+                        <option value="">-- Choose a saved address --</option>
+                        @foreach($addresses as $addr)
+                            <option value="{{ $addr->id }}" 
+                                    data-name="{{ $addr->name }}"
+                                    data-email="{{ $addr->email }}"
+                                    data-phone="{{ $addr->phone }}"
+                                    data-address="{{ $addr->address }}"
+                                    data-city="{{ $addr->city }}"
+                                    data-zip="{{ $addr->zip_code }}">
+                                {{ $addr->name }} ({{ $addr->city }}) {{ $addr->is_default ? '[DEFAULT]' : '' }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <script>
+                    document.getElementById('saved_address_selector').addEventListener('change', function() {
+                        const option = this.options[this.selectedIndex];
+                        if (option.value) {
+                            document.getElementsByName('name')[0].value = option.getAttribute('data-name');
+                            document.getElementsByName('email')[0].value = option.getAttribute('data-email');
+                            document.getElementsByName('number')[0].value = option.getAttribute('data-phone');
+                            document.getElementsByName('address')[0].value = option.getAttribute('data-address');
+                            document.getElementsByName('city')[0].value = option.getAttribute('data-city');
+                            document.getElementsByName('zip_code')[0].value = option.getAttribute('data-zip');
+                            
+                            // Visual feedback
+                            this.style.borderColor = '#28a745';
+                            setTimeout(() => { this.style.borderColor = '#eee'; }, 1000);
+                        }
+                    });
+                </script>
+                @endif
+
                 {{-- Name + Phone --}}
                 <div class="row mb-3">
                     <div class="col-md-6">

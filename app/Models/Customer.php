@@ -13,4 +13,14 @@ class Customer extends Authenticatable
         'phone',
         'password'
     ];
+
+    public function addresses()
+    {
+        return $this->hasMany(CustomerAddress::class);
+    }
+
+    public function defaultAddress()
+    {
+        return $this->hasOne(CustomerAddress::class)->where('is_default', true);
+    }
 }

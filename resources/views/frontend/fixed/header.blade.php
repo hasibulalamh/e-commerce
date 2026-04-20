@@ -77,17 +77,31 @@
                                     </a>
                                 </li>
                                 @if(auth('customerg')->check())
-                                <li class="nav-item dropdown">
-                                    <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" style="color: #333; font-weight: 500;">
+                                <li class="nav-item" style="position: relative; list-style: none;">
+                                    <a href="javascript:void(0)" id="accountDropdownBtn"
+                                       style="color: #333; font-weight: 600; padding: 8px 15px; display: flex; align-items: center; gap: 5px; text-decoration: none; cursor: pointer;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                         {{ auth('customerg')->user()->name }}
+                                        <small>▼</small>
                                     </a>
-                                    <div class="dropdown-menu dropdown-menu-right">
-                                        <a class="dropdown-item" href="{{ route('customer.profile') }}">Profile</a>
-                                        <a class="dropdown-item" href="{{ route('customer.orders') }}">My Orders</a>
-                                        <div class="dropdown-divider"></div>
-                                        <form action="{{ route('customer.logout') }}" method="POST">
+                                    <div id="accountDropdownMenu" 
+                                         style="display: none; position: absolute; top: 100%; right: 0; min-width: 180px; 
+                                                background: white; border: 1px solid #eee; box-shadow: 0 10px 25px rgba(0,0,0,0.15); 
+                                                border-radius: 12px; padding: 10px; z-index: 999999; margin-top: 5px;">
+                                        <a href="{{ route('customer.profile') }}" 
+                                           style="display: block; padding: 10px 15px; color: #333; text-decoration: none; font-weight: 500; border-radius: 8px; transition: 0.2s;"
+                                           onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                                            👤 Profile
+                                        </a>
+                                        <div style="height: 1px; background: #eee; margin: 5px 0;"></div>
+                                        <form action="{{ route('customer.logout') }}" method="POST" style="margin: 0;">
                                             @csrf
-                                            <button type="submit" class="dropdown-item">Logout</button>
+                                            <button type="submit" 
+                                                    style="display: block; width: 100%; text-align: left; padding: 10px 15px; color: #dc3545; 
+                                                           text-decoration: none; font-weight: 500; border-radius: 8px; border: none; background: none; cursor: pointer; transition: 0.2s;"
+                                                    onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background='transparent'">
+                                                🚪 Logout
+                                            </button>
                                         </form>
                                     </div>
                                 </li>
@@ -107,3 +121,39 @@
             </div>
 
             <!-- Rest of the code remains the same -->
+        </div>
+    </div>
+</header>
+
+<style>
+    /* Ensure dropdown is visible when 'show' class is added */
+    .nav-item.dropdown .dropdown-menu.show {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0) !important;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const btn = document.getElementById('accountDropdownBtn');
+        const menu = document.getElementById('accountDropdownMenu');
+        
+        if (btn && menu) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const isVisible = menu.style.display === 'block';
+                menu.style.display = isVisible ? 'none' : 'block';
+            });
+
+            // Close when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!btn.contains(e.target) && !menu.contains(e.target)) {
+                    menu.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>

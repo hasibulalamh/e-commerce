@@ -4,6 +4,7 @@ namespace App\Http\Controllers\frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\CustomerAddress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -106,6 +107,116 @@ class CustomerController extends Controller
         $customer->update($data);
 
         toastr()->success('Profile updated successfully!');
+        return redirect()->back();
+    }
+
+    public function addresses()
+    {
+        $addresses = auth('customerg')->user()->addresses()->latest()->get();
+        return view('frontend.pages.addresses', compact('addresses'));
+    }
+
+    public function addressStore(Request $request)
+    {
+        $customer = auth('customerg')->user();
+        
+        if ($customer->addresses()->count() >= 5) {
+            toastr()->error('You can only have up to 5 addresses.');
+            return redirect()->back();
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:100',
+            'zip_code' => 'nullable|string|max:20',
+        ]);
+
+        $isFirst = $customer->addresses()->count() == 0;
+
+        CustomerAddress::create([
+            'customer_id' => $customer->id,
+            'name' => $request->name,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'address' => $request->address,
+            'city' => $request->city,
+            'zip_code' => $request->zip_code,
+            'is_default' => $isFirst
+        ]);
+
+        toastr()->success('Address added successfully!');
+        return redirect()->back();
+    }
+
+    public function addressEdit($id)
+    {
+        $address = CustomerAddress::where('id', $id)
+            ->where('customer_id', auth('customerg')->id())
+            ->firstOrFail();
+            
+        return view('frontend.pages.address-edit', compact('address'));
+    }
+
+    public function addressUpdate(Request $request, $id)
+    {
+        $address = CustomerAddress::where('id', $id)
+            ->where('customer_id', auth('customerg')->id())
+            ->firstOrFail();
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:100',
+            'zip_code' => 'nullable|string|max:20',
+        ]);
+
+        $address->update($request->only(['name', 'email', 'phone', 'address', 'city', 'zip_code']));
+
+        toastr()->success('Address updated successfully!');
+        return redirect()->route('customer.addresses');
+    }
+
+    public function addressDelete($id)
+    {
+        $address = CustomerAddress::where('id', $id)
+            ->where('customer_id', auth('customerg')->id())
+            ->firstOrFail();
+
+        if ($address->is_default) {
+            $address->delete();
+            // Set another address as default if exists
+            $newDefault = auth('customerg')->user()->addresses()->first();
+            if ($newDefault) {
+                $newDefault->update(['is_default' => true]);
+            }
+        } else {
+            $address->delete();
+        }
+
+        toastr()->success('Address deleted successfully!');
+        return redirect()->back();
+    }
+
+    public function addressSetDefault($id)
+    {
+        $customer = auth('customerg')->user();
+        
+        // Reset all defaults
+        $customer->addresses()->update(['is_default' => false]);
+        
+        // Set new default
+        $address = CustomerAddress::where('id', $id)
+            ->where('customer_id', $customer->id)
+            ->firstOrFail();
+            
+        $address->update(['is_default' => true]);
+
+        toastr()->success('Default address updated!');
         return redirect()->back();
     }
 }

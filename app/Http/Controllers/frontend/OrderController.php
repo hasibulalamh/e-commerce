@@ -82,8 +82,8 @@ class OrderController extends Controller
 
     public function checkout(){
         $mycart = Session::get('cart') ?? [];
-        return view('frontend.shopping.checkout',compact('mycart'));
-
+        $addresses = auth('customerg')->user()->addresses()->get();
+        return view('frontend.shopping.checkout', compact('mycart', 'addresses'));
     }
 
     public function storeaddorder(Request $request)

@@ -55,6 +55,14 @@ Route::group(['middleware' => 'customerg'], function () {
     Route::get('/customer/orders', [OrderController::class, 'myorders'])->name('customer.orders');
     Route::get('/customer/orders/{id}', [OrderController::class, 'orderdetail'])->name('customer.order.detail');
     
+    // Address Management
+    Route::get('/customer/addresses', [CustomerController::class, 'addresses'])->name('customer.addresses');
+    Route::post('/customer/addresses/store', [CustomerController::class, 'addressStore'])->name('customer.address.store');
+    Route::get('/customer/addresses/edit/{id}', [CustomerController::class, 'addressEdit'])->name('customer.address.edit');
+    Route::post('/customer/addresses/update/{id}', [CustomerController::class, 'addressUpdate'])->name('customer.address.update');
+    Route::delete('/customer/addresses/delete/{id}', [CustomerController::class, 'addressDelete'])->name('customer.address.delete');
+    Route::post('/customer/addresses/set-default/{id}', [CustomerController::class, 'addressSetDefault'])->name('customer.address.default');
+    
     Route::post('/placeorder/store', [OrderController::class, 'storeaddorder'])->name('placeorder.store');
 });
 
