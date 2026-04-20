@@ -27,7 +27,7 @@ class OrderListController extends Controller
         // Base query with relationships
         $query = Order::with(['orderDetails' => function($q) {
             $q->with('product');
-        }, 'user'])->latest();
+        }, 'user', 'customer'])->latest();
 
         // Apply filters
         if ($status && $status !== 'all') {
@@ -52,6 +52,10 @@ class OrderListController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('id', 'like', "%{$search}%")
                   ->orWhereHas('user', function($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('customer', function($q) use ($search) {
                       $q->where('name', 'like', "%{$search}%")
                         ->orWhere('email', 'like', "%{$search}%");
                   });
@@ -105,7 +109,7 @@ class OrderListController extends Controller
     public function show($id)
     {
         try {
-            $order = Order::with(['orderDetails.product.category', 'orderDetails.product.brand', 'statusHistories.changedBy', 'user'])
+            $order = Order::with(['orderDetails.product.category', 'orderDetails.product.brand', 'statusHistories.changedBy', 'user', 'customer'])
                 ->findOrFail($id);
 
             // Calculate order totals
@@ -333,7 +337,7 @@ class OrderListController extends Controller
 
     public function export(Request $request)
     {
-        $query = Order::with(['orderDetails', 'user']);
+        $query = Order::with(['orderDetails', 'user', 'customer']);
 
         // Apply filters
         if ($request->status && $request->status !== 'all') {
@@ -357,6 +361,10 @@ class OrderListController extends Controller
             $query->where(function($q) use ($request) {
                 $q->where('id', 'like', "%{$request->search}%")
                   ->orWhereHas('user', function($q) use ($request) {
+                      $q->where('name', 'like', "%{$request->search}%")
+                        ->orWhere('email', 'like', "%{$request->search}%");
+                  })
+                  ->orWhereHas('customer', function($q) use ($request) {
                       $q->where('name', 'like', "%{$request->search}%")
                         ->orWhere('email', 'like', "%{$request->search}%");
                   });
@@ -388,8 +396,8 @@ class OrderListController extends Controller
         foreach ($orders as $order) {
             $rows[] = [
                 $order->id,
-                $order->user->name,
-                $order->user->email,
+                $order->customer_id ? ($order->customer->name ?? 'N/A') : ($order->user->name ?? 'N/A'),
+                $order->customer_id ? ($order->customer->email ?? 'N/A') : ($order->user->email ?? 'N/A'),
                 $order->created_at->format('Y-m-d H:i:s'),
                 ucfirst($order->status),
                 $order->payment_status ? 'Paid' : 'Unpaid',

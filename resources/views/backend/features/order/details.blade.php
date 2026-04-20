@@ -266,11 +266,11 @@
                             <h5 class="card-title mb-3">Customer Information</h5>
                             <div class="mb-3">
                                 <label class="info-label">Name</label>
-                                <p class="info-value">{{ optional($order->user)->name ?? 'Guest User' }}</p>
+                                <p class="info-value">{{ $order->customer_id ? optional($order->customer)->name : optional($order->user)->name ?? 'Guest User' }}</p>
                             </div>
                             <div class="mb-3">
                                 <label class="info-label">Email</label>
-                                <p class="info-value">{{ optional($order->user)->email ?? 'N/A' }}</p>
+                                <p class="info-value">{{ $order->customer_id ? optional($order->customer)->email : optional($order->user)->email ?? 'N/A' }}</p>
                             </div>
                             <div class="mb-3">
                                 <label class="info-label">Phone</label>

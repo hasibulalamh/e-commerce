@@ -107,7 +107,7 @@
 
                     {{-- Remove --}}
                     <div>
-                        <a href="{{ route('cart.remove', $cartId) }}"
+                        <button type="submit" form="remove-form-{{ $cartId }}"
                            onclick="return confirm('Remove this item?')"
                            style="background:none; border:none; 
                                   color:#dc3545; font-size:1.3rem;
@@ -115,7 +115,7 @@
                                   text-decoration:none;"
                            title="Remove">
                             🗑
-                        </a>
+                        </button>
                     </div>
                 </div>
                 @endforeach
@@ -131,6 +131,14 @@
                     </button>
                 </div>
                 </form>
+
+                {{-- Hidden Remove Forms --}}
+                @foreach(session('cart') as $cartId => $cartData)
+                    <form id="remove-form-{{ $cartId }}" action="{{ route('cart.remove', $cartId) }}" method="POST" style="display:none;">
+                        @csrf
+                        @method('DELETE')
+                    </form>
+                @endforeach
             </div>
         </div>
 

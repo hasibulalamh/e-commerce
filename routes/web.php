@@ -43,7 +43,7 @@ Route::get('/product/list', [FrontendProductController::class, 'listview'])->nam
 // Customer protected routes
 Route::group(['middleware' => 'customerg'], function () {
     Route::get('/addtocart/{product}', [OrderController::class, 'addtocart'])->name('addto.cart');
-    Route::get('/cart/remove/{id}', [OrderController::class, 'removecart'])->name('cart.remove');
+    Route::delete('/cart/remove/{id}', [OrderController::class, 'removecart'])->name('cart.remove');
     Route::post('/cart/update', [OrderController::class, 'updatecart'])->name('cart.update');
     Route::post('/customer/logout', [CustomerController::class, 'logout'])->name('customer.logout');
     Route::get('/cart/view', [OrderController::class, 'view'])->name('cart.view');

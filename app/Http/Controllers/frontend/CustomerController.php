@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 class CustomerController extends Controller
 {
     public function register(){
-        return view('frontend.auth.register');
+        return view('frontend.auth.login');
     }
 
     public function store(Request $request){
@@ -42,7 +42,7 @@ class CustomerController extends Controller
 
     // Show login form
     public function login(){
-        return view('frontend.auth.register');
+        return view('frontend.auth.login');
     }
 
     // Handle login submission
