@@ -113,15 +113,21 @@ class OrderController extends Controller
         $total = $subtotal + $shipping_cost;
 
         $myorder = Order::create([
-            'customer_id' => auth('customerg')->user()->id,
-            'receiver_name' => $request->name,
-            'receiver_email' => $request->email,
-            'receiver_mobile' => $request->number,
+            'customer_id'      => auth('customerg')->user()->id,
+            'name'             => $request->name,
+            'email'            => $request->email,
+            'phone'            => $request->number,
+            'address'          => $request->address,
+            'city'             => $request->city,
+            'receiver_name'    => $request->name,
+            'receiver_email'   => $request->email,
+            'receiver_mobile'  => $request->number,
             'receiver_address' => $request->address,
-            'receiver_city' => $request->city,
-            'subtotal' => $subtotal,
-            'total' => $total,
-            'payment_method' => $request->pay,
+            'receiver_city'    => $request->city,
+            'subtotal'         => $subtotal,
+            'total'            => $total,
+            'payment_method'   => $request->pay,
+            'status'           => 'pending',
         ]);
 
         foreach ($mycart as $cartdata) {

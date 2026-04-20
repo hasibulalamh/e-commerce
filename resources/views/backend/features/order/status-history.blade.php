@@ -187,7 +187,7 @@
                         <div class="d-sm-flex align-items-center justify-content-between mb-4">
                             <h1 class="h3 mb-0 text-gray-800">Order #{{ $order->id }} - Status History</h1>
                             <div>
-                                <a href="{{ route('orders.show', $order->id) }}" class="btn btn-secondary btn-sm">
+                                <a href="{{ route('order.view', $order->id) }}" class="btn btn-secondary btn-sm">
                                     <i class="bi bi-arrow-left"></i> Back to Order
                                 </a>
                             </div>

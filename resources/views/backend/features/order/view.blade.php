@@ -369,7 +369,7 @@
                                                                 </div>
                                                             </td>
                                                             <td>
-                                                                <a href="{{ route('orders.show', $order->id) }}" class="text-body fw-bold">
+                                                                <a href="{{ route('order.view', $order->id) }}" class="text-body fw-bold">
                                                                     #{{ $order->id }}
                                                                 </a>
                                                             </td>
@@ -400,7 +400,7 @@
                                                             <td>{{ $order->created_at->format('d M, Y') }}</td>
                                                             <td>
                                                                 <div class="btn-group" role="group">
-                                                                    <a href="{{ route('orders.show', $order->id) }}"
+                                                                    <a href="{{ route('order.view', $order->id) }}"
                                                                         class="btn btn-sm btn-soft-primary"
                                                                         data-bs-toggle="tooltip"
                                                                         title="View Details">
@@ -556,7 +556,7 @@
         if (confirm(message)) {
             const form = $('<form>', {
                 method: 'POST',
-                action: `/admin/orders/status/update/${orderId}/${status}` // directly use URL pattern
+                action: `/admin/orders/status/update/${orderId}`
             });
 
             const token = $('meta[name="csrf-token"]').attr('content');
@@ -564,6 +564,12 @@
                 type: 'hidden',
                 name: '_token',
                 value: token
+            }));
+
+            form.append($('<input>', {
+                type: 'hidden',
+                name: 'status',
+                value: status
             }));
 
             $('body').append(form);

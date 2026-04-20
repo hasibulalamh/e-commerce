@@ -84,7 +84,7 @@ class OrderListController extends Controller
 
         $orders = $query->paginate($perPage);
 
-        return view('backend.features.order.view', compact(
+        return view('backend.features.order.list', compact(
             'orders',
             'totalOrders',
             'pendingOrders',
@@ -417,5 +417,11 @@ class OrderListController extends Controller
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
+    }
+    public function invoice($id)
+    {
+        $order = Order::with(['orderDetails.product', 'customer'])
+                      ->findOrFail($id);
+        return view('backend.features.order.invoice', compact('order'));
     }
 }

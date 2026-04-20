@@ -123,12 +123,13 @@ Route::get('/search', [FrontendProductController::class, 'search'])->name('produ
         Route::prefix('orders')->group(function () {
             Route::get('/', [OrderListController::class, 'list'])->name('orders.list');
             Route::get('/view/{id}', [OrderListController::class, 'show'])->name('order.view');
-            Route::post('/status/update/{id}/{status}', [OrderListController::class, 'updateStatus'])->name('orders.status.update');
-            Route::post('/{order}/status-history', [OrderListController::class, 'statusHistory'])->name('orders.status.history');
+            Route::post('/status/update/{id}', [OrderListController::class, 'updateStatus'])->name('orders.status.update');
+            Route::get('/{order}/status-history', [OrderListController::class, 'statusHistory'])->name('orders.status.history');
             Route::post('/{order}/confirm', [OrderListController::class, 'confirm'])->name('orders.confirm');
             Route::post('/{order}/cancel', [OrderListController::class, 'cancel'])->name('orders.cancel');
-            Route::post('/bulk-update', [OrderListController::class, 'bulkUpdate'])->name('orders.bulk-update');
+            Route::get('/bulk-update', [OrderListController::class, 'bulkUpdate'])->name('orders.bulk-update');
             Route::get('/export', [OrderListController::class, 'export'])->name('orders.export');
+            Route::get('/invoice/{id}', [OrderListController::class, 'invoice'])->name('order.invoice');
         });
 
         // Banner Routes
