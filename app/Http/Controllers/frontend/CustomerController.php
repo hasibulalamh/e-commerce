@@ -78,7 +78,8 @@ class CustomerController extends Controller
 
     public function profile()
     {
-        return view('frontend.pages.profile');
+        $addresses = auth('customerg')->user()->addresses()->get();
+        return view('frontend.pages.profile', compact('addresses'));
     }
 
     public function profileupdate(Request $request)
@@ -86,19 +87,33 @@ class CustomerController extends Controller
         $customer = auth('customerg')->user();
 
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:customers,email,' . $customer->id,
             'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:500',
+            'default_address_id' => 'nullable|exists:customer_addresses,id',
             'password' => 'nullable|string|min:6|confirmed',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
-        $data = [
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'address' => $request->address,
-        ];
+        $data = [];
+        if ($request->has('phone')) $data['phone'] = $request->phone;
+
+        if ($request->filled('default_address_id')) {
+            $customer->addresses()->update(['is_default' => false]);
+            $addr = \App\Models\CustomerAddress::where('id', $request->default_address_id)
+                        ->where('customer_id', $customer->id)->first();
+            if ($addr) {
+                $addr->update(['is_default' => true]);
+                $data['address'] = $addr->address;
+            }
+        }
+
+        if ($request->hasFile('image')) {
+            if ($customer->image && file_exists(public_path($customer->image))) {
+                unlink(public_path($customer->image));
+            }
+            $fileName = time() . '_' . $request->file('image')->getClientOriginalName();
+            $request->file('image')->move(public_path('upload/customers'), $fileName);
+            $data['image'] = 'upload/customers/' . $fileName;
+        }
 
         if ($request->filled('password')) {
             $data['password'] = bcrypt($request->password);

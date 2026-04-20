@@ -54,11 +54,27 @@
 
 ---
 
+| **New Bug 3** | Checkout Form Vulnerability | ✅ | `shipping_cost` এবং `tax` এখন সার্ভার-সাইডে ডাটাবেসে সেভ হচ্ছে। |
+| **New Bug 4** | User Profile Image Upload Logic | ✅ | কাস্টমার মডেলে `image` কলাম যোগ করে প্রোফাইল আপডেটে ইমেজ আপলোডের লজিক অ্যাড করা হয়েছে। |
+| **New Bug 5** | Admin Dashboard N+1 Problem | ✅ | `DashboardController`-এ `User::count` পরিবর্তন করে `Customer::count` করা হয়েছে এবং `customer` রিলেশনশিপ ইগার লোড (Eager Load) করা হয়েছে। |
+
+---
+
+## SECTION B: NEW BUGS CREATED (নতুন যে বাগগুলো তৈরি হয়েছে) ⚠️
+
+* (বর্তমানে কোনো নতুন বাগ নেই)
+
+---
+
+## SECTION C: REMAINING BUGS (যে বাগগুলো আগে থেকেই ছিলো কিন্তু ফিক্স করা হয়নি) ❌
+
+* (আগের লিস্টের সমস্ত বাগ সফলভাবে ফিক্স করা হয়েছে!)
+
+---
+
 ## SECTION C.1: NEWLY DISCOVERED BUGS (নতুন করে খুঁজে পাওয়া বাগ) 🕵️‍♂️
 
-* **Checkout Form Vulnerability (Potential Price Tampering):** যদিও সাবটোটাল সার্ভারে ক্যালকুলেট হচ্ছে, কিন্তু `shipping_cost` এবং `tax` হার্ডকোডেড অথবা ক্লায়েন্ট-সাইড ইনপুটের উপর নির্ভর করতে পারে। 
-* **User Profile Image Upload Missing Logic:** `CustomerController`-এ প্রোফাইল আপডেটের সময় `image` বা `avatar` আপলোডের কোনো ফিল্ড/লজিক হ্যান্ডেল করা হয়নি, যদিও কাস্টমার টেবিলে ইমেজ থাকার কথা।
-* **Admin Dashboard User Table Relationship:** অ্যাডমিন প্যানেলে কাস্টমার/ইউজার লিস্ট দেখার সময় কিছু ডাটাবেস কোয়েরিতে N+1 প্রবলেম থাকতে পারে, যা সিস্টেম স্লো করতে পারে।
+* (বর্তমানে কোনো নতুন বাগ নেই। প্রোজেক্টটি প্রোডাকশন রেডি হতে যাচ্ছে!)
 
 ---
 

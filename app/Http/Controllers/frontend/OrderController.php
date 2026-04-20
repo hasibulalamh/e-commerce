@@ -125,6 +125,8 @@ class OrderController extends Controller
             'receiver_address' => $request->address,
             'receiver_city'    => $request->city,
             'subtotal'         => $subtotal,
+            'shipping_cost'    => $shipping_cost,
+            'tax'              => 0,
             'total'            => $total,
             'payment_method'   => $request->pay,
             'status'           => 'pending',
