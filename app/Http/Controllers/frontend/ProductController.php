@@ -11,7 +11,12 @@ class ProductController extends Controller
     public function view($id)
     {
         $product = Product::findOrFail($id);
-        return view('frontend.pages.Productdetails', compact('product'));
+        $relatedProducts = Product::where('category_id', $product->category_id)
+            ->where('id', '!=', $product->id)
+            ->where('status', 'active')
+            ->take(4)
+            ->get();
+        return view('frontend.pages.Productdetails', compact('product', 'relatedProducts'));
     }
 
     public function listview(Request $request)

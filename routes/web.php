@@ -7,10 +7,12 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\frontend\BrandController as FrontendBrandController;
 use App\Http\Controllers\frontend\CustomerController;
 use App\Http\Controllers\frontend\HomeController;
-use App\Http\Controllers\frontend\OrderController;  // ✅ ADD THIS LINE
+use App\Http\Controllers\frontend\OrderController;
 use App\Http\Controllers\frontend\PasswordResetController;
 use App\Http\Controllers\frontend\ProductController as FrontendProductController;
 use App\Http\Controllers\frontend\SocialAuthController;
+use App\Http\Controllers\frontend\WishlistController;
+use App\Http\Controllers\frontend\ReviewController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderListController;
 use App\Http\Controllers\ProfileController;
@@ -87,6 +89,14 @@ Route::group(['middleware' => 'customerg'], function () {
     Route::post('/customer/addresses/set-default/{id}', [CustomerController::class, 'addressSetDefault'])->name('customer.address.default');
     
     Route::post('/placeorder/store', [OrderController::class, 'storeaddorder'])->name('placeorder.store');
+
+    // Wishlist
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('customer.wishlist');
+    Route::post('/wishlist/toggle/{productId}', [WishlistController::class, 'toggle'])->name('customer.wishlist.toggle');
+    Route::delete('/wishlist/remove/{id}', [WishlistController::class, 'remove'])->name('customer.wishlist.remove');
+
+    // Reviews
+    Route::post('/product/review', [ReviewController::class, 'store'])->name('customer.product.review');
 });
 
 // Public Search

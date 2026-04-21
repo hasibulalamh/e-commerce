@@ -8,10 +8,9 @@
             <div class="col-lg-6">
                 <div class="product-image-wrapper">
                     <div class="main-image">
-                        <img src="{{ ('/uploads/products/'.$product->image) }}"
+                        <img src="{{ asset('/uploads/products/'.$product->image) }}"
                             alt="{{ $product->name }}"
                             class="img-fluid">
-
                     </div>
                 </div>
             </div>
@@ -21,19 +20,22 @@
                 <div class="product-details-content">
                     <h2 class="product-title mb-3">{{ $product->name }}</h2>
 
-                    <!-- Rating Section
+                    <!-- Rating Section -->
                     <div class="rating-wrapper mb-3">
                         <div class="rating d-inline-block">
+                            @php $avgRating = $product->average_rating; @endphp
                             @for($i = 1; $i <= 5; $i++)
-                                @if($i <=$product->rating)
-                                <i class="fas fa-star text-warning"></i>
+                                @if($avgRating >= $i)
+                                    <i class="fas fa-star text-warning"></i>
+                                @elseif($avgRating >= $i - 0.5)
+                                    <i class="fas fa-star-half-alt text-warning"></i>
                                 @else
-                                <i class="fas fa-star-half-alt text-warning"></i>
+                                    <i class="far fa-star text-warning"></i>
                                 @endif
                             @endfor
                         </div>
-                        <span class="review-count ml-2">({{ $product->reviews_count ?? 0 }} Reviews)</span>
-                    </div> -->
+                        <span class="review-count ml-2">({{ $product->reviews->count() }} Reviews)</span>
+                    </div>
 
                     <!-- Product Details -->
                     <div class="product-info mb-4">
@@ -59,9 +61,6 @@
                                 </span>
                                 <span class="badge bg-danger ml-2">{{ $product->discount }}% OFF</span>
                             </div>
-                            <div class="mb-2">
-                                <small class="text-success">You save: {{ number_format($product->discount_amount, 2) }} BDT</small>
-                            </div>
                         @endif
                         <h3 class="current-price text-primary font-weight-bold">
                             {{ number_format($product->final_price, 2) }} BDT
@@ -74,28 +73,162 @@
                         <p>{{ $product->description }}</p>
                     </div>
 
-                    <!-- Add to Cart Form -->
-                    <div class="product-description mb-4">
+                    <!-- Actions -->
+                    <div class="product-actions d-flex align-items-center mb-4">
                         <a href="{{route('addto.cart',$product->id)}}" 
-                           class="btn btn-primary px-4 py-2" 
+                           class="btn btn-primary px-4 py-2 mr-3" 
                            style="background-color: #007bff; color: white; text-decoration: none;">
                             Add to Cart
                         </a>
+                        
+                        <button class="btn btn-outline-danger wishlist-toggle-btn" data-id="{{ $product->id }}">
+                            <i class="{{ auth('customerg')->check() && auth('customerg')->user()->wishlists()->where('product_id', $product->id)->exists() ? 'fas' : 'far' }} fa-heart"></i>
+                            Wishlist
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Reviews Section -->
+        <div class="row mt-50">
+            <div class="col-12">
+                <div class="reviews-wrapper border-top pt-40">
+                    <h3 class="mb-30">Customer Reviews</h3>
+                    
+                    <div class="row">
+                        <!-- Review List -->
+                        <div class="col-lg-7">
+                            @if($product->reviews->count() > 0)
+                                @foreach($product->reviews as $review)
+                                    <div class="single-review mb-30 p-3 border rounded">
+                                        <div class="review-header d-flex justify-content-between mb-2">
+                                            <h6 class="font-weight-bold mb-0">{{ $review->customer->name }}</h6>
+                                            <div class="rating">
+                                                @for($i = 1; $i <= 5; $i++)
+                                                    <i class="{{ $i <= $review->rating ? 'fas' : 'far' }} fa-star text-warning"></i>
+                                                @endfor
+                                            </div>
+                                        </div>
+                                        <p class="mb-1">{{ $review->comment }}</p>
+                                        <small class="text-muted">{{ $review->created_at->diffForHumans() }}</small>
+                                    </div>
+                                @endforeach
+                            @else
+                                <p class="text-muted italic">No reviews yet. Be the first to review this product!</p>
+                            @endif
+                        </div>
+
+                        <!-- Review Form -->
+                        <div class="col-lg-5">
+                            <div class="review-form-area p-4 bg-light rounded shadow-sm">
+                                <h5 class="mb-3 font-weight-bold">Write a Review</h5>
+                                <form action="{{ route('customer.product.review') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    
+                                    <div class="form-group mb-4 text-center">
+                                        <label class="d-block mb-2 font-weight-bold" style="font-size: 1.1rem;">Rate this Product</label>
+                                        <div class="star-rating-input">
+                                            @for($i = 5; $i >= 1; $i--)
+                                                <input type="radio" id="rate{{ $i }}" name="rating" value="{{ $i }}" required>
+                                                <label for="rate{{ $i }}" title="{{ $i }} stars">
+                                                    <i class="fas fa-star"></i>
+                                                </label>
+                                            @endfor
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group mb-3">
+                                        <label class="font-weight-bold">Share your experience</label>
+                                        <textarea name="comment" class="form-control" rows="4" placeholder="Write your review here..." style="border-radius: 12px; border: 1px solid #ddd;"></textarea>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold" style="border-radius: 10px; background: #222; border: none;">
+                                        Submit Review
+                                    </button>
+                                </form>
+                                <p class="mt-3 small text-muted">* You can only review products you have purchased and received.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Products Section -->
+        @if($relatedProducts->count() > 0)
+        <div class="row mt-60">
+            <div class="col-12">
+                <div class="section-tittle mb-40">
+                    <h3 class="font-weight-bold">Related Products</h3>
+                </div>
+            </div>
+            @foreach($relatedProducts as $rp)
+            <div class="col-lg-3 col-md-4 col-sm-6">
+                <div class="properties pb-30">
+                    <div class="properties-card shadow-sm rounded overflow-hidden">
+                        <div class="properties-img">
+                            <a href="{{ route('product.details', $rp->id) }}">
+                                <div style="height: 220px; overflow: hidden; background: #f5f5f5;">
+                                    <img src="{{ asset('/uploads/products/'.$rp->image) }}" alt="{{ $rp->name }}" style="width:100%; height:100%; object-fit:cover;">
+                                </div>
+                            </a>
+                        </div>
+                        <div class="properties-caption p-3">
+                            <h3 style="font-size: 1rem; margin-bottom: 10px;">
+                                <a href="{{ route('product.details', $rp->id) }}" class="text-dark">{{ $rp->name }}</a>
+                            </h3>
+                            <div class="price">
+                                <span class="text-primary font-weight-bold">৳{{ number_format($rp->final_price, 2) }}</span>
+                                @if($rp->discount > 0)
+                                    <span class="text-muted small ml-2" style="text-decoration: line-through;">৳{{ number_format($rp->price, 2) }}</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @endif
     </div>
 </main>
 
-<!-- Back to Top Button -->
-<div id="back-top">
-    <a class="wrapper" title="Go to Top" href="#">
-        <div class="arrows-container">
-            <div class="arrow arrow-one"></div>
-            <div class="arrow arrow-two"></div>
-        </div>
-    </a>
-</div>
+<style>
+    /* Star Rating Input Styles */
+    .star-rating-input {
+        display: inline-flex;
+        flex-direction: row-reverse;
+        font-size: 2.5rem;
+    }
+
+    .star-rating-input input {
+        display: none;
+    }
+
+    .star-rating-input label {
+        color: #ddd;
+        cursor: pointer;
+        padding: 0 5px;
+        transition: all 0.2s ease;
+    }
+
+    .star-rating-input input:checked ~ label,
+    .star-rating-input label:hover,
+    .star-rating-input label:hover ~ label {
+        color: #f5b301;
+        transform: scale(1.1);
+    }
+
+    /* Animation for reviews */
+    .single-review {
+        transition: transform 0.3s ease;
+    }
+    .single-review:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+</style>
 
 @endsection

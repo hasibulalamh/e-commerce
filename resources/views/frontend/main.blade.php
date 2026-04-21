@@ -203,34 +203,19 @@
                                                     🛒 Add to Cart
                                                 </a>
                                                 {{-- Wishlist --}}
-                                                <a href="#" title="Add to Wishlist"
-                                                   onclick="
-                                                     if(this.dataset.liked === 'true') {
-                                                       this.dataset.liked='false';
-                                                       this.style.background='white';
-                                                       this.style.color='#e44d26';
-                                                       this.innerHTML='♡';
-                                                     } else {
-                                                       this.dataset.liked='true';
-                                                       this.style.background='#e44d26';
-                                                       this.style.color='white';
-                                                       this.innerHTML='♥';
-                                                     }
-                                                     return false;"
-                                                   data-liked="false"
-                                                   style="background:white; 
-                                                          color:#e44d26;
-                                                          padding:8px 12px; 
-                                                          border-radius:4px;
-                                                          text-decoration:none; 
-                                                          font-size:18px;
-                                                          font-weight:bold;
-                                                          display:inline-block;
-                                                          border: 2px solid #e44d26;
-                                                          line-height:1;
-                                                          cursor:pointer;">
-                                                    ♡
-                                                </a>
+                                                <button class="wishlist-toggle-btn" data-id="{{ $products->id }}" 
+                                                        style="background: white; 
+                                                               color: #e44d26;
+                                                               padding: 8px 12px; 
+                                                               border-radius: 4px;
+                                                               border: 2px solid #e44d26;
+                                                               line-height: 1;
+                                                               cursor: pointer;
+                                                               transition: 0.3s;"
+                                                        onmouseover="this.style.background='#e44d26'; this.querySelector('i').style.color='white';"
+                                                        onmouseleave="this.style.background='white'; this.querySelector('i').style.color='#e44d26';">
+                                                    <i class="{{ auth('customerg')->check() && auth('customerg')->user()->wishlists()->where('product_id', $products->id)->exists() ? 'fas' : 'far' }} fa-heart"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </a>
@@ -341,34 +326,19 @@
                                             🛒 Add to Cart
                                         </a>
                                         {{-- Wishlist --}}
-                                        <a href="#" title="Add to Wishlist"
-                                           onclick="
-                                             if(this.dataset.liked === 'true') {
-                                               this.dataset.liked='false';
-                                               this.style.background='white';
-                                               this.style.color='#e44d26';
-                                               this.innerHTML='♡';
-                                             } else {
-                                               this.dataset.liked='true';
-                                               this.style.background='#e44d26';
-                                               this.style.color='white';
-                                               this.innerHTML='♥';
-                                             }
-                                             return false;"
-                                           data-liked="false"
-                                           style="background:white; 
-                                                  color:#e44d26;
-                                                  padding:8px 12px; 
-                                                  border-radius:4px;
-                                                  text-decoration:none; 
-                                                  font-size:18px;
-                                                  font-weight:bold;
-                                                  display:inline-block;
-                                                  border: 2px solid #e44d26;
-                                                  line-height:1;
-                                                  cursor:pointer;">
-                                            ♡
-                                        </a>
+                                        <button class="wishlist-toggle-btn" data-id="{{ $item->id }}" 
+                                                style="background: white; 
+                                                       color: #e44d26;
+                                                       padding: 8px 12px; 
+                                                       border-radius: 4px;
+                                                       border: 2px solid #e44d26;
+                                                       line-height: 1;
+                                                       cursor: pointer;
+                                                       transition: 0.3s;"
+                                                onmouseover="this.style.background='#e44d26'; this.querySelector('i').style.color='white';"
+                                                onmouseleave="this.style.background='white'; this.querySelector('i').style.color='#e44d26';">
+                                            <i class="{{ auth('customerg')->check() && auth('customerg')->user()->wishlists()->where('product_id', $item->id)->exists() ? 'fas' : 'far' }} fa-heart"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </a>

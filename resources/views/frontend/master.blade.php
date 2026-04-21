@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://preview.colorlib.com/theme/capitalshop/assets/css/animate.min.css">
     <link rel="stylesheet" href="https://preview.colorlib.com/theme/capitalshop/assets/css/price_rangs.css">
     <link rel="stylesheet" href="https://preview.colorlib.com/theme/capitalshop/assets/css/magnific-popup.css">
-    <link rel="stylesheet" href="https://preview.colorlib.com/theme/capitalshop/assets/css/fontawesome-all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://preview.colorlib.com/theme/capitalshop/assets/css/themify-icons.css">
     <link rel="stylesheet" href="https://preview.colorlib.com/theme/capitalshop/assets/css/slick.css">
     <link rel="stylesheet" href="https://preview.colorlib.com/theme/capitalshop/assets/css/nice-select.css">
@@ -174,6 +174,38 @@
         $('body').append(toast);
         toast.fadeIn().delay(3000).fadeOut(function() { $(this).remove(); });
     }
+
+    // AJAX Wishlist Toggle
+    $(document).on('click', '.wishlist-toggle-btn', function(e) {
+        e.preventDefault();
+        const btn = $(this);
+        const productId = btn.data('id');
+        const icon = btn.find('i');
+
+        $.ajax({
+            url: "{{ url('/wishlist/toggle') }}/" + productId,
+            method: 'POST',
+            data: {
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(response) {
+                if (response.success) {
+                    if (response.action === 'added') {
+                        icon.removeClass('far').addClass('fas');
+                        showToast(response.message, 'success');
+                    } else {
+                        icon.removeClass('fas').addClass('far');
+                        showToast(response.message, 'info');
+                    }
+                } else {
+                    showToast(response.message, 'error');
+                }
+            },
+            error: function() {
+                showToast('Please login to use wishlist.', 'error');
+            }
+        });
+    });
     </script>
 </body>
 

@@ -32,10 +32,24 @@
                                             <a href="{{ route('product.details', $product->id) }}">
                                                 <img src="{{ asset('uploads/products/'.$product->image) }}" alt="{{ $product->name }}">
                                             </a>
-                                            <div class="socal_icon">
-                                                <a href="{{route('addto.cart',$product->id)}}">
-                                                    <i class="ti-shopping-cart"></i>
+                                            <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: row; align-items: center; gap: 6px; white-space: nowrap;">
+                                                <a href="{{ route('addto.cart', $product->id) }}" class="ajax-cart-btn" title="Add to Cart" style="background:#e44d26; color:white; padding:8px 16px; border-radius:4px; text-decoration:none; font-size:13px; font-weight:600; display:inline-block;">
+                                                    🛒 Add to Cart
                                                 </a>
+                                                {{-- Wishlist --}}
+                                                <button class="wishlist-toggle-btn" data-id="{{ $product->id }}" 
+                                                        style="background: white; 
+                                                               color: #e44d26;
+                                                               padding: 8px 12px; 
+                                                               border-radius: 4px;
+                                                               border: 2px solid #e44d26;
+                                                               line-height: 1;
+                                                               cursor: pointer;
+                                                               transition: 0.3s;"
+                                                        onmouseover="this.style.background='#e44d26'; this.querySelector('i').style.color='white';"
+                                                        onmouseleave="this.style.background='white'; this.querySelector('i').style.color='#e44d26';">
+                                                    <i class="{{ auth('customerg')->check() && auth('customerg')->user()->wishlists()->where('product_id', $product->id)->exists() ? 'fas' : 'far' }} fa-heart"></i>
+                                                </button>
                                             </div>
                                         </div>
                                         <div class="properties-caption properties-caption2">

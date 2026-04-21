@@ -93,6 +93,11 @@
                                            onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
                                             👤 Profile
                                         </a>
+                                        <a href="{{ route('customer.wishlist') }}" 
+                                           style="display: block; padding: 10px 15px; color: #333; text-decoration: none; font-weight: 500; border-radius: 8px; transition: 0.2s;"
+                                           onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='transparent'">
+                                            ❤️ Wishlist
+                                        </a>
                                         <div style="height: 1px; background: #eee; margin: 5px 0;"></div>
                                         <form action="{{ route('customer.logout') }}" method="POST" style="margin: 0;">
                                             @csrf

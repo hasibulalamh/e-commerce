@@ -42,6 +42,11 @@
                                   transition: 0.2s; font-weight: 700; font-size: 14px;">
                             <span style="margin-right: 12px;">📦</span> Order History
                         </a>
+                        <a href="{{ route('customer.wishlist') }}" 
+                           style="display: flex; align-items: center; padding: 12px 25px; color: #555; text-decoration: none;
+                                  transition: 0.2s; font-weight: 600; font-size: 14px;">
+                            <span style="margin-right: 12px;">❤️</span> My Wishlist
+                        </a>
                         <form action="{{ route('customer.logout') }}" method="POST">
                             @csrf
                             <button type="submit" 
