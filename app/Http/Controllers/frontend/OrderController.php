@@ -84,7 +84,27 @@ class OrderController extends Controller
     public function checkout(){
         $mycart = Session::get('cart') ?? [];
         $addresses = auth('customerg')->user()->addresses()->get();
-        return view('frontend.shopping.checkout', compact('mycart', 'addresses'));
+        
+        $productIds = collect($mycart)->pluck('id')->toArray();
+        
+        // Fetch coupons the customer has collected
+        $customer = auth('customerg')->user();
+        $collectedCouponIds = $customer->coupons()->wherePivot('is_used', false)->pluck('coupons.id')->toArray();
+
+        // Filter active coupons that are collected and applicable
+        $availableCoupons = \App\Models\Coupon::where('status', 'active')
+            ->whereIn('id', $collectedCouponIds)
+            ->where(function($query) use ($productIds) {
+                $query->whereNull('product_id')
+                      ->orWhereIn('product_id', $productIds);
+            })
+            ->where(function($query) {
+                $query->whereNull('expiry_date')
+                      ->orWhereDate('expiry_date', '>=', now());
+            })
+            ->get();
+
+        return view('frontend.shopping.checkout', compact('mycart', 'addresses', 'availableCoupons'));
     }
 
     public function storeaddorder(Request $request)
@@ -92,11 +112,11 @@ class OrderController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'number' => 'required|string|max:20',
+            'phone' => 'required|string|max:20',
             'address' => 'required|string|max:500',
             'city' => 'required|string|max:100',
-            'zip_code' => 'nullable|string|max:20',
-            'pay' => 'required|in:CASH,SSL',
+            'postal_code' => 'nullable|string|max:20',
+            'payment_method' => 'required|in:cod,online',
         ]);
 
         $mycart = Session::get('cart');
@@ -113,25 +133,56 @@ class OrderController extends Controller
                 $subtotal += $item['price'] * $item['quantity'];
             }
             $shipping_cost = 100;
-            $total = $subtotal + $shipping_cost;
+            
+            // Coupon logic
+            $discount = 0;
+            $coupon_code = null;
+            if (Session::has('coupon')) {
+                $coupon_session = Session::get('coupon');
+                $coupon = \App\Models\Coupon::where('code', $coupon_session['code'])->first();
+                if ($coupon && $coupon->isValid($subtotal, $mycart)) {
+                    
+                    $applicableSubtotal = 0;
+                    if ($coupon->product_id) {
+                        foreach ($mycart as $item) {
+                            if ($item['id'] == $coupon->product_id) {
+                                $applicableSubtotal += $item['price'] * $item['quantity'];
+                            }
+                        }
+                    } else {
+                        $applicableSubtotal = $subtotal;
+                    }
+
+                    $discount = $coupon->calculateDiscount($applicableSubtotal);
+                    $coupon_code = $coupon->code;
+                    $coupon->increment('used_count');
+
+                    // Mark as used for customer
+                    auth('customerg')->user()->coupons()->updateExistingPivot($coupon->id, ['is_used' => true]);
+                }
+            }
+
+            $total = ($subtotal + $shipping_cost) - $discount;
 
             $myorder = Order::create([
                 'customer_id'      => auth('customerg')->user()->id,
                 'name'             => $request->name,
                 'email'            => $request->email,
-                'phone'            => $request->number,
+                'phone'            => $request->phone,
                 'address'          => $request->address,
                 'city'             => $request->city,
                 'receiver_name'    => $request->name,
                 'receiver_email'   => $request->email,
-                'receiver_mobile'  => $request->number,
+                'receiver_mobile'  => $request->phone,
                 'receiver_address' => $request->address,
                 'receiver_city'    => $request->city,
                 'subtotal'         => $subtotal,
                 'shipping_cost'    => $shipping_cost,
                 'tax'              => 0,
+                'coupon_code'      => $coupon_code,
+                'discount_amount'  => $discount,
                 'total'            => $total,
-                'payment_method'   => $request->pay,
+                'payment_method'   => $request->payment_method == 'cod' ? 'CASH' : 'SSL',
                 'status'           => 'pending',
             ]);
 
@@ -155,9 +206,17 @@ class OrderController extends Controller
             }
 
             DB::commit();
+
+            // Send Order Confirmation Email
+            try {
+                $myorder->customer->notify(new \App\Notifications\OrderConfirmationNotification($myorder));
+            } catch (\Exception $e) {
+                \Log::error('Mail Error: ' . $e->getMessage());
+            }
+
             toastr()->title('Place Order')->success('Order placed successfully!');
-            Session::forget('cart');
-            return redirect()->route('Home');
+            Session::forget(['cart', 'coupon']);
+            return redirect()->route('order.confirmation', $myorder->id);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -224,5 +283,15 @@ class OrderController extends Controller
         }
 
         return view('frontend.pages.orderdetail', compact('order'));
+    }
+
+    public function orderConfirmation($id)
+    {
+        $order = Order::where('id', $id)
+            ->where('customer_id', auth('customerg')->user()->id)
+            ->with(['orderDetails.product'])
+            ->firstOrFail();
+
+        return view('frontend.pages.order-confirmation', compact('order'));
     }
 }

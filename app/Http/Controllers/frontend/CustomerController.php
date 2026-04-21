@@ -271,6 +271,15 @@ class CustomerController extends Controller
         return view('frontend.pages.profile', compact('addresses'));
     }
 
+    public function vouchers()
+    {
+        $vouchers = auth('customerg')->user()->coupons()
+            ->withPivot('collected_at', 'is_used')
+            ->orderBy('collected_at', 'desc')
+            ->get();
+        return view('frontend.pages.vouchers', compact('vouchers'));
+    }
+
     public function profileupdate(Request $request)
     {
         $customer = auth('customerg')->user();

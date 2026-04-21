@@ -9,14 +9,15 @@ use App\Models\Category;
 use App\Models\Brand;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
     public function dashboard()
     {
         try {
-            // Dashboard statistics
-            $totalRevenue = Order::where('status', 'completed')->sum('total');
+            // Dashboard statistics - include all non-cancelled orders for revenue to show progress
+            $totalRevenue = Order::where('status', '!=', 'cancelled')->sum('total');
             $totalOrders = Order::count();
             $totalProducts = Product::count();
             $totalCustomers = \App\Models\Customer::count();
@@ -29,15 +30,18 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get();
 
-            // Top selling products
-            $topProducts = Product::withCount('orderDetails')
-                ->orderBy('order_details_count', 'desc')
+            // Top selling products (by quantity)
+            $topProducts = Product::select('products.*')
+                ->join('orderdetails', 'products.id', '=', 'orderdetails.product_id')
+                ->selectRaw('SUM(orderdetails.quantity) as total_sold')
+                ->groupBy('products.id')
+                ->orderBy('total_sold', 'desc')
                 ->take(5)
                 ->get();
 
             // Monthly revenue data for chart
             $monthlyRevenue = Order::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, SUM(total) as total')
-                ->where('status', 'completed')
+                ->where('status', '!=', 'cancelled')
                 ->groupBy('year', 'month')
                 ->orderBy('year', 'asc')
                 ->orderBy('month', 'asc')

@@ -30,6 +30,9 @@
                             <li style="margin-bottom: 12px;">
                                 <a href="{{ route('customer.wishlist') }}" style="color: #555; text-decoration: none; font-weight: 500; transition: 0.2s;" onmouseover="this.style.color='#e44d26'" onmouseout="this.style.color='#555'">My Wishlist</a>
                             </li>
+                            <li style="margin-bottom: 12px;">
+                                <a href="{{ route('customer.vouchers') }}" style="color: #555; text-decoration: none; font-weight: 500; transition: 0.2s;" onmouseover="this.style.color='#e44d26'" onmouseout="this.style.color='#555'">My Vouchers</a>
+                            </li>
                         </ul>
                     </div>
 

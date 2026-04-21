@@ -76,6 +76,18 @@
             </a>
         </li>
 
+        <li class="nav-item my-1">
+            <a class="nav-link {{ request()->routeIs('coupons.*') ? 'active' : '' }}" href="{{route('coupons.index')}}">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 5v2"></path>
+                    <path d="M15 11v2"></path>
+                    <path d="M15 17v2"></path>
+                    <path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z"></path>
+                </svg>
+                Coupons
+            </a>
+        </li>
+
         <li class="nav-divider"></li>
 
         <li class="nav-item my-1">

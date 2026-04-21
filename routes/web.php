@@ -89,6 +89,7 @@ Route::group(['middleware' => 'customerg'], function () {
     Route::post('/customer/addresses/set-default/{id}', [CustomerController::class, 'addressSetDefault'])->name('customer.address.default');
     
     Route::post('/placeorder/store', [OrderController::class, 'storeaddorder'])->name('placeorder.store');
+    Route::get('/order/confirmation/{id}', [OrderController::class, 'orderConfirmation'])->name('order.confirmation');
 
     // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('customer.wishlist');
@@ -97,6 +98,12 @@ Route::group(['middleware' => 'customerg'], function () {
 
     // Reviews
     Route::post('/product/review', [ReviewController::class, 'store'])->name('customer.product.review');
+
+    // Coupon Application
+    Route::post('/coupon/collect/{id}', [\App\Http\Controllers\frontend\CouponController::class, 'collect'])->name('customer.coupon.collect');
+    Route::post('/coupon/apply', [\App\Http\Controllers\frontend\CouponController::class, 'apply'])->name('customer.coupon.apply');
+    Route::get('/coupon/remove', [\App\Http\Controllers\frontend\CouponController::class, 'remove'])->name('customer.coupon.remove');
+    Route::get('/customer/vouchers', [CustomerController::class, 'vouchers'])->name('customer.vouchers');
 });
 
 // Public Search
@@ -182,5 +189,8 @@ Route::get('/search', [FrontendProductController::class, 'search'])->name('produ
             Route::get('/edit/{id}', [BannerController::class, 'edit'])->name('banner.edit');
             Route::post('/update/{id}', [BannerController::class, 'update'])->name('banner.update');
         });
+
+        // Coupon Routes
+        Route::resource('coupons', \App\Http\Controllers\Admin\CouponController::class);
     });
 });

@@ -8,309 +8,240 @@
     .stats-card {
         transition: all 0.3s ease;
         border: none;
-        border-radius: 12px;
+        border-radius: 15px;
         overflow: hidden;
-        position: relative;
+        color: #fff;
     }
 
     .stats-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
 
     .stat-icon {
-        width: 48px;
-        height: 48px;
+        width: 50px;
+        height: 50px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 10px;
-        background: rgba(255,255,255,0.2);
+        border-radius: 12px;
+        background: rgba(255,255,255,0.25);
     }
+
+    .bg-gradient-primary { background: linear-gradient(45deg, #4e73df 0%, #224abe 100%); }
+    .bg-gradient-success { background: linear-gradient(45deg, #1cc88a 0%, #13855c 100%); }
+    .bg-gradient-info { background: linear-gradient(45deg, #36b9cc 0%, #258391 100%); }
+    .bg-gradient-warning { background: linear-gradient(45deg, #f6c23e 0%, #dda20a 100%); }
 
     .chart-card {
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
     }
 
-    .mini-chart {
-        height: 70px;
-        margin-top: 1rem;
+    .table-card {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
     }
 
-    .social-card {
-        border-radius: 12px;
-        overflow: hidden;
-        transition: all 0.3s;
-    }
-
-    .social-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    }
-
-    .progress-group {
-        margin-bottom: 1rem;
-    }
-
-    .progress-group-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0.5rem;
-    }
-
-    .progress-thin {
-        height: 4px;
+    .product-img {
+        width: 40px;
+        height: 40px;
+        object-fit: cover;
+        border-radius: 8px;
     }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid px-4">
+<div class="container-fluid px-4 py-4">
+    @if($error)
+        <div class="alert alert-danger shadow-sm border-0 mb-4" role="alert">
+            <i class="fas fa-exclamation-triangle mr-2"></i> {{ $error }}
+        </div>
+    @endif
+
     <!-- Stats Cards Row -->
     <div class="row g-4 mb-4">
-        <!-- Users Card -->
+        <!-- Revenue Card -->
         <div class="col-sm-6 col-xl-3">
-            <div class="card stats-card text-white bg-primary">
+            <div class="card stats-card bg-gradient-primary">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="fs-4 fw-semibold">26K</div>
-                            <div class="small">Total Users</div>
-                            <div class="small mt-1">
-                                <span class="text-white-50">-12.4%</span>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="6 9 12 15 18 9"></polyline>
-                                </svg>
-                            </div>
+                            <div class="text-white-50 small text-uppercase fw-bold">Total Revenue</div>
+                            <div class="fs-3 fw-bold">৳{{ number_format($totalRevenue, 2) }}</div>
                         </div>
                         <div class="stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="9" cy="7" r="4"></circle>
-                                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
+                            <i class="fas fa-money-bill-wave fa-lg"></i>
                         </div>
-                    </div>
-                    <div class="mini-chart">
-                        <canvas id="userChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Income Card -->
+        <!-- Orders Card -->
         <div class="col-sm-6 col-xl-3">
-            <div class="card stats-card text-white bg-info">
+            <div class="card stats-card bg-gradient-success">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="fs-4 fw-semibold">$6,200</div>
-                            <div class="small">Total Income</div>
-                            <div class="small mt-1">
-                                <span class="text-white-50">+40.9%</span>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="18 15 12 9 6 15"></polyline>
-                                </svg>
-                            </div>
+                            <div class="text-white-50 small text-uppercase fw-bold">Total Orders</div>
+                            <div class="fs-3 fw-bold">{{ $totalOrders }}</div>
                         </div>
                         <div class="stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="12" y1="1" x2="12" y2="23"></line>
-                                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                            </svg>
+                            <i class="fas fa-shopping-cart fa-lg"></i>
                         </div>
-                    </div>
-                    <div class="mini-chart">
-                        <canvas id="incomeChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Conversion Card -->
+        <!-- Customers Card -->
         <div class="col-sm-6 col-xl-3">
-            <div class="card stats-card text-white bg-warning">
+            <div class="card stats-card bg-gradient-info">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="fs-4 fw-semibold">2.49%</div>
-                            <div class="small">Conversion Rate</div>
-                            <div class="small mt-1">
-                                <span class="text-white-50">+84.7%</span>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="18 15 12 9 6 15"></polyline>
-                                </svg>
-                            </div>
+                            <div class="text-white-50 small text-uppercase fw-bold">Customers</div>
+                            <div class="fs-3 fw-bold">{{ $totalCustomers }}</div>
                         </div>
                         <div class="stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                            </svg>
+                            <i class="fas fa-users fa-lg"></i>
                         </div>
-                    </div>
-                    <div class="mini-chart">
-                        <canvas id="conversionChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Sessions Card -->
+        <!-- Products Card -->
         <div class="col-sm-6 col-xl-3">
-            <div class="card stats-card text-white bg-danger">
+            <div class="card stats-card bg-gradient-warning">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="fs-4 fw-semibold">44K</div>
-                            <div class="small">Total Sessions</div>
-                            <div class="small mt-1">
-                                <span class="text-white-50">-23.6%</span>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="6 9 12 15 18 9"></polyline>
-                                </svg>
-                            </div>
+                            <div class="text-white-50 small text-uppercase fw-bold">Active Products</div>
+                            <div class="fs-3 fw-bold">{{ $totalProducts }}</div>
                         </div>
                         <div class="stat-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                            </svg>
+                            <i class="fas fa-box fa-lg"></i>
                         </div>
-                    </div>
-                    <div class="mini-chart">
-                        <canvas id="sessionChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Main Traffic Chart -->
-    <div class="card chart-card mb-4">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="card-title mb-0">Traffic Overview</h4>
-                    <div class="small text-muted">Monthly statistics for 2025</div>
-                </div>
-                <div class="btn-group btn-group-sm">
-                    <button class="btn btn-outline-secondary" onclick="updateMainChart('day', this)">Day</button>
-                    <button class="btn btn-outline-secondary active" onclick="updateMainChart('month', this)">Month</button>
-                    <button class="btn btn-outline-secondary" onclick="updateMainChart('year', this)">Year</button>
-                </div>
-            </div>
-            <div style="height: 300px; position: relative;">
-                <canvas id="mainChart"></canvas>
-            </div>
-        </div>
-        <div class="card-footer bg-white">
-            <div class="row text-center">
-                <div class="col-sm-6 col-lg-3 mb-3 mb-lg-0">
-                    <div class="text-muted small mb-1">Visits</div>
-                    <div class="fw-semibold">29,703 Users</div>
-                    <div class="progress mt-2 progress-thin">
-                        <div class="progress-bar bg-success" style="width: 40%" role="progressbar"></div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg-3 mb-3 mb-lg-0">
-                    <div class="text-muted small mb-1">Unique</div>
-                    <div class="fw-semibold">24,093 Users</div>
-                    <div class="progress mt-2 progress-thin">
-                        <div class="progress-bar bg-info" style="width: 20%" role="progressbar"></div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg-3 mb-3 mb-lg-0">
-                    <div class="text-muted small mb-1">Pageviews</div>
-                    <div class="fw-semibold">78,706 Views</div>
-                    <div class="progress mt-2 progress-thin">
-                        <div class="progress-bar bg-warning" style="width: 60%" role="progressbar"></div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg-3">
-                    <div class="text-muted small mb-1">New Users</div>
-                    <div class="fw-semibold">22,123 Users</div>
-                    <div class="progress mt-2 progress-thin">
-                        <div class="progress-bar bg-danger" style="width: 80%" role="progressbar"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Social Cards -->
+    <!-- Charts Row -->
     <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card social-card text-white" style="background: #3b5998;">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                        </svg>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <div class="fs-4 fw-semibold">89k</div>
-                            <div class="small text-white-50">Friends</div>
-                        </div>
-                        <div class="col">
-                            <div class="fs-4 fw-semibold">459</div>
-                            <div class="small text-white-50">Feeds</div>
-                        </div>
-                    </div>
-                    <div style="height: 60px; margin-top: 1rem;">
-                        <canvas id="facebookChart"></canvas>
+        <div class="col-xl-8">
+            <div class="card chart-card">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="card-title mb-0 fw-bold">Sales Overview</h5>
+                    <p class="text-muted small">Revenue trends over time</p>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div style="height: 350px;">
+                        <canvas id="salesChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-4">
-            <div class="card social-card text-white" style="background: #1da1f2;">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                        </svg>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <div class="fs-4 fw-semibold">973k</div>
-                            <div class="small text-white-50">Followers</div>
-                        </div>
-                        <div class="col">
-                            <div class="fs-4 fw-semibold">1.8k</div>
-                            <div class="small text-white-50">Tweets</div>
-                        </div>
-                    </div>
-                    <div style="height: 60px; margin-top: 1rem;">
-                        <canvas id="twitterChart"></canvas>
+        <div class="col-xl-4">
+            <div class="card table-card h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="card-title mb-0 fw-bold">Top Selling Products</h5>
+                </div>
+                <div class="card-body px-4">
+                    <div class="table-responsive">
+                        <table class="table table-borderless align-middle">
+                            <thead>
+                                <tr class="text-muted small text-uppercase">
+                                    <th>Product</th>
+                                    <th class="text-end">Sales</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($topProducts as $p)
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="{{ asset('uploads/products/'.$p->image) }}" class="product-img me-3" 
+                                                 onerror="this.src='{{ asset('upload/products/'.$p->image) }}';">
+                                            <div class="text-truncate" style="max-width: 150px;">
+                                                <div class="fw-bold small">{{ $p->name }}</div>
+                                                <div class="text-muted smaller">৳{{ number_format($p->final_price, 2) }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-end fw-bold">{{ $p->order_details_count }}</td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="2" class="text-center text-muted py-4">No sales data yet.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="col-md-4">
-            <div class="card social-card text-white" style="background: #0077b5;">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                        </svg>
-                    </div>
-                    <div class="row">
-                        <div class="col">
-                            <div class="fs-4 fw-semibold">500+</div>
-                            <div class="small text-white-50">Contacts</div>
-                        </div>
-                        <div class="col">
-                            <div class="fs-4 fw-semibold">292</div>
-                            <div class="small text-white-50">Feeds</div>
-                        </div>
-                    </div>
-                    <div style="height: 60px; margin-top: 1rem;">
-                        <canvas id="linkedinChart"></canvas>
+    <!-- Recent Orders Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card table-card mb-4">
+                <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 fw-bold">Recent Orders</h5>
+                    <a href="{{ route('orders.list') }}" class="btn btn-sm btn-outline-primary rounded-pill">View All Orders</a>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr class="text-muted small text-uppercase">
+                                    <th>Order ID</th>
+                                    <th>Customer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentOrders as $order)
+                                <tr>
+                                    <td class="fw-bold">#ORD-{{ $order->id }}</td>
+                                    <td>
+                                        <div class="fw-bold">{{ $order->name }}</div>
+                                        <div class="text-muted small">{{ $order->email }}</div>
+                                    </td>
+                                    <td class="fw-bold text-primary">৳{{ number_format($order->total, 2) }}</td>
+                                    <td>
+                                        @php
+                                            $badgeClass = match($order->status) {
+                                                'completed' => 'bg-success',
+                                                'pending' => 'bg-warning',
+                                                'processing' => 'bg-info',
+                                                'cancelled' => 'bg-danger',
+                                                default => 'bg-secondary'
+                                            };
+                                        @endphp
+                                        <span class="badge {{ $badgeClass }} rounded-pill px-3">{{ ucfirst($order->status) }}</span>
+                                    </td>
+                                    <td class="text-muted small">{{ $order->created_at->format('M d, Y h:i A') }}</td>
+                                    <td class="text-end">
+                                        <a href="{{ route('order.view', $order->id) }}" class="btn btn-sm btn-light rounded-circle shadow-sm">
+                                            <i class="fas fa-eye text-primary"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr><td colspan="6" class="text-center text-muted py-5">No orders found.</td></tr>
+                                @endforelse
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -322,67 +253,71 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Mini charts setup
-    const miniChartData = [12,19,3,5,2,3,9];
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    
+    // Gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(78, 115, 223, 0.2)');
+    gradient.addColorStop(1, 'rgba(78, 115, 223, 0)');
 
-    function createMiniChart(ctx, color) {
-        return new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-                datasets: [{
-                    data: miniChartData,
-                    borderColor: color,
-                    backgroundColor: color+'33',
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 0
-                }]
-            },
-            options: {
-                responsive:true,
-                plugins:{ legend:{ display:false } },
-                scales:{ x:{ display:false }, y:{ display:false } }
-            }
-        });
-    }
-
-    createMiniChart(document.getElementById('userChart'), '#fff');
-    createMiniChart(document.getElementById('incomeChart'), '#fff');
-    createMiniChart(document.getElementById('conversionChart'), '#fff');
-    createMiniChart(document.getElementById('sessionChart'), '#fff');
-    createMiniChart(document.getElementById('facebookChart'), '#fff');
-    createMiniChart(document.getElementById('twitterChart'), '#fff');
-    createMiniChart(document.getElementById('linkedinChart'), '#fff');
-
-    // Main Chart setup
-    const mainChartCtx = document.getElementById('mainChart').getContext('2d');
-    let mainChart = new Chart(mainChartCtx, {
+    new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+            labels: {!! json_encode($monthlyLabels) !!},
             datasets: [{
-                label: 'Visitors',
-                data: [30,45,60,50,70,90,100,120,130,125,140,150],
-                borderColor: '#007bff',
-                backgroundColor: 'rgba(0,123,255,0.2)',
+                label: 'Revenue (BDT)',
+                data: {!! json_encode($monthlyData) !!},
+                borderColor: '#4e73df',
+                borderWidth: 3,
+                backgroundColor: gradient,
                 fill: true,
-                tension:0.4
+                tension: 0.4,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#4e73df',
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: '#4e73df',
+                pointHoverBorderColor: '#fff',
+                pointHitRadius: 10,
+                pointBorderWidth: 2
             }]
         },
-        options:{
-            responsive:true,
-            plugins:{ legend:{ display:false } },
-            scales:{ y:{ beginAtZero:true } }
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: '#fff',
+                    titleColor: '#333',
+                    bodyColor: '#666',
+                    borderColor: '#eee',
+                    borderWidth: 1,
+                    padding: 10,
+                    callbacks: {
+                        label: function(context) {
+                            return '৳' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [2, 2], color: '#f0f0f0' },
+                    ticks: {
+                        callback: function(value) {
+                            if (value >= 1000) return '৳' + (value/1000) + 'k';
+                            return '৳' + value;
+                        }
+                    }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
         }
     });
-
-    window.updateMainChart = function(type, btn) {
-        document.querySelectorAll('.btn-group button').forEach(b => b.classList.remove('active'));
-        if(btn) btn.classList.add('active');
-        console.log('Chart updated to:', type);
-        // You can update data here dynamically based on 'type'
-    }
 </script>
 @endpush
-</html>

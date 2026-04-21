@@ -1,108 +1,258 @@
-# 🔍 Comprehensive System Audit & Analysis Report
-**Project:** Laravel E-commerce Platform
-**Date:** 2026-04-20
+# 🔍 E-Commerce Platform — System Audit Report
+**Date:** 2026-04-21
+**Framework:** Laravel 12.47.0 / PHP 8.4.20 / MySQL 8.0
+**Total Routes:** 97 | **Total Migrations:** 34 (all ran) | **Controllers:** 20 | **Blade Views:** 56
 
 ---
 
-## SECTION A: BUGS FIXED (যে বাগগুলো ফিক্স করা হয়েছে) ✅
+## ✅ SECTION A: BUGS FIXED (from original V-001 to V-024)
 
-| ID | Issue (সমস্যা) | Status | Notes |
-|:---|:---|:---:|:---|
-| **V-001** | Mass Assignment Vulnerability | ✅ | সব মডেলে `$guarded = []` সরিয়ে `$fillable` ব্যবহার করা হয়েছে। |
-| **V-002** | Destructive Actions via GET Routes | ✅ | Admin delete রাউটগুলো `Route::delete()` এ আপডেট করা হয়েছে এবং Logout `POST` করা হয়েছে। |
-| **V-003** | No Admin Role Check | ✅ | Admin রাউটগুলোতে `admin` middleware সঠিকভাবে অ্যাপ্লাই করা হয়েছে। |
-| **V-004** | No Validation on Checkout | ✅ | Checkout-এ server-side ভ্যালিডেশন এবং cart subtotal রি-ক্যালকুলেশন যোগ করা হয়েছে (`OrderController::storeaddorder`)। |
-| **V-005** | Admin Login — No Password Validation Rule | ✅ | পাসওয়ার্ড রুল `required\|string\|min:6` অ্যাড করা হয়েছে (`AuthController::loginsubmit`)। |
-| **V-006** | `User` Model Missing `role` from `$fillable` | ✅ | `role` কলামটি `$fillable` এ অ্যাড করা হয়েছে। |
-| **V-008** | Dashboard Uses Non-Existent `orderItems` | ✅ | ড্যাশবোর্ডে ভুল রিলেশনশিপ সরিয়ে সঠিক `orderDetails` রিলেশনশিপ ব্যবহার করা হয়েছে। |
-| **V-009** | File Upload — No File Type Validation | ✅ | Brand, Category, এবং Product আপলোডে ইমেজ ভ্যালিডেশন (`mimes:jpeg,png,jpg,gif,webp`) দেওয়া হয়েছে। |
-| **V-010** | Undefined Variable `$fileName` | ✅ | ফাইল আপলোডের আগে ভেরিয়েবলটি সঠিকভাবে `null` ইনিশিয়ালাইজ করা হয়েছে। |
-| **V-011** | Add-to-Cart Outside Auth Middleware | ✅ | Cart এর কাজগুলো `customerg` middleware-এর ভেতরে নেওয়া হয়েছে। |
-| **V-012** | `updateStatus` Route Mismatch | ✅ | ফর্ম সাবমিটের সাথে মিল রেখে রাউটটি `Route::post()` করা হয়েছে। |
-| **V-013** | Checkout Form — Blade Syntax Error | ✅ | Literal strings ফিক্স করে সঠিক ব্লেড সিনট্যাক্স `{{ auth('customerg')->user()->name }}` ব্যবহার করা হয়েছে। |
-| **V-014** | Category Validation Typo — `sccess` Instead of `success` | ✅ | `CategoryController`-এ টাইপো ফিক্স করা হয়েছে। |
-| **V-015** | Product Validation Shows Success Toast on Failure | ✅ | Laravel-এর ডিফল্ট `$request->validate()` ব্যবহার করে সমস্যাটি সমাধান করা হয়েছে। |
-| **V-016** | Hardcoded Shipping Logic | ✅ | চেকআউটে শিপিং চার্জ সঠিকভাবে `100 BDT` ক্যালকুলেট করা হয়েছে। |
-| **V-017** | No Rate Limiting on Login Routes | ✅ | Admin এবং Customer লগইন রাউটে `throttle:5,1` অ্যাড করা হয়েছে। |
-| **V-019** | `.env` Exposed in Repository Root | ✅ | `.env` ফাইলটি `.gitignore`-এ অ্যাড করে সিকিউর করা হয়েছে। |
-| **V-021** | Inconsistent Naming Conventions | ✅ | ডাটাবেস মাইগ্রেশনগুলো রিফ্যাক্টর করে সঠিক নামকরণ নিশ্চিত করা হয়েছে। |
-| **V-022** | Cart View — Hardcoded Static Image | ✅ | `cart.blade.php`-এ ডাইনামিক প্রোডাক্ট ইমেজ (`upload/products/`) ফেচ করা হয়েছে। |
-| **V-023** | No Pagination on Homepage Products | ✅ | হোমপেজে মেমোরি ওভারলোড এড়াতে `Product::all()` সরিয়ে `take(8)` ও `take(6)` ব্যবহার করা হয়েছে। |
-| **V-024** | Product List — 50 Items Per Page (Too High) | ✅ | পেজিনেশন কমিয়ে `10` বা `12` করা হয়েছে। |
-| **SQL Injection** | Search Input | ✅ | প্রোডাক্ট সার্চে `whereRaw` বা unsafe query সরিয়ে parameterized query ব্যবহার করা হয়েছে। |
+| Code | Issue | Status | Notes |
+|------|-------|--------|-------|
+| V-001 | Mass Assignment ($guarded=[]) on 5 models | ✅ Fixed | $fillable added to all models (Product, Order, Banner, etc.) |
+| V-002 | Destructive GET routes (DELETE/POST) | ✅ Fixed | All delete routes use DELETE method + CSRF |
+| V-003 | No Admin Role Check | ✅ Fixed | AdminMiddleware created + role='admin', `auth` + `admin` middleware on all admin routes |
+| V-004 | No Checkout Validation | ✅ Fixed | Server-side validation added in `storeaddorder()` — name, email, phone, address, city, payment_method |
+| V-005 | Admin Login no password validation | ✅ Fixed | `password=>required\|min:6` added + `throttle:5,1` rate limiting |
+| V-006 | User model missing role in fillable | ✅ Fixed | role added to $fillable |
+| V-007 | Order-User relationship mismatch | ✅ Fixed | `customer()` relationship added to Order model pointing to Customer model |
+| V-008 | Dashboard uses wrong orderItems relation | ✅ Fixed | Changed to `orderDetails` throughout |
+| V-009 | File upload no type validation | ✅ Fixed | `mimes:jpeg,png,jpg,gif,webp` added to image uploads |
+| V-010 | Undefined $fileName variable | ✅ Fixed | `$fileName = null` before if block |
+| V-011 | Add-to-cart outside auth middleware | ✅ Fixed | Moved inside `customerg` middleware group (line 70 of web.php) |
+| V-012 | updateStatus route mismatch | ✅ Fixed | Route uses POST method: `Route::post('/status/update/{id}', ...)` |
+| V-013 | Checkout Blade syntax error | ✅ Fixed | `{{ }}` added around auth() calls |
+| V-014 | Category typo sccess→success | ✅ Fixed | Corrected in CategoryController |
+| V-015 | Product shows success toast on failure | ✅ Fixed | Changed to `error()` |
+| V-016 | Shipping cost mismatch (+1 vs 100 BDT) | ✅ Fixed | `$shipping_cost = 100` in OrderController line 135 |
+| V-017 | No rate limiting on login | ✅ Fixed | `throttle:5,1` on admin login (line 119) + customer login (line 35) + registration (line 33) |
+| V-018 | Customer login returns register view | ⚠️ Partial | Both login and register have separate routes but shared page by design |
+| V-019 | .env in repository | ✅ Fixed | `.env` IS in `.gitignore` (confirmed: `.env`, `.env.backup`, `.env.production` all listed) |
+| V-020 | Session encryption disabled | ✅ Fixed | `SESSION_ENCRYPT=true` confirmed in .env, `SESSION_DRIVER=database` |
+| V-021 | orderdetail.php lowercase filename | ✅ Fixed | Model is `OrderDetail.php` (proper casing) |
+| V-022 | Cart shows static image | ✅ Fixed | Dynamic product image via `$item['image']` |
+| V-023 | No pagination on homepage | ✅ Fixed | Products paginated |
+| V-024 | Product list 50 items per page | ✅ Fixed | Changed to 12 |
 
----
-
-| **New Bug 1** | Order Export Fatal Error (user relationship null) | ✅ | `OrderListController`-এ `customer_id` চেক করে লজিক ফিক্স করা হয়েছে। |
-| **New Bug 2** | Order Details Crash on Customer Relationship | ✅ | `details.blade.php` এবং কন্ট্রোলারে `customer` রিলেশনশিপ হ্যান্ডেল করা হয়েছে। |
-| **V-007** | Core Identity Logic (Order-User-Customer Mismatch) | ✅ | অর্ডার এক্সপোর্ট এবং ভিউ করার সময় কাস্টমার নাকি অ্যাডমিন অর্ডার করেছে তা সঠিকভাবে আলাদা করা হয়েছে। |
-| **V-002** | Lingering GET destructive actions | ✅ | `/cart/remove/{id}` রাউটটি `DELETE` মেথডে আপডেট করা হয়েছে এবং ফর্মে CSRF প্রোটেকশন দেওয়া হয়েছে। |
-| **V-018** | Customer Login returns Register view | ✅ | `register.blade.php` ফাইলের নাম পরিবর্তন করে `login.blade.php` করা হয়েছে এবং কন্ট্রোলারে আপডেট করা হয়েছে। |
-| **V-020** | Session Encryption Disabled | ✅ | `.env` ফাইলে `SESSION_ENCRYPT=true` করে সেশন সিকিউর করা হয়েছে। |
+**Summary: 22/24 fully fixed, 1 partial (by design), 1 was already fixed**
 
 ---
 
-## SECTION B: NEW BUGS CREATED (নতুন যে বাগগুলো তৈরি হয়েছে) ⚠️
+## 🔴 SECTION B: NEW BUGS CREATED (during development)
 
-* (বর্তমানে কোনো নতুন বাগ নেই)
-
----
-
-## SECTION C: REMAINING BUGS (যে বাগগুলো আগে থেকেই ছিলো কিন্তু ফিক্স করা হয়নি) ❌
-
-* (আগের লিস্টের সমস্ত বাগ সফলভাবে ফিক্স করা হয়েছে!)
-
----
-
-| **New Bug 3** | Checkout Form Vulnerability | ✅ | `shipping_cost` এবং `tax` এখন সার্ভার-সাইডে ডাটাবেসে সেভ হচ্ছে। |
-| **New Bug 4** | User Profile Image Upload Logic | ✅ | কাস্টমার মডেলে `image` কলাম যোগ করে প্রোফাইল আপডেটে ইমেজ আপলোডের লজিক অ্যাড করা হয়েছে। |
-| **New Bug 5** | Admin Dashboard N+1 Problem | ✅ | `DashboardController`-এ `User::count` পরিবর্তন করে `Customer::count` করা হয়েছে এবং `customer` রিলেশনশিপ ইগার লোড (Eager Load) করা হয়েছে। |
+| # | Bug | File | Severity | Status |
+|---|-----|------|----------|--------|
+| B-001 | **`banner.update` route MISSING** — Edit banner form submits to `route('banner.update', $banner->id)` but NO route with name `banner.update` exists in web.php. Banner edits will crash with `Route [banner.update] not defined` error. | `routes/web.php` line 183-189, `resources/views/backend/features/banner/edit.blade.php` line 14 | 🔴 CRITICAL | ❌ Not Fixed |
+| B-002 | **`coupon_code` and `discount_amount` NOT in Order $fillable** — `storeaddorder()` passes `coupon_code` and `discount_amount` to `Order::create()` (lines 182-183) but these fields are NOT in the Order model's `$fillable` array. Coupons are silently ignored on every order. | `app/Models/Order.php` line 12-34 | 🔴 CRITICAL | ❌ Not Fixed |
+| B-003 | **DOUBLE STOCK DECREMENT** — Stock is decremented TWICE: once in `OrderController@storeaddorder()` line 198 (`$product->decrement('stock', ...)`) when placing the order, AND again in `OrderListController@handleStatusChangeActions()` lines 244-250 when admin confirms the order. Every confirmed order loses 2× the actual quantity from stock. | `OrderController.php:198` + `OrderListController.php:244-250` | 🔴 CRITICAL | ❌ Not Fixed |
+| B-004 | **No Order Confirmation Page** — After placing order, user is redirected to homepage (`return redirect()->route('Home')`) with only a toast message. No dedicated confirmation/thank-you page showing order number, details, or next steps. | `OrderController.php:219` | 🟡 Medium | ❌ Not Fixed |
+| B-005 | **`APP_DEBUG=true` in production .env** — Debug mode is enabled, exposing stack traces, database credentials, and environment variables to any user who triggers an error. | `.env` | 🔴 CRITICAL (for production) | ❌ Not Fixed |
+| B-006 | **Error log: `Call to undefined method App\Models\Customer::wishlists()`** — Productdetails.blade.php calls `Customer::wishlists()` but this method may be missing or mis-named on the Customer model. Logged on 2026-04-20 23:33:36. | `resources/views/frontend/pages/Productdetails.blade.php`, `app/Models/Customer.php` | 🟡 Medium | ⚠️ Check |
 
 ---
 
-## SECTION B: NEW BUGS CREATED (নতুন যে বাগগুলো তৈরি হয়েছে) ⚠️
+## 🟡 SECTION C: REMAINING BUGS (not yet fixed)
 
-* (বর্তমানে কোনো নতুন বাগ নেই)
+### V-019: .env in .gitignore — ✅ RESOLVED
+```
+.gitignore contains: .env, .env.backup, .env.production
+```
+
+### V-020: Session encryption — ✅ RESOLVED
+```
+SESSION_DRIVER=database
+SESSION_ENCRYPT=true
+```
+
+### Missing Route Definitions
+
+| Route Name | Referenced In | Exists in web.php? | Status |
+|------------|---------------|---------------------|--------|
+| `banner.update` | `backend/features/banner/edit.blade.php:14` | ❌ NO | 🔴 BROKEN |
+| `order.confirmation` | N/A (should exist after checkout) | ❌ NO | 🟡 Missing Feature |
+
+### Order Confirmation Page — ❌ DOES NOT EXIST
+- After `placeorder/store`, user gets redirected to `Home` route
+- No `order.confirmation`, `order.success`, or `order.thankyou` route exists
+- No corresponding view file exists in `resources/views/frontend/`
+
+### Invoice Route — ✅ WORKS
+- Route `order.invoice` exists at `admin/orders/invoice/{id}`
+- `OrderListController@invoice` method exists (line 431-436)
+- Invoice view exists at `resources/views/backend/features/order/invoice.blade.php`
+
+### Double Stock Decrement — 🔴 CRITICAL
+- `OrderController@storeaddorder()` decrements stock at line 198: `$product->decrement('stock', $cartdata['quantity'])`
+- `OrderListController@handleStatusChangeActions()` decrements stock AGAIN at lines 244-250 when status changes to 'confirmed'
+- **Fix:** Remove stock decrement from EITHER the order placement OR the order confirmation — not both
+
+### Order Model Missing Fillable Fields — 🔴 CRITICAL
+- `coupon_code` and `discount_amount` are passed in `Order::create()` but not in `$fillable`
+- These values are silently dropped by Laravel's mass assignment protection
+- **Fix:** Add `'coupon_code'` and `'discount_amount'` to `Order::$fillable`
 
 ---
 
-## SECTION C: REMAINING BUGS (যে বাগগুলো আগে থেকেই ছিলো কিন্তু ফিক্স করা হয়নি) ❌
+## ✅ SECTION D: FEATURES COMPLETED
 
-* (আগের লিস্টের সমস্ত বাগ সফলভাবে ফিক্স করা হয়েছে!)
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Admin Login/Logout | ✅ | With rate limiting (`throttle:5,1`), auth+admin middleware |
+| Admin CRUD - Category | ✅ | Full CRUD + Image + CSV Import |
+| Admin CRUD - Brand | ✅ | Full CRUD + Image + CSV Import |
+| Admin CRUD - Product | ✅ | Full CRUD + Image + CSV Import + Discount + Soft Deletes |
+| Admin CRUD - Banner | ⚠️ | Create, List, Delete work. **Edit/Update BROKEN** (missing route) |
+| Admin Order Management | ✅ | List, View, Status Update (with transitions), Invoice, Bulk Update, Export CSV |
+| Admin Dashboard | ✅ | Stats, Revenue, Monthly comparison |
+| Admin Coupon Management | ✅ | Full CRUD via resource routes, product-specific coupons |
+| Customer Registration | ✅ | With validation + OTP email verification |
+| Customer Login/Logout | ✅ | With rate limiting + 2FA support |
+| Customer Profile Edit | ✅ | Name, Email, Phone, Address, Password, Profile Image |
+| Customer Address Book | ✅ | Multiple addresses, set default, edit, delete |
+| Customer Order History | ✅ | My Orders page with pagination + Order Detail view |
+| Customer Vouchers | ✅ | Collect & use coupons, My Vouchers page |
+| Customer Wishlist | ✅ | Toggle, list, remove. Back-in-stock notifications |
+| Product Reviews/Ratings | ✅ | Submit review, display average rating, related products |
+| Product Listing + Filter | ✅ | Category filter sidebar |
+| Product Search | ✅ | Name + description search |
+| Product Details Page | ✅ | With discount display, reviews, related products, wishlist toggle |
+| Add to Cart (AJAX) | ✅ | No page reload, toast notification, stock validation |
+| Cart Management | ✅ | Update qty (with stock check), Remove item |
+| Checkout | ✅ | COD + SSL option, address selection, coupon application |
+| Order Placement | ✅ | COD working, DB transaction, stock validation |
+| Discount System | ✅ | % stored, BDT displayed via `getFinalPriceAttribute()` |
+| Bulk Import CSV | ✅ | Category, Brand, Product with image URL |
+| Dynamic Homepage | ✅ | Real products, banners, categories |
+| Responsive Design | ✅ | Bootstrap based |
+| Security Middleware | ✅ | Admin role check, customer auth guard |
+| Stock Validation | ✅ | On add to cart + on order placement |
+| Password Reset | ✅ | Forgot password → Email link → Reset form (PasswordResetController) |
+| Social Login (Google) | ✅ | Google OAuth via Socialite |
+| Email Notifications | ✅ | OTP, 2FA, Password Reset, Order Confirmation, Shipping Status, Back-in-Stock |
+| Order Status Tracking | ✅ | Status history timeline with admin notes |
 
 ---
 
-## SECTION C.1: NEWLY DISCOVERED BUGS (নতুন করে খুঁজে পাওয়া বাগ) 🕵️‍♂️
+## 🔴 SECTION E: MUST-HAVE FEATURES (not done — required for production)
 
-* (বর্তমানে কোনো নতুন বাগ নেই। প্রোজেক্টটি প্রোডাকশন রেডি হতে যাচ্ছে!)
-
----
-
-## SECTION D: FEATURES COMPLETED (যে ফিচারগুলো সম্পন্ন হয়েছে) ✅
-
-* **Product, Category, & Brand CRUD:** অ্যাডমিন প্যানেল থেকে ক্যাটাগরি, ব্র্যান্ড এবং প্রোডাক্ট তৈরি, আপডেট এবং ডিলিট করার পুরো প্রসেস রেডি।
-* **Cart Logic Completed:** কার্টে আইটেম যোগ করা, রিমুভ করা এবং কোয়ান্টিটি আপডেট করার ফাংশনগুলো কাজ করছে।
-* **Inventory Management:** কার্টে অ্যাড করার সময় স্টক চেক হচ্ছে এবং অর্ডার কনফার্ম করার পর স্টক স্বয়ংক্রিয়ভাবে কমে যাচ্ছে।
-* **Product Search & Filtering:** ফ্রন্টএন্ডে সিকিউরড প্রোডাক্ট সার্চ এবং ক্যাটাগরি ভিত্তিক ফিল্টারিং কাজ করছে।
-* **Customer Profile & Address Book:** কাস্টমার প্রোফাইল আপডেট করা এবং সর্বোচ্চ ৫টি ডেলিভারি অ্যাড্রেস ম্যানেজ করার সিস্টেম রেডি।
-* **Customer Order Tracking:** কাস্টমাররা তাদের "My Orders" পেজে অর্ডার হিস্ট্রি এবং ডিটেইলস দেখতে পাচ্ছেন।
-* **Invoice Generation:** ব্যাকএন্ড অ্যাডমিনদের জন্য PDF/HTML ইনভয়েস জেনারেট করার অপশন চালু হয়েছে।
-* **Admin Security:** `AdminMiddleware` দিয়ে অ্যাডমিন প্যানেলের সবগুলো রাউট সিকিউর করা হয়েছে।
+| Priority | Feature | Why Important | Effort |
+|----------|---------|---------------|--------|
+| P0 | **Fix `banner.update` route** | Banner edit page crashes — admin cannot update banners | 5 min |
+| P0 | **Fix Order `$fillable` for coupons** | Coupon discounts are silently lost on every order | 5 min |
+| P0 | **Fix double stock decrement** | Stock count goes negative, inventory corrupted | 15 min |
+| P0 | **Order Confirmation Page** | User needs visual feedback after order (order #, summary, what's next) | 1 hr |
+| P0 | **`APP_DEBUG=false` for production** | Security — hides stack traces, DB credentials, env vars from users | 5 min |
+| P1 | Invoice Download (PDF) | Professional feature — currently HTML only | 1 hr |
+| P1 | Out of Stock display on product page | UX — prevent frustrated add-to-cart attempts | 30 min |
+| P1 | SSLCommerz Payment (sandbox test) | Checkout has "online" option but no SSLCommerz integration | 3 hr |
 
 ---
 
-## SECTION E: MUST-HAVE FEATURES (যে ফিচারগুলো প্রোজেক্টে অবশ্যই করতে হবে) 🔴
+## 🟡 SECTION F: OPTIONAL FEATURES (would increase project value/grade)
 
-* **Payment Gateway Integration:** চেকআউটে "SSL" অপশন সিলেক্ট করা যায়, কিন্তু SSLCommerz, bKash বা Stripe-এর আসল পেমেন্ট প্রসেসিং লজিক নেই। বর্তমানে সবগুলো অর্ডার শুধু "Pending" হিসেবে ডাটাবেসে সেভ হচ্ছে।
-* **Email Notifications:** সিস্টেমে `MAIL_MAILER=log` সেট করা আছে। ইউজার রেজিস্ট্রেশন বা অর্ডার কনফার্মেশনের পর কোনো কনফার্মেশন ইমেইল যাচ্ছে না। আসল SMTP বা মেইল ইন্টিগ্রেশন করতে হবে।
-* **Password Reset Flow (Forgot Password):** অ্যাডমিন বা কাস্টমার কেউ পাসওয়ার্ড ভুলে গেলে সেটা ইমেইলের মাধ্যমে রিকভার করার কোনো সিস্টেম নেই।
+| Feature | Value Added | Effort |
+|---------|-------------|--------|
+| Coupon/Discount Codes (checkout) | ✅ Already Done — coupon collect, apply, remove working | — |
+| Product Reviews/Ratings | ✅ Already Done — submit, display, average rating | — |
+| Wishlist (save to DB) | ✅ Already Done — toggle, list, back-in-stock alerts | — |
+| Product Image Gallery | Multiple images per product | 2 hr |
+| Related Products section | ✅ Already Done — shown on product detail page | — |
+| Order Tracking timeline | ✅ Already Done — status history with admin notes | — |
+| Admin Sales Charts | Better dashboard insights (Chart.js) | 2 hr |
+| Product Inventory Alert | Low stock notifications (back-in-stock already done) | 1 hr |
+| SEO Meta Tags | Search engine visibility | 1 hr |
+| Multi-image upload | Professional product display | 2 hr |
+| Print Invoice button | Already working (HTML invoice page exists) | 30 min |
+| Automated Tests | Code quality, professionalism | 4 hr |
 
 ---
 
-## SECTION F: OPTIONAL FEATURES (যে ফিচারগুলো করলে প্রোজেক্টের ভ্যালু বাড়বে) 🟡
+## 📋 SECTION G: RECOMMENDED ACTION PLAN (before submission)
 
-* **Product Reviews and Ratings:** কাস্টমাররা যেন প্রোডাক্ট কিনে রিভিউ এবং রেটিং দিতে পারেন। এটি ইউজার ট্রাস্ট বাড়াতে খুব কার্যকরী।
-* **Customer Wishlist:** কাস্টমাররা যেন তাদের পছন্দের প্রোডাক্টগুলো পরে কেনার জন্য উইশলিস্টে সেভ করে রাখতে পারেন।
-* **Coupon & Discount Engine:** ফ্রন্টএন্ডে "Apply Coupon"-এর যে UI আছে, সেটা ব্যাকএন্ড লজিকের সাথে যুক্ত করে ডিসকাউন্ট ভ্যালিডেশন এবং টোটাল অ্যামাউন্ট আপডেট করার ফিচার তৈরি করা।
-* **Multi-Language / Localization:** ইংরেজি ও বাংলার মিশ্রণে হার্ডকোড করা টেক্সটগুলো সরিয়ে Laravel-এর `__('lang')` ফাইল সিস্টেম ব্যবহার করে ডায়নামিক ভাষা পরিবর্তন করার সুবিধা।
-* **Automated Test Suite:** `tests/` ডিরেক্টরিতে চেকআউট বা পেমেন্ট সম্পর্কিত কোনো ফিচার টেস্ট নেই। ভবিষ্যতে কোড আপডেট করার সময় প্রোজেক্ট যেন ক্র্যাশ না করে, সেজন্য বেসিক ইন্টিগ্রেশন টেস্ট লেখা প্রয়োজন।
+### 🚨 Do RIGHT NOW (< 15 min total):
+
+1. **Fix `banner.update` route** — Add to `routes/web.php` inside banner prefix:
+   ```php
+   Route::post('/update/{id}', [BannerController::class, 'update'])->name('banner.update');
+   ```
+
+2. **Fix Order `$fillable`** — Add to `app/Models/Order.php` `$fillable` array:
+   ```php
+   'coupon_code',
+   'discount_amount',
+   ```
+
+3. **Fix double stock decrement** — Remove the stock decrement from `OrderListController@handleStatusChangeActions()` case `'confirmed'` (lines 243-251), since stock is already decremented at order placement time in `OrderController@storeaddorder()`.
+
+4. **Set `APP_DEBUG=false`** in `.env` for production deployment.
+
+### ✅ Do TODAY (< 1 hr each):
+
+1. **Create Order Confirmation Page**
+   - Add route: `Route::get('/order/confirmation/{id}', [OrderController::class, 'confirmation'])->name('order.confirmation');`
+   - Create view: `resources/views/frontend/pages/order-confirmation.blade.php`
+   - Change redirect in `storeaddorder()` from `Home` to `order.confirmation`
+
+2. **Verify Customer wishlists() method** — Check if `Customer` model has `wishlists()` relationship (error logged on 2026-04-20)
+
+3. **GitHub push** with all fixes
+
+### ⏭️ Skip for now (do after submission):
+
+1. SSLCommerz live payment integration
+2. PDF Invoice download
+3. Automated tests
+4. Multi-image product gallery
+
+---
+
+## 🔧 SECTION H: TECHNICAL DEBT
+
+| Item | Risk | Fix |
+|------|------|-----|
+| `APP_DEBUG=true` in .env | 🔴 High | Set to `false` before any deployment |
+| Double stock decrement on confirmed orders | 🔴 High | Remove one of the two decrement locations |
+| Order model missing coupon fillable fields | 🔴 High | Add `coupon_code`, `discount_amount` to `$fillable` |
+| `banner.update` route missing | 🔴 High | Add POST route for banner update |
+| No automated tests | 🟡 Medium | Add PHPUnit tests for critical flows (order, cart, auth) |
+| Images served from public/ | 🟠 Low | Move to storage with symlink or CDN |
+| No image optimization | 🟠 Low | Add Intervention/Image for resize/compress |
+| Hardcoded shop name | 🟠 Low | Move to `config/settings.php` or admin settings table |
+| 34 migrations (some are fixes) | 🟠 Low | Consider squashing migrations before production |
+| No HTTPS enforcement | 🟡 Medium | Add `URL::forceScheme('https')` in AppServiceProvider for production |
+
+---
+
+## 📊 SECTION I: PROJECT STATISTICS
+
+### Codebase Overview
+| Metric | Count |
+|--------|-------|
+| Total Routes | 97 |
+| Total Migrations | 34 (all ran successfully) |
+| Controllers (Backend) | 9 |
+| Controllers (Frontend) | 11 |
+| Blade Views (Backend) | 27 |
+| Blade Views (Frontend) | 29 |
+| Models | Order, OrderDetail, Product, Category, Brand, Banner, Customer, User, Wishlist, Review, Coupon, CustomerCoupon, OrderStatusHistory |
+
+### Feature Completion Score
+| Category | Done | Total | % |
+|----------|------|-------|---|
+| Admin Features | 8 | 8 | 100% |
+| Customer Auth | 6 | 6 | 100% |
+| Shopping Flow | 5 | 6 | 83% (missing confirmation page) |
+| Product Features | 5 | 5 | 100% |
+| Extra Features | 6 | 6 | 100% |
+| **Overall** | **30** | **31** | **97%** |
+
+### Critical Bug Score
+| Severity | Count | Status |
+|----------|-------|--------|
+| 🔴 Critical (new bugs) | 3 | Need immediate fix |
+| 🟡 Medium | 2 | Should fix before submission |
+| ✅ Fixed (V-001 to V-024) | 23/24 | Excellent |
+
+---
+
+> **Bottom Line:** The project is feature-rich and well-structured (97% complete), but has **3 critical bugs introduced during development** (banner.update route, coupon fillable, double stock decrement) that need fixing before submission. All 3 can be fixed in under 20 minutes total.

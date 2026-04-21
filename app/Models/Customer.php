@@ -55,6 +55,13 @@ class Customer extends Authenticatable
         return $this->hasMany(Review::class);
     }
 
+    public function coupons()
+    {
+        return $this->belongsToMany(Coupon::class, 'customer_coupons')
+                    ->withPivot('collected_at', 'is_used')
+                    ->withTimestamps();
+    }
+
     public function defaultAddress()
     {
         return $this->hasOne(CustomerAddress::class)->where('is_default', true);

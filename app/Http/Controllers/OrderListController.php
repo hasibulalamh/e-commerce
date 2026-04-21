@@ -240,14 +240,8 @@ class OrderListController extends Controller
     {
         switch ($newStatus) {
             case 'confirmed':
-                // Update inventory
-                foreach ($order->orderDetails as $detail) {
-                    $product = $detail->product;
-                    if ($product) {
-                        $product->stock -= $detail->quantity;
-                        $product->save();
-                    }
-                }
+                // Stock already decremented at order placement (OrderController@storeaddorder)
+                // No additional stock changes needed here
                 break;
 
             case 'cancelled':
@@ -277,11 +271,13 @@ class OrderListController extends Controller
 
     protected function sendStatusNotifications($order, $newStatus, $previousStatus)
     {
-        // Example: Send email notification to customer
-        // Mail::to($order->user->email)->send(new OrderStatusChangedMail($order, $newStatus, $previousStatus));
-
-        // Example: Send SMS notification
-        // SmsService::send($order->user->phone, "Your order #{$order->id} status has been updated to {$newStatus}.");
+        if ($order->customer) {
+            try {
+                $order->customer->notify(new \App\Notifications\ShippingStatusNotification($order, $newStatus));
+            } catch (\Exception $e) {
+                \Log::error('Status Mail Error: ' . $e->getMessage());
+            }
+        }
     }
 
     public function bulkUpdate(Request $request)

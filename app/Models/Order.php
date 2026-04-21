@@ -26,6 +26,8 @@ class Order extends Model
         'subtotal',
         'shipping_cost',
         'tax',
+        'coupon_code',
+        'discount_amount',
         'total',
         'payment_method',
         'payment_status',

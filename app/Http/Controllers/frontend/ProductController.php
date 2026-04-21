@@ -11,12 +11,25 @@ class ProductController extends Controller
     public function view($id)
     {
         $product = Product::findOrFail($id);
+        
+        // Fetch active coupons for this product or general ones
+        $coupons = \App\Models\Coupon::where('status', 'active')
+            ->where(function($query) use ($product) {
+                $query->whereNull('product_id')
+                      ->orWhere('product_id', $product->id);
+            })
+            ->where(function($query) {
+                $query->whereNull('expiry_date')
+                      ->orWhereDate('expiry_date', '>=', now());
+            })
+            ->get();
+
         $relatedProducts = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('status', 'active')
             ->take(4)
             ->get();
-        return view('frontend.pages.Productdetails', compact('product', 'relatedProducts'));
+        return view('frontend.pages.Productdetails', compact('product', 'relatedProducts', 'coupons'));
     }
 
     public function listview(Request $request)

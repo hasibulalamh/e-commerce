@@ -1,308 +1,477 @@
 @extends('frontend.master')
+
+@section('title', 'Secure Checkout | Capital Shop')
+
 @section('content')
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<div style="background:#f8f9fa; min-height:70vh; padding:40px 0;">
-<div class="container">
+<style>
+    :root {
+        --primary-color: #f85606; /* Daraz Orange */
+        --secondary-color: #2b3445;
+        --bg-light: #f4f6f9;
+        --border-radius: 12px;
+        --card-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
 
-    <div class="row">
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: var(--bg-light);
+    }
 
-        {{-- LEFT: Billing Form --}}
-        <div class="col-lg-7 mb-4">
-            <div style="background:white; border-radius:12px;
-                        box-shadow:0 2px 15px rgba(0,0,0,0.08); padding:30px;">
-                
-                <h4 style="font-weight:700; margin-bottom:25px; 
-                            padding-bottom:15px; border-bottom:2px solid #f0f0f0;
-                            color:#222;">
-                    📋 Billing Details
-                </h4>
+    .checkout-container {
+        padding-top: 40px;
+        padding-bottom: 80px;
+    }
 
-                <form action="{{ route('placeorder.store') }}" method="POST">
-                @csrf
+    .card-modern {
+        background: #fff;
+        border: none;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
 
-                {{-- Saved Addresses Selector --}}
-                @if($addresses->count() > 0)
-                <div class="mb-4" style="background:#f9f9f9; padding:15px; border-radius:10px; border:1px dashed #ccc;">
-                    <label style="font-weight:700; font-size:12px; color:#e44d26; text-transform:uppercase; margin-bottom:10px; display:block;">
-                        🚀 Quick Select Saved Address
-                    </label>
-                    <select id="saved_address_selector" class="form-control" style="height:45px; border-radius:8px; border:2px solid #eee;">
-                        <option value="">-- Choose a saved address --</option>
-                        @foreach($addresses as $addr)
-                            <option value="{{ $addr->id }}" 
-                                    data-name="{{ $addr->name }}"
-                                    data-email="{{ $addr->email }}"
-                                    data-phone="{{ $addr->phone }}"
-                                    data-address="{{ $addr->address }}"
-                                    data-city="{{ $addr->city }}"
-                                    data-zip="{{ $addr->zip_code }}">
-                                {{ $addr->name }} ({{ $addr->city }}) {{ $addr->is_default ? '[DEFAULT]' : '' }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+    .card-header-modern {
+        background: #fff;
+        padding: 20px 24px;
+        border-bottom: 1px solid #f0f0f0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-                <script>
-                    document.getElementById('saved_address_selector').addEventListener('change', function() {
-                        const option = this.options[this.selectedIndex];
-                        if (option.value) {
-                            document.getElementsByName('name')[0].value = option.getAttribute('data-name');
-                            document.getElementsByName('email')[0].value = option.getAttribute('data-email');
-                            document.getElementsByName('number')[0].value = option.getAttribute('data-phone');
-                            document.getElementsByName('address')[0].value = option.getAttribute('data-address');
-                            document.getElementsByName('city')[0].value = option.getAttribute('data-city');
-                            document.getElementsByName('zip_code')[0].value = option.getAttribute('data-zip');
-                            
-                            // Visual feedback
-                            this.style.borderColor = '#28a745';
-                            setTimeout(() => { this.style.borderColor = '#eee'; }, 1000);
-                        }
-                    });
-                </script>
-                @endif
+    .card-header-modern h5 {
+        margin: 0;
+        font-weight: 700;
+        color: var(--secondary-color);
+        font-size: 1.1rem;
+    }
 
-                {{-- Name + Phone --}}
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label style="font-weight:600; font-size:13px; 
-                                      color:#555; margin-bottom:6px; display:block;">
-                            Full Name *
-                        </label>
-                        <input type="text" name="name" 
-                               value="{{ auth('customerg')->user()->name }}"
-                               placeholder="Your full name"
-                               style="width:100%; padding:12px 15px; border:2px solid #eee;
-                                      border-radius:8px; font-size:14px; outline:none;
-                                      transition:border 0.2s;"
-                               onfocus="this.style.border='2px solid #e44d26'"
-                               onblur="this.style.border='2px solid #eee'">
-                        @error('name')
-                            <span style="color:#dc3545; font-size:12px;">{{ $message }}</span>
-                        @enderror
+    .header-icon {
+        width: 36px;
+        height: 36px;
+        background: rgba(248, 86, 6, 0.1);
+        color: var(--primary-color);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    /* Form Styles */
+    .form-group-modern {
+        margin-bottom: 20px;
+    }
+
+    .form-label-modern {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #4b5563;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .form-control-modern {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        background: #fff;
+    }
+
+    .form-control-modern:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(248, 86, 6, 0.1);
+        outline: none;
+    }
+
+    /* Payment Methods */
+    .payment-option-modern {
+        position: relative;
+        padding: 16px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .payment-option-modern:hover {
+        border-color: var(--primary-color);
+        background: rgba(248, 86, 6, 0.02);
+    }
+
+    .payment-option-modern.active {
+        border-color: var(--primary-color);
+        background: rgba(248, 86, 6, 0.05);
+    }
+
+    .payment-icon {
+        width: 48px;
+        height: 48px;
+        background: #fff;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    /* Voucher / Ticket Styles (Daraz Style) */
+    .voucher-card {
+        background: #fff;
+        border-radius: 10px;
+        display: flex;
+        overflow: hidden;
+        margin-bottom: 15px;
+        border: 1px solid #ffefe0;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    
+    .voucher-card:hover {
+        transform: scale(1.02);
+    }
+
+    .voucher-left {
+        background: var(--primary-color);
+        color: #fff;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 80px;
+        position: relative;
+    }
+
+    .voucher-left::after {
+        content: '';
+        position: absolute;
+        right: -5px;
+        top: 0;
+        bottom: 0;
+        width: 10px;
+        background-image: radial-gradient(circle, #fff 50%, transparent 50%);
+        background-size: 10px 10px;
+    }
+
+    .voucher-right {
+        flex: 1;
+        padding: 15px;
+        background: #fff9f5;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .voucher-code {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--secondary-color);
+        letter-spacing: 1px;
+    }
+
+    /* Sticky Summary */
+    .summary-sidebar {
+        position: sticky;
+        top: 100px;
+    }
+
+    .btn-place-order {
+        background: var(--primary-color);
+        border: none;
+        padding: 16px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: #fff;
+        width: 100%;
+        transition: transform 0.2s, background 0.2s;
+        box-shadow: 0 10px 20px rgba(248, 86, 6, 0.2);
+    }
+
+    .btn-place-order:hover {
+        background: #e04b00;
+        transform: translateY(-2px);
+    }
+
+    .total-amount {
+        font-size: 1.5rem;
+        color: var(--primary-color);
+        font-weight: 800;
+    }
+</style>
+
+<div class="checkout-container container">
+    <form action="{{ route('placeorder.store') }}" method="POST" id="checkout-form">
+        @csrf
+        <div class="row g-4">
+            {{-- Main Content --}}
+            <div class="col-lg-8">
+                {{-- Shipping Information --}}
+                <div class="card-modern">
+                    <div class="card-header-modern">
+                        <div class="header-icon"><i class="fas fa-truck"></i></div>
+                        <h5>Shipping Information</h5>
                     </div>
-                    <div class="col-md-6">
-                        <label style="font-weight:600; font-size:13px;
-                                      color:#555; margin-bottom:6px; display:block;">
-                            Phone Number *
-                        </label>
-                        <input type="text" name="number"
-                               value="{{ old('number') }}"
-                               placeholder="01XXXXXXXXX"
-                               style="width:100%; padding:12px 15px; border:2px solid #eee;
-                                      border-radius:8px; font-size:14px; outline:none;
-                                      transition:border 0.2s;"
-                               onfocus="this.style.border='2px solid #e44d26'"
-                               onblur="this.style.border='2px solid #eee'">
-                        @error('number')
-                            <span style="color:#dc3545; font-size:12px;">{{ $message }}</span>
-                        @enderror
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">FULL NAME</label>
+                                    <input type="text" name="name" class="form-control-modern" value="{{ old('name', Auth::guard('customerg')->user()->name) }}" placeholder="Enter your full name" required>
+                                    @error('name') <small class="text-danger">{{ $message }}</small> @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">PHONE NUMBER</label>
+                                    <input type="text" name="phone" class="form-control-modern" value="{{ old('phone') }}" placeholder="01XXXXXXXXX" required>
+                                    @error('phone') <small class="text-danger">{{ $message }}</small> @enderror
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">EMAIL ADDRESS</label>
+                                    <input type="email" name="email" class="form-control-modern" value="{{ old('email', Auth::guard('customerg')->user()->email) }}" placeholder="yourname@example.com" required>
+                                    @error('email') <small class="text-danger">{{ $message }}</small> @enderror
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">STREET ADDRESS</label>
+                                    <input type="text" name="address" class="form-control-modern" value="{{ old('address') }}" placeholder="Apartment, suite, unit, etc." required>
+                                    @error('address') <small class="text-danger">{{ $message }}</small> @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">CITY</label>
+                                    <input type="text" name="city" class="form-control-modern" value="{{ old('city') }}" placeholder="e.g. Dhaka" required>
+                                    @error('city') <small class="text-danger">{{ $message }}</small> @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">ZIP CODE</label>
+                                    <input type="text" name="postal_code" class="form-control-modern" value="{{ old('postal_code') }}" placeholder="1200">
+                                    @error('postal_code') <small class="text-danger">{{ $message }}</small> @enderror
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Email --}}
-                <div class="mb-3">
-                    <label style="font-weight:600; font-size:13px;
-                                  color:#555; margin-bottom:6px; display:block;">
-                        Email Address *
-                    </label>
-                    <input type="email" name="email"
-                           value="{{ auth('customerg')->user()->email }}"
-                           placeholder="your@email.com"
-                           style="width:100%; padding:12px 15px; border:2px solid #eee;
-                                  border-radius:8px; font-size:14px; outline:none;
-                                  transition:border 0.2s;"
-                           onfocus="this.style.border='2px solid #e44d26'"
-                           onblur="this.style.border='2px solid #eee'">
-                    @error('email')
-                        <span style="color:#dc3545; font-size:12px;">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                {{-- Address --}}
-                <div class="mb-3">
-                    <label style="font-weight:600; font-size:13px;
-                                  color:#555; margin-bottom:6px; display:block;">
-                        Street Address *
-                    </label>
-                    <input type="text" name="address"
-                           value="{{ old('address') }}"
-                           placeholder="House no, Road no, Area"
-                           style="width:100%; padding:12px 15px; border:2px solid #eee;
-                                  border-radius:8px; font-size:14px; outline:none;
-                                  transition:border 0.2s;"
-                           onfocus="this.style.border='2px solid #e44d26'"
-                           onblur="this.style.border='2px solid #eee'">
-                    @error('address')
-                        <span style="color:#dc3545; font-size:12px;">{{ $message }}</span>
-                    @enderror
-                </div>
-
-                {{-- City + ZIP --}}
-                <div class="row mb-4">
-                    <div class="col-md-6">
-                        <label style="font-weight:600; font-size:13px;
-                                      color:#555; margin-bottom:6px; display:block;">
-                            City *
-                        </label>
-                        <input type="text" name="city"
-                               value="{{ old('city') }}"
-                               placeholder="Dhaka"
-                               style="width:100%; padding:12px 15px; border:2px solid #eee;
-                                      border-radius:8px; font-size:14px; outline:none;
-                                      transition:border 0.2s;"
-                               onfocus="this.style.border='2px solid #e44d26'"
-                               onblur="this.style.border='2px solid #eee'">
-                        @error('city')
-                            <span style="color:#dc3545; font-size:12px;">{{ $message }}</span>
-                        @enderror
+                {{-- Available Vouchers (BOX List) --}}
+                <div class="card-modern" id="available_vouchers_section" style="{{ session('coupon') ? 'display:none;' : 'display:block;' }}">
+                    <div class="card-header-modern">
+                        <div class="header-icon"><i class="fas fa-ticket-alt"></i></div>
+                        <h5>Available Vouchers</h5>
                     </div>
-                    <div class="col-md-6">
-                        <label style="font-weight:600; font-size:13px;
-                                      color:#555; margin-bottom:6px; display:block;">
-                            ZIP Code
-                        </label>
-                        <input type="text" name="zip_code"
-                               value="{{ old('zip_code') }}"
-                               placeholder="1200"
-                               style="width:100%; padding:12px 15px; border:2px solid #eee;
-                                      border-radius:8px; font-size:14px; outline:none;
-                                      transition:border 0.2s;"
-                               onfocus="this.style.border='2px solid #e44d26'"
-                               onblur="this.style.border='2px solid #eee'">
-                        @error('zip_code')
-                            <span style="color:#dc3545; font-size:12px;">{{ $message }}</span>
-                        @enderror
+                    <div class="card-body p-4">
+                        <p class="text-muted small mb-4">Click on a voucher to apply it to your order.</p>
+                        <div class="row g-3">
+                            @forelse($availableCoupons as $coupon)
+                                <div class="col-md-6">
+                                    <div class="voucher-card shadow-sm" onclick="applyVoucher('{{ $coupon->code }}')">
+                                        <div class="voucher-left">
+                                            <i class="fas fa-percentage"></i>
+                                            <small class="fw-bold mt-1" style="font-size: 8px;">GET</small>
+                                        </div>
+                                        <div class="voucher-right">
+                                            <div>
+                                                <div class="voucher-code text-uppercase">{{ $coupon->code }}</div>
+                                                <small class="text-muted d-block" style="font-size: 10px;">
+                                                    @if($coupon->type == 'percent')
+                                                        {{ $coupon->value }}% OFF
+                                                    @else
+                                                        ৳{{ $coupon->value }} OFF
+                                                    @endif
+                                                    (Min. ৳{{ $coupon->min_purchase }})
+                                                </small>
+                                            </div>
+                                            <div class="btn btn-sm btn-outline-primary py-0" style="font-size: 10px; border-radius: 20px;">APPLY</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="col-12 text-center py-4">
+                                    <div class="text-muted opacity-50 mb-2"><i class="fas fa-ticket-alt fa-3x"></i></div>
+                                    <p class="text-muted">No vouchers available at the moment.</p>
+                                </div>
+                            @endforelse
+                        </div>
                     </div>
                 </div>
 
                 {{-- Payment Method --}}
-                <div style="background:#f8f9fa; border-radius:10px; padding:20px; margin-bottom:20px;">
-                    <h6 style="font-weight:700; margin-bottom:15px; color:#333;">
-                        💳 Payment Method
-                    </h6>
+                <div class="card-modern">
+                    <div class="card-header-modern">
+                        <div class="header-icon"><i class="fas fa-wallet"></i></div>
+                        <h5>Payment Method</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="payment-options">
+                            <label class="payment-option-modern active">
+                                <input type="radio" name="payment_method" value="cod" class="d-none" checked>
+                                <div class="payment-icon">💵</div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold">Cash on Delivery</h6>
+                                    <p class="text-muted small mb-0">Pay when you receive the product.</p>
+                                </div>
+                                <div class="check-icon text-primary"><i class="fas fa-check-circle"></i></div>
+                            </label>
 
-                    <label style="display:flex; align-items:center; gap:12px;
-                                  padding:15px; border:2px solid #eee; border-radius:8px;
-                                  margin-bottom:10px; cursor:pointer; background:white;
-                                  transition:border 0.2s;"
-                           onclick="this.style.border='2px solid #e44d26'">
-                        <input type="radio" name="pay" value="CASH" {{ old('pay') == 'CASH' || !old('pay') ? 'checked' : '' }}
-                               style="width:18px; height:18px; accent-color:#e44d26;">
-                        <div>
-                            <div style="font-weight:600; color:#333;">💵 Cash on Delivery</div>
-                            <div style="font-size:12px; color:#888;">Pay when your order arrives</div>
+                            <label class="payment-option-modern">
+                                <input type="radio" name="payment_method" value="online" class="d-none">
+                                <div class="payment-icon">💳</div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold">SSLCommerz</h6>
+                                    <p class="text-muted small mb-0">Pay securely with Cards or Mobile Banking.</p>
+                                </div>
+                                <div class="check-icon text-muted"><i class="far fa-circle"></i></div>
+                            </label>
                         </div>
-                    </label>
-
-                    <label style="display:flex; align-items:center; gap:12px;
-                                  padding:15px; border:2px solid #eee; border-radius:8px;
-                                  cursor:pointer; background:white; transition:border 0.2s;"
-                           onclick="this.style.border='2px solid #e44d26'">
-                        <input type="radio" name="pay" value="SSL" {{ old('pay') == 'SSL' ? 'checked' : '' }}
-                               style="width:18px; height:18px; accent-color:#e44d26;">
-                        <div>
-                            <div style="font-weight:600; color:#333;">🔒 SSLCommerz</div>
-                            <div style="font-size:12px; color:#888;">Secure online payment</div>
-                        </div>
-                    </label>
-                    @error('pay')
-                        <span style="color:#dc3545; font-size:12px; display:block; mt-2;">{{ $message }}</span>
-                    @enderror
+                    </div>
                 </div>
-
-                {{-- Hidden total --}}
-                <input type="hidden" name="total_amount" 
-                       value="{{ array_sum(array_column(session('cart', []), 'subtotal')) }}">
-
-                {{-- Place Order Button --}}
-                <button type="submit"
-                        style="width:100%; background:#e44d26; color:white;
-                               padding:16px; border:none; border-radius:8px;
-                               font-size:1.1rem; font-weight:700; cursor:pointer;
-                               letter-spacing:0.5px;">
-                    🛍️ Place Order
-                </button>
-
-                </form>
             </div>
-        </div>
 
-        {{-- RIGHT: Order Summary --}}
-        <div class="col-lg-5">
-            <div style="background:white; border-radius:12px;
-                        box-shadow:0 2px 15px rgba(0,0,0,0.08);
-                        padding:25px; position:sticky; top:20px;">
-                
-                <h5 style="font-weight:700; margin-bottom:20px;
-                            padding-bottom:15px; border-bottom:2px solid #f0f0f0;">
-                    🛒 Your Order
-                </h5>
+            {{-- Sidebar --}}
+            <div class="col-lg-4">
+                <div class="summary-sidebar">
+                    <div class="card-modern">
+                        <div class="card-header-modern">
+                            <h5>Order Summary</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            {{-- Products --}}
+                            <div class="mb-4">
+                                @php $subtotal = 0; @endphp
+                                @if(session('cart'))
+                                    @foreach(session('cart') as $item)
+                                        @php $subtotal += $item['price'] * $item['quantity']; @endphp
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="position-relative">
+                                                <img src="{{ asset('upload/products/' . ($item['image'] ?? 'default.jpg')) }}" 
+                                                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" style="font-size: 9px;">
+                                                    {{ $item['quantity'] }}
+                                                </span>
+                                            </div>
+                                            <div class="ms-3 flex-grow-1">
+                                                <p class="mb-0 small fw-bold text-truncate" style="max-width: 150px;">{{ $item['name'] }}</p>
+                                                <small class="text-muted">৳{{ number_format($item['price'], 2) }}</small>
+                                            </div>
+                                            <div class="fw-bold small">৳{{ number_format($item['price'] * $item['quantity'], 2) }}</div>
+                                        </div>
+                                    @endforeach
+                                @endif
+                            </div>
 
-                {{-- Items --}}
-                @php $subtotal = 0; @endphp
-                @if(session('cart'))
-                @foreach(session('cart') as $item)
-                @php $subtotal += $item['price'] * $item['quantity']; @endphp
-                <div style="display:flex; align-items:center; gap:12px;
-                            margin-bottom:15px; padding-bottom:15px;
-                            border-bottom:1px solid #f5f5f5;">
-                    <div style="width:55px; height:55px; border-radius:8px;
-                                overflow:hidden; background:#f5f5f5; flex-shrink:0;">
-                        @if(isset($item['image']) && $item['image'])
-                            <img src="{{ asset('upload/products/' . $item['image']) }}"
-                                 style="width:100%; height:100%; object-fit:cover;">
-                        @else
-                            <div style="width:100%; height:100%; display:flex;
-                                        align-items:center; justify-content:center;">📦</div>
-                        @endif
-                    </div>
-                    <div style="flex:1;">
-                        <p style="margin:0; font-weight:600; font-size:0.88rem; color:#333;">
-                            {{ $item['name'] }}
-                        </p>
-                        <p style="margin:0; font-size:12px; color:#888;">
-                            Qty: {{ $item['quantity'] }}
-                        </p>
-                    </div>
-                    <div style="font-weight:700; color:#e44d26; white-space:nowrap;">
-                        ৳{{ number_format($item['price'] * $item['quantity'], 2) }}
-                    </div>
-                </div>
-                @endforeach
-                @endif
+                            <hr class="my-4" style="border-style: dashed;">
 
-                {{-- Totals --}}
-                <div style="border-top:2px solid #f0f0f0; padding-top:15px;">
-                    <div style="display:flex; justify-content:space-between;
-                                margin-bottom:8px; color:#555; font-size:14px;">
-                        <span>Subtotal</span>
-                        <span style="font-weight:600;">৳{{ number_format($subtotal, 2) }}</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between;
-                                margin-bottom:15px; color:#555; font-size:14px;">
-                        <span>Shipping (Flat Rate)</span>
-                        <span style="font-weight:600;">৳100.00</span>
-                    </div>
-                    <div style="display:flex; justify-content:space-between;
-                                padding:15px; background:#fff3f0; border-radius:8px;">
-                        <span style="font-weight:700; font-size:1rem;">Total</span>
-                        <span style="font-weight:700; font-size:1.2rem; color:#e44d26;">
-                            ৳{{ number_format($subtotal + 100, 2) }}
-                        </span>
-                    </div>
-                </div>
+                            {{-- Applied Coupon Card (BOX) --}}
+                            <div id="applied_coupon_area" style="{{ session('coupon') ? 'display:block;' : 'display:none;' }}" class="mb-4">
+                                <div class="voucher-card shadow-sm">
+                                    <div class="voucher-left">
+                                        <i class="fas fa-percentage"></i>
+                                        <small class="fw-bold mt-1" style="font-size: 8px;">OFFER</small>
+                                    </div>
+                                    <div class="voucher-right">
+                                        <div>
+                                            <div class="voucher-code text-uppercase" id="display_coupon_code">
+                                                {{ session('coupon')['code'] ?? '' }}
+                                            </div>
+                                            <small class="text-success fw-bold" style="font-size: 10px;">Voucher Applied Successfully!</small>
+                                        </div>
+                                        <a href="{{ route('customer.coupon.remove') }}" class="text-danger p-2" title="Remove Voucher">
+                                            <i class="fas fa-times-circle"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
 
-                <div style="margin-top:15px; padding:12px; background:#f0fff4;
-                            border-radius:8px; border-left:4px solid #28a745;">
-                    <p style="margin:0; font-size:12px; color:#155724;">
-                        🔒 Your order information is secure and encrypted.
-                    </p>
+                            {{-- Calculations --}}
+                            <div class="space-y-3">
+                                <div class="d-flex justify-content-between text-muted mb-2">
+                                    <span class="small">Merchandise Subtotal</span>
+                                    <span class="small fw-bold">৳{{ number_format($subtotal, 2) }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between text-muted mb-2">
+                                    <span class="small">Shipping Fee</span>
+                                    <span class="small fw-bold">৳100.00</span>
+                                </div>
+                                <div id="discount_row" class="justify-content-between mb-2" style="{{ session('coupon') ? 'display:flex;' : 'display:none;' }}">
+                                    <span class="small text-success">Voucher Discount</span>
+                                    <span class="small fw-bold text-success">- ৳<span id="display_discount">{{ number_format(session('coupon')['discount'] ?? 0, 2) }}</span></span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mt-4">
+                                    <span class="fw-bold" style="color: #333;">Total Payment</span>
+                                    <span class="total-amount" id="display_total">
+                                        ৳{{ number_format(($subtotal + 100) - (session('coupon')['discount'] ?? 0), 2) }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-place-order mt-4">
+                                PLACE ORDER
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
-    </div>
-</div>
+    </form>
 </div>
 
+@push('js')
+<script>
+    function applyVoucher(code) {
+        $.ajax({
+            url: "{{ route('customer.coupon.apply') }}",
+            method: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                code: code
+            },
+            success: function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    $('#available_vouchers_section').fadeOut();
+                    $('#display_coupon_code').text(code.toUpperCase());
+                    $('#applied_coupon_area').fadeIn().css('display', 'block');
+                    $('#display_discount').text(response.discount.toFixed(2));
+                    $('#discount_row').css('display', 'flex');
+                    $('#display_total').text('৳' + response.new_total.toLocaleString('en-US', {minimumFractionDigits: 2}));
+                } else {
+                    showToast(response.message, 'error');
+                }
+            },
+            error: function() {
+                showToast('Connection error. Please try again.', 'error');
+            }
+        });
+    }
+
+    $('.payment-option-modern').on('click', function() {
+        $('.payment-option-modern').removeClass('active');
+        $('.payment-option-modern .check-icon').html('<i class="far fa-circle text-muted"></i>');
+        
+        $(this).addClass('active');
+        $(this).find('.check-icon').html('<i class="fas fa-check-circle text-primary"></i>');
+        $(this).find('input[name="payment_method"]').prop('checked', true);
+    });
+</script>
+@endpush
 @endsection

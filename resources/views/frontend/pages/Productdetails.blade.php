@@ -7,10 +7,10 @@
             <!-- Product Images Column -->
             <div class="col-lg-6">
                 <div class="product-image-wrapper">
-                    <div class="main-image">
-                        <img src="{{ asset('/uploads/products/'.$product->image) }}"
+                    <div class="main-image shadow-sm rounded overflow-hidden" style="border: 1px solid #eee; background: #fff;">
+                        <img src="{{ asset('upload/products/'.$product->image) }}"
                             alt="{{ $product->name }}"
-                            class="img-fluid">
+                            class="img-fluid w-100" style="object-fit: contain; height: 500px;">
                     </div>
                 </div>
             </div>
@@ -66,6 +66,33 @@
                             {{ number_format($product->final_price, 2) }} BDT
                         </h3>
                     </div>
+
+                    <!-- Available Vouchers -->
+                    @if($coupons->count() > 0)
+                    <div class="vouchers-section mb-4 p-3 rounded" style="background: #fff9f5; border: 1px dashed #f85606;">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-ticket-alt text-primary mr-2" style="color: #f85606 !important;"></i>
+                            <h6 class="mb-0 font-weight-bold" style="font-size: 0.9rem;">Available Vouchers</h6>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2">
+                            @foreach($coupons as $coupon)
+                                @php 
+                                    $isCollected = auth('customerg')->check() && auth('customerg')->user()->coupons()->where('coupon_id', $coupon->id)->exists();
+                                @endphp
+                                <div class="voucher-ticket {{ $isCollected ? 'collected' : '' }}" 
+                                     id="voucher-{{ $coupon->id }}"
+                                     onclick="{{ $isCollected ? '' : 'collectVoucher('.$coupon->id.')' }}" 
+                                     title="{{ $isCollected ? 'Already Collected' : 'Click to Collect' }}">
+                                    <div class="vt-left">৳{{ $coupon->value }}{{ $coupon->type == 'percent' ? '%' : '' }}</div>
+                                    <div class="vt-right" id="voucher-text-{{ $coupon->id }}">
+                                        {{ $isCollected ? 'COLLECTED' : 'COLLECT' }}
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        <small class="text-muted mt-2 d-block" style="font-size: 10px;">* Vouchers must be collected to use at checkout.</small>
+                    </div>
+                    @endif
 
                     <!-- Description -->
                     <div class="product-description mb-4">
@@ -170,8 +197,8 @@
                     <div class="properties-card shadow-sm rounded overflow-hidden">
                         <div class="properties-img">
                             <a href="{{ route('product.details', $rp->id) }}">
-                                <div style="height: 220px; overflow: hidden; background: #f5f5f5;">
-                                    <img src="{{ asset('/uploads/products/'.$rp->image) }}" alt="{{ $rp->name }}" style="width:100%; height:100%; object-fit:cover;">
+                                <div style="height: 220px; overflow: hidden; background: #fff; border-bottom: 1px solid #eee;">
+                                    <img src="{{ asset('upload/products/'.$rp->image) }}" alt="{{ $rp->name }}" style="width:100%; height:100%; object-fit:contain;">
                                 </div>
                             </a>
                         </div>
@@ -229,6 +256,84 @@
         transform: translateY(-3px);
         box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     }
+
+    /* Voucher Ticket Styles */
+    .voucher-ticket {
+        display: flex;
+        background: #fff;
+        border-radius: 4px;
+        overflow: hidden;
+        font-size: 12px;
+        cursor: pointer;
+        border: 1px solid #ffefe0;
+        margin-right: 10px;
+        margin-bottom: 5px;
+        box-shadow: 0 2px 4px rgba(248, 86, 6, 0.05);
+        transition: 0.2s;
+    }
+    .voucher-ticket:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(248, 86, 6, 0.1);
+    }
+    .vt-left {
+        background: #f85606;
+        color: #fff;
+        padding: 4px 8px;
+        font-weight: 700;
+        position: relative;
+    }
+    .vt-left::after {
+        content: '';
+        position: absolute;
+        right: -3px;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        background-image: radial-gradient(circle, #fff9f5 50%, transparent 50%);
+        background-size: 6px 6px;
+    }
+    .vt-right {
+        padding: 4px 10px;
+        font-weight: 600;
+        color: #f85606;
+        background: #fff;
+    }
+    .voucher-ticket.collected {
+        cursor: default;
+        opacity: 0.8;
+        filter: grayscale(0.5);
+    }
+    .voucher-ticket.collected .vt-left {
+        background: #6c757d;
+    }
+    .voucher-ticket.collected .vt-right {
+        color: #6c757d;
+    }
+    .gap-2 { gap: 0.5rem; }
 </style>
+
+<script>
+    function collectVoucher(id) {
+        $.ajax({
+            url: "{{ url('/coupon/collect') }}/" + id,
+            method: "POST",
+            data: {
+                _token: "{{ csrf_token() }}"
+            },
+            success: function(response) {
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    $('#voucher-' + id).addClass('collected').attr('onclick', '').attr('title', 'Already Collected');
+                    $('#voucher-text-' + id).text('COLLECTED');
+                } else {
+                    showToast(response.message, 'error');
+                }
+            },
+            error: function() {
+                showToast('Please login to collect vouchers.', 'error');
+            }
+        });
+    }
+</script>
 
 @endsection
