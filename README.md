@@ -2,6 +2,8 @@
 ### Built with Passion using Laravel 12 & PHP 8.4
 ### Author: Hasibul Alam | Dedicated Junior Full-Stack Developer
 
+<img width="100%" height="736" alt="Screenshot from 2026-04-22 22-48-55" src="https://github.com/user-attachments/assets/131151ac-1e43-4c8d-8a2b-8e12ae8ac1b1" />
+
 ---
 
 ## 📖 Table of Contents
