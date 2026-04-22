@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Shop | eCommers</title>
-    <meta name="description" content="">
+    <meta name="description" content="Capital Shop - Best online shopping in Bangladesh. Electronics, Fashion, Sports and more.">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" type="image/x-icon" href="https://preview.colorlib.com/theme/capitalshop/assets/img/icon/favicon.png.webp">
@@ -67,9 +67,9 @@
     <script src="https://preview.colorlib.com/theme/capitalshop/assets/js/bootstrap.min.js"></script>
 
     <!-- Slick-slider , Owl-Carousel ,slick-nav -->
-    <script src="https://preview.colorlib.com/theme/capitalshop/assets/js/owl.carousel.min.js"></script>
-    <script src="https://preview.colorlib.com/theme/capitalshop/assets/js/slick.min.js"></script>
-    <script src="https://preview.colorlib.com/theme/capitalshop/assets/js/jquery.slicknav.min.js"></script>
+    <script src="https://preview.colorlib.com/theme/capitalshop/assets/js/owl.carousel.min.js" defer></script>
+    <script src="https://preview.colorlib.com/theme/capitalshop/assets/js/slick.min.js" defer></script>
+    <script src="https://preview.colorlib.com/theme/capitalshop/assets/js/jquery.slicknav.min.js" defer></script>
 
     <!--wow , counter , waypoint, Nice-select -->
     <script src="https://preview.colorlib.com/theme/capitalshop/assets/js/wow.min.js"></script>

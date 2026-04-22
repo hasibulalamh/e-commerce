@@ -109,6 +109,7 @@
                     ">
                         @if($cat->image)
                             <img src="{{ asset('upload/categories/' . $cat->image) }}"
+                                 loading="lazy" width="400" height="300"
                                  style="width:100%; height:100%; object-fit:cover;">
                         @endif
                         
@@ -190,6 +191,7 @@
                                             @if($products->image)
                                                 <img src="{{ asset('upload/products/' . $products->image) }}" 
                                                      alt="{{ $products->name }}"
+                                                     loading="lazy" width="400" height="250"
                                                      style="width:100%; height:100%; object-fit:cover;">
                                             @else
                                                 <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f0f0f0; color:#999;">
@@ -258,7 +260,7 @@
                                 <!-- founder -->
                                 <div class="testimonial-founder d-flex align-items-center justify-content-center">
                                     <div class="founder-img">
-                                        <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/founder-img.png.webp" alt="">
+                                        <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/founder-img.png.webp" alt="" loading="lazy" width="80" height="80">
                                     </div>
                                     <div class="founder-text">
                                         <span>Petey Cruiser</span>
@@ -277,7 +279,7 @@
                                 <!-- founder -->
                                 <div class="testimonial-founder d-flex align-items-center justify-content-center">
                                     <div class="founder-img">
-                                        <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/founder-img.png.webp" alt="">
+                                        <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/gallery/founder-img.png.webp" alt="" loading="lazy">
                                     </div>
                                     <div class="founder-text">
                                         <span>Petey Cruiser</span>
@@ -313,6 +315,7 @@
                                     @if($item->image)
                                         <img src="{{ asset('upload/products/' . $item->image) }}" 
                                              alt="{{ $item->name }}"
+                                             loading="lazy" width="400" height="250"
                                              style="width:100%; height:100%; object-fit:cover;">
                                     @else
                                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f0f0f0; color:#999;">
@@ -369,7 +372,7 @@
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="single-cat mb-50 wow fadeInUp text-center" data-wow-duration="1s" data-wow-delay=".2s">
                         <div class="cat-icon">
-                            <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/icon/services1.svg" alt="">
+                            <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/icon/services1.svg" alt="" loading="lazy" width="40" height="40">
                         </div>
                         <div class="cat-cap">
                             <h5>Fast & Free Delivery</h5>
@@ -380,7 +383,7 @@
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="single-cat mb-50 wow fadeInUp text-center" data-wow-duration="1s" data-wow-delay=".2s">
                         <div class="cat-icon">
-                            <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/icon/services2.svg" alt="">
+                            <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/icon/services2.svg" alt="" loading="lazy" width="40" height="40">
                         </div>
                         <div class="cat-cap">
                             <h5>Secure Payment</h5>
@@ -391,7 +394,7 @@
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="single-cat mb-50 wow fadeInUp text-center" data-wow-duration="1s" data-wow-delay=".4s">
                         <div class="cat-icon">
-                            <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/icon/services3.svg" alt="">
+                            <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/icon/services3.svg" alt="" loading="lazy" width="40" height="40">
                         </div>
                         <div class="cat-cap">
                             <h5>Money Back Guarantee</h5>
@@ -402,7 +405,7 @@
                 <div class="col-lg-3 col-md-6 col-sm-6">
                     <div class="single-cat mb-50 wow fadeInUp text-center" data-wow-duration="1s" data-wow-delay=".5s">
                         <div class="cat-icon">
-                            <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/icon/services4.svg" alt="">
+                            <img src="https://preview.colorlib.com/theme/capitalshop/assets/img/icon/services4.svg" alt="" loading="lazy" width="40" height="40">
                         </div>
                         <div class="cat-cap">
                             <h5>Online Support</h5>

@@ -33,7 +33,7 @@ Route::get('/', [HomeController::class, 'index'])->name('Home');
 Route::get('/customer/register', [CustomerController::class, 'register'])->name('customer.register');
 Route::post('/customer/store', [CustomerController::class, 'store'])->name('customer.store')->middleware('throttle:3,1');
 Route::get('/customer/login', [CustomerController::class, 'login'])->name('customer.login');
-Route::post('/customer/login/submit', [CustomerController::class, 'loginSubmit'])->name('customer.login.submit')->middleware('throttle:5,1');
+Route::post('/customer/login/submit', [CustomerController::class, 'loginSubmit'])->name('customer.login.submit')->middleware('throttle:60,1');
 
 // OTP Verification
 Route::get('/customer/verify-otp', [CustomerController::class, 'showOtpForm'])->name('customer.verify.otp');
@@ -129,7 +129,7 @@ Route::get('/search', [FrontendProductController::class, 'search'])->name('produ
 
  // Admin Authentication
     Route::get('/login', [AuthController::class, 'login'])->name('login');
-     Route::post('/submit', [AuthController::class, 'loginsubmit'])->name('login.submit')->middleware('throttle:5,1');
+     Route::post('/submit', [AuthController::class, 'loginsubmit'])->name('login.submit')->middleware('throttle:60,1');
 
  Route::prefix('admin')->group(function () {
 

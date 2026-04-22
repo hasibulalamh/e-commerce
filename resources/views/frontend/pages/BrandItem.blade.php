@@ -31,6 +31,7 @@
                                     @if($product->image)
                                         <img src="{{ asset('upload/products/' . $product->image) }}" 
                                              alt="{{ $product->name }}"
+                                             loading="lazy"
                                              style="width:100%; height:100%; object-fit:cover;">
                                     @else
                                         <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f0f0f0; color:#999;">

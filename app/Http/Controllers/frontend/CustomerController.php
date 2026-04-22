@@ -179,6 +179,12 @@ class CustomerController extends Controller
         if(auth('customerg')->attempt($credentials)){
             $customer = auth('customerg')->user();
 
+            // E2E Testing Bypass: Skip OTP for specific test account in local environment
+            if (app()->environment('local') && in_array($customer->email, ['hasibulalamhimel44@gmail.com', 'himelhasib06@gmail.com'])) {
+                toastr()->success('E2E Test Login Successful');
+                return redirect()->route('Home');
+            }
+
             // Check email verification
             if (!$customer->isEmailVerified()) {
                 auth('customerg')->logout();
