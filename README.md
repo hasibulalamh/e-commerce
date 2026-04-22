@@ -211,4 +211,4 @@ This project is a solid foundation. In the next phase, we will add:
 
 ## 📄 License
 This project is for educational and commercial use. © 2026 Hasibul Alam.
-Built with ❤️ and **25 Years of Experience**.
+Built with ❤️ .
