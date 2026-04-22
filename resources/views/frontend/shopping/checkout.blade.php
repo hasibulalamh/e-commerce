@@ -255,14 +255,24 @@
                                     @error('address') <small class="text-danger">{{ $message }}</small> @enderror
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">CITY</label>
                                     <input type="text" name="city" class="form-control-modern" value="{{ old('city') }}" placeholder="e.g. Dhaka" required>
                                     @error('city') <small class="text-danger">{{ $message }}</small> @enderror
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <div class="form-group-modern">
+                                    <label class="form-label-modern">DELIVERY ZONE</label>
+                                    <select name="delivery_zone" id="delivery_zone" class="form-select form-control-modern" style="background: #f8f9fa;" required>
+                                        <option value="inside_dhaka">Inside Dhaka (৳70)</option>
+                                        <option value="outside_dhaka">Outside Dhaka (৳130)</option>
+                                    </select>
+                                    @error('delivery_zone') <small class="text-danger">{{ $message }}</small> @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">ZIP CODE</label>
                                     <input type="text" name="postal_code" class="form-control-modern" value="{{ old('postal_code') }}" placeholder="1200">
@@ -406,20 +416,20 @@
                             <div class="space-y-3">
                                 <div class="d-flex justify-content-between text-muted mb-2">
                                     <span class="small">Merchandise Subtotal</span>
-                                    <span class="small fw-bold">৳{{ number_format($subtotal, 2) }}</span>
+                                    <span class="small fw-bold">৳<span id="display_subtotal">{{ number_format($subtotal, 2, '.', '') }}</span></span>
                                 </div>
                                 <div class="d-flex justify-content-between text-muted mb-2">
                                     <span class="small">Shipping Fee</span>
-                                    <span class="small fw-bold">৳100.00</span>
+                                    <span class="small fw-bold">৳<span id="display_shipping">70.00</span></span>
                                 </div>
                                 <div id="discount_row" class="justify-content-between mb-2" style="{{ session('coupon') ? 'display:flex;' : 'display:none;' }}">
                                     <span class="small text-success">Voucher Discount</span>
-                                    <span class="small fw-bold text-success">- ৳<span id="display_discount">{{ number_format(session('coupon')['discount'] ?? 0, 2) }}</span></span>
+                                    <span class="small fw-bold text-success">- ৳<span id="display_discount">{{ number_format(session('coupon')['discount'] ?? 0, 2, '.', '') }}</span></span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mt-4">
                                     <span class="fw-bold" style="color: #333;">Total Payment</span>
-                                    <span class="total-amount" id="display_total">
-                                        ৳{{ number_format(($subtotal + 100) - (session('coupon')['discount'] ?? 0), 2) }}
+                                    <span class="total-amount">
+                                        ৳<span id="display_total">{{ number_format(($subtotal + 70) - (session('coupon')['discount'] ?? 0), 2, '.', '') }}</span>
                                     </span>
                                 </div>
                             </div>
@@ -471,7 +481,44 @@
         $(this).addClass('active');
         $(this).find('.check-icon').html('<i class="fas fa-check-circle text-primary"></i>');
         $(this).find('input[name="payment_method"]').prop('checked', true);
+
+        // Update form action based on payment method
+        const method = $(this).find('input[name="payment_method"]').val();
+        if (method === 'online') {
+            $('#checkout-form').attr('action', "{{ route('payment.sslcommerz') }}");
+        } else {
+            $('#checkout-form').attr('action', "{{ route('placeorder.store') }}");
+        }
     });
+
+    // Handle Delivery Zone Change
+    $('#delivery_zone').on('change', function() {
+        updateTotal();
+    });
+
+    function updateTotal() {
+        const shippingInsideDhaka = {{ \App\Models\Setting::get('shipping_charge_dhaka', 70) }};
+        const shippingOutsideDhaka = {{ \App\Models\Setting::get('shipping_charge_outside', 130) }};
+        const zone = $('#delivery_zone').val();
+        let shipping = (zone === 'inside_dhaka') ? shippingInsideDhaka : shippingOutsideDhaka;
+        
+        // Check if free delivery coupon is active
+        const isFreeDelivery = @json(session('coupon')['is_free_delivery'] ?? false);
+        if (isFreeDelivery) {
+            shipping = 0;
+        }
+
+        $('#display_shipping').text(shipping.toFixed(2));
+        
+        const subtotal = parseFloat($('#display_subtotal').text());
+        const discount = parseFloat($('#display_discount').text() || 0);
+        const total = (subtotal + shipping) - discount;
+        
+        $('#display_total').text(total.toFixed(2));
+    }
+
+    // Initialize on load
+    updateTotal();
 </script>
 @endpush
 @endsection

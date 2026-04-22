@@ -57,6 +57,12 @@ class DashboardController extends Controller
                 $monthlyData[] = $revenue->total;
             }
 
+            // Low stock products (stock < 5)
+            $lowStockProducts = Product::where('stock', '<', 5)
+                ->orderBy('stock', 'asc')
+                ->take(5)
+                ->get();
+
             return view('backend.dashboard', [
                 'totalRevenue' => $totalRevenue,
                 'totalOrders' => $totalOrders,
@@ -66,6 +72,7 @@ class DashboardController extends Controller
                 'totalBrands' => $totalBrands,
                 'recentOrders' => $recentOrders,
                 'topProducts' => $topProducts,
+                'lowStockProducts' => $lowStockProducts,
                 'monthlyLabels' => $monthlyLabels,
                 'monthlyData' => $monthlyData,
                 'error' => null

@@ -85,16 +85,36 @@
                                 </div>
 
                                 <div class="mb-3">
-                                    <label for="productImage" class="form-label">Product Image</label>
+                                    <label for="productImage" class="form-label">Main Product Image</label>
                                     <input type="file" class="form-control @error('image') is-invalid @enderror" id="productImage" name="image">
-                                    @error('image')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     
                                     @if($product->image)
                                         <div class="mt-2">
-                                            <p class="mb-1 small text-muted">Current Image:</p>
-                                            <img src="{{ asset('upload/products/' . $product->image) }}" alt="Current Image" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                                            <p class="mb-1 small text-muted">Current Main Image:</p>
+                                            <img src="{{ asset('upload/products/' . $product->image) }}" alt="Main Image" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="galleryImages" class="form-label">Gallery Images (Multiple)</label>
+                                    <input type="file" class="form-control @error('gallery_images.*') is-invalid @enderror" id="galleryImages" name="gallery_images[]" multiple>
+                                    @error('gallery_images.*') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                    
+                                    @if($product->productImages->count() > 0)
+                                        <div class="mt-3">
+                                            <p class="mb-2 small text-muted">Current Gallery Images (click to delete):</p>
+                                            <div class="d-flex flex-wrap gap-2">
+                                                @foreach($product->productImages as $image)
+                                                    <div class="gallery-image-container position-relative" id="gallery-image-{{ $image->id }}">
+                                                        <img src="{{ asset('upload/products/gallery/' . $image->image) }}" alt="Gallery Image" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                                                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle delete-gallery-image" data-id="{{ $image->id }}" style="padding: 2px 6px; font-size: 10px;">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
+                                                @endforeach
+                                            </div>
                                         </div>
                                     @endif
                                 </div>
@@ -127,3 +147,34 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        $('.delete-gallery-image').on('click', function() {
+            const imageId = $(this).data('id');
+            const container = $('#gallery-image-' + imageId);
+            
+            if (confirm('Are you sure you want to delete this image?')) {
+                $.ajax({
+                    url: "{{ url('admin/products/gallery/delete') }}/" + imageId,
+                    type: 'DELETE',
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            container.fadeOut(300, function() {
+                                $(this).remove();
+                            });
+                        }
+                    },
+                    error: function() {
+                        alert('Failed to delete image. Please try again.');
+                    }
+                });
+            }
+        });
+    });
+</script>
+@endpush

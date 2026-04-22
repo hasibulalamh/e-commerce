@@ -91,14 +91,16 @@ class CouponController extends Controller
         Session::put('coupon', [
             'code' => $coupon->code,
             'discount' => $discount,
+            'is_free_delivery' => $coupon->is_free_delivery,
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Coupon applied successfully!',
             'discount' => $discount,
+            'is_free_delivery' => $coupon->is_free_delivery,
             'discount_text' => number_format($discount, 2) . ' BDT',
-            'new_total' => ($subtotal - $discount) + 100, // 100 is shipping
+            'new_total' => ($subtotal - $discount), // Total without shipping, JS will add shipping
         ]);
     }
 

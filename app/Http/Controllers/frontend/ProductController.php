@@ -10,7 +10,7 @@ class ProductController extends Controller
 {
     public function view($id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with(['category', 'brand', 'reviews.customer', 'productImages'])->findOrFail($id);
         
         // Fetch active coupons for this product or general ones
         $coupons = \App\Models\Coupon::where('status', 'active')
@@ -24,7 +24,8 @@ class ProductController extends Controller
             })
             ->get();
 
-        $relatedProducts = Product::where('category_id', $product->category_id)
+        $relatedProducts = Product::with(['category', 'brand'])
+            ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('status', 'active')
             ->take(4)
@@ -35,7 +36,8 @@ class ProductController extends Controller
     public function listview(Request $request)
     {
         $categoryId = $request->input('category');
-        $products = Product::where('status', 'active')
+        $products = Product::with(['category', 'brand'])
+            ->where('status', 'active')
             ->when($categoryId, fn($q) => $q->where('category_id', $categoryId))
             ->paginate(12);
 
@@ -48,7 +50,8 @@ class ProductController extends Controller
     public function search(Request $request)
     {
         $query = $request->input('q');
-        $products = Product::where('status', 'active')
+        $products = Product::with(['category', 'brand'])
+            ->where('status', 'active')
             ->where(function ($q) use ($query) {
                 $q->where('name', 'LIKE', "%{$query}%")
                     ->orWhere('description', 'LIKE', "%{$query}%");

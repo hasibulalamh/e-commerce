@@ -62,9 +62,16 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="productImage" class="form-label">Product Image</label>
+                                    <label for="productImage" class="form-label">Main Product Image</label>
                                     <input type="file" class="form-control @error('image') is-invalid @enderror" id="productImage" name="image" required>
                                     @error('image') <span class="text-danger small">{{ $message }}</span> @enderror
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="galleryImages" class="form-label">Gallery Images (Multiple)</label>
+                                    <input type="file" class="form-control @error('gallery_images.*') is-invalid @enderror" id="galleryImages" name="gallery_images[]" multiple>
+                                    @error('gallery_images.*') <span class="text-danger small">{{ $message }}</span> @enderror
+                                    <div class="form-text">You can select multiple images at once.</div>
                                 </div>
 
                                 <!-- Status -->

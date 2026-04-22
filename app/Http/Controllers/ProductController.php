@@ -52,7 +52,7 @@ class ProductController extends Controller
         }
 
         //eloquent orm model create method
-        Product::create([
+        $product = Product::create([
             "name" => $request->name,
             "category_id" => $request->category_id,
             "brand_id" => $request->brand_id,
@@ -64,13 +64,25 @@ class ProductController extends Controller
             "image" => $fileName
         ]);
 
+        // Handle multiple gallery images
+        if ($request->hasFile('gallery_images')) {
+            foreach ($request->file('gallery_images') as $image) {
+                $galleryFileName = uniqid('gallery_') . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('upload/products/gallery'), $galleryFileName);
+                \App\Models\ProductImage::create([
+                    'product_id' => $product->id,
+                    'image' => $galleryFileName
+                ]);
+            }
+        }
+
         toastr()->title('Product')->success('Product created successfully');
         return redirect()->route('product.list');
     }
 
     public function edit($id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with('productImages')->findOrFail($id);
         $category = Category::all();
         $brand = Brand::all();
         return view('backend.features.product.edit', compact('product', 'category', 'brand'));
@@ -81,15 +93,16 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
 
         $request->validate([
-            'name' => 'required|string|max:55',
+            'name' => 'required|string|max:255',
             'category_id' => 'required|integer|exists:categories,id',
             'brand_id' => 'required|integer|exists:brands,id',
-            'description' => 'required|string|max:555',
+            'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
             'discount' => 'nullable|integer|min:0|max:100',
             'status' => 'required|string|in:active,inactive',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048'
         ]);
 
         $fileName = $product->image;
@@ -111,8 +124,31 @@ class ProductController extends Controller
             "image" => $fileName
         ]);
 
+        // Handle multiple gallery images
+        if ($request->hasFile('gallery_images')) {
+            foreach ($request->file('gallery_images') as $image) {
+                $galleryFileName = uniqid('gallery_') . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('upload/products/gallery'), $galleryFileName);
+                \App\Models\ProductImage::create([
+                    'product_id' => $product->id,
+                    'image' => $galleryFileName
+                ]);
+            }
+        }
+
         toastr()->title('Product')->success('Product updated successfully');
         return redirect()->route('product.list');
+    }
+
+    public function deleteGalleryImage($id)
+    {
+        $image = \App\Models\ProductImage::findOrFail($id);
+        $imagePath = public_path('upload/products/gallery/' . $image->image);
+        if (file_exists($imagePath)) {
+            unlink($imagePath);
+        }
+        $image->delete();
+        return response()->json(['success' => true]);
     }
 
     public function import(Request $request)

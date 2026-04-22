@@ -7,11 +7,25 @@
             <!-- Product Images Column -->
             <div class="col-lg-6">
                 <div class="product-image-wrapper">
-                    <div class="main-image shadow-sm rounded overflow-hidden" style="border: 1px solid #eee; background: #fff;">
+                    <div class="main-image shadow-sm rounded overflow-hidden mb-3" style="border: 1px solid #eee; background: #fff;">
                         <img src="{{ asset('upload/products/'.$product->image) }}"
+                            id="expandedImg"
                             alt="{{ $product->name }}"
                             class="img-fluid w-100" style="object-fit: contain; height: 500px;">
                     </div>
+                    
+                    @if($product->productImages->count() > 0)
+                    <div class="product-gallery-thumbnails d-flex flex-wrap gap-2">
+                        <div class="thumbnail-item active" onclick="changeImage(this, '{{ asset('upload/products/'.$product->image) }}')">
+                            <img src="{{ asset('upload/products/'.$product->image) }}" alt="Thumbnail" class="img-fluid rounded border">
+                        </div>
+                        @foreach($product->productImages as $gallery)
+                        <div class="thumbnail-item" onclick="changeImage(this, '{{ asset('upload/products/gallery/'.$gallery->image) }}')">
+                            <img src="{{ asset('upload/products/gallery/'.$gallery->image) }}" alt="Thumbnail" class="img-fluid rounded border">
+                        </div>
+                        @endforeach
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -334,6 +348,40 @@
             }
         });
     }
+
+    function changeImage(element, src) {
+        var expandImg = document.getElementById("expandedImg");
+        expandImg.src = src;
+        
+        // Update active class
+        var thumbnails = document.getElementsByClassName("thumbnail-item");
+        for (var i = 0; i < thumbnails.length; i++) {
+            thumbnails[i].classList.remove("active");
+        }
+        element.classList.add("active");
+    }
 </script>
+
+<style>
+    .thumbnail-item {
+        width: 80px;
+        height: 80px;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: 0.3s;
+    }
+    .thumbnail-item:hover, .thumbnail-item.active {
+        opacity: 1;
+    }
+    .thumbnail-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .thumbnail-item.active img {
+        border-color: #f85606 !important;
+        border-width: 2px !important;
+    }
+</style>
 
 @endsection

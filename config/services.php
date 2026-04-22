@@ -47,4 +47,9 @@ return [
         'redirect' => env('FACEBOOK_REDIRECT_URL', '/customer/auth/facebook/callback'),
     ],
 
+    'steadfast' => [
+        'api_key' => env('STEADFAST_API_KEY'),
+        'secret_key' => env('STEADFAST_SECRET_KEY'),
+    ],
+
 ];

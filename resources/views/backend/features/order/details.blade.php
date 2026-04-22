@@ -295,6 +295,16 @@
                                 <label class="info-label">Postal Code</label>
                                 <p class="info-value">{{ $order->postal_code ?? 'N/A' }}</p>
                             </div>
+                            @if($order->tracking_id)
+                            <div class="mb-3">
+                                <label class="info-label">Courier Tracking ID</label>
+                                <p class="info-value"><span class="badge bg-primary">{{ $order->tracking_id }}</span></p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="info-label">Courier Status</label>
+                                <p class="info-value"><span class="badge bg-info">{{ ucfirst($order->courier_status) }}</span></p>
+                            </div>
+                            @endif
                         </div>
                     </div>
 
@@ -366,6 +376,16 @@
                                     <i class="mdi mdi-history me-1"></i>
                                     View Status History
                                 </a>
+
+                                @if(!$order->tracking_id && in_array($order->status, ['confirmed', 'shipped']))
+                                <form action="{{ route('orders.send-steadfast', $order->id) }}" method="POST" class="d-grid mt-2">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="mdi mdi-truck-fast me-1"></i>
+                                        Send to Steadfast
+                                    </button>
+                                </form>
+                                @endif
                             </div>
                         </div>
                     </div>

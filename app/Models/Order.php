@@ -32,6 +32,11 @@ class Order extends Model
         'payment_method',
         'payment_status',
         'transaction_id',
+        'delivery_zone',
+        'tracking_id',
+        'courier_status',
+        'rider_name',
+        'rider_phone',
         'status',
     ];
 

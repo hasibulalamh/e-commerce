@@ -428,4 +428,92 @@ class OrderListController extends Controller
                       ->findOrFail($id);
         return view('backend.features.order.invoice', compact('order'));
     }
+
+    // Send order to Steadfast Courier
+    public function sendToSteadfast($id)
+    {
+        $order = Order::findOrFail($id);
+
+        if ($order->tracking_id) {
+            return redirect()->back()->with('error', 'Order already sent to Steadfast. Tracking ID: ' . $order->tracking_id);
+        }
+
+        $steadfast = new \App\Services\SteadfastCourier();
+        $result = $steadfast->createOrder($order);
+
+        if ($result['success']) {
+            $order->update([
+                'tracking_id' => $result['tracking_id'],
+                'courier_status' => $result['status'],
+                'status' => 'shipped' // Automatically mark as shipped
+            ]);
+
+            // Log history
+            \App\Models\OrderStatusHistory::create([
+                'order_id' => $order->id,
+                'status' => 'shipped',
+                'notes' => 'Order sent to Steadfast Courier. Tracking ID: ' . $result['tracking_id'],
+                'changed_by' => auth()->id()
+            ]);
+
+            return redirect()->back()->with('success', 'Order successfully sent to Steadfast! Tracking ID: ' . $result['tracking_id']);
+        }
+
+        return redirect()->back()->with('error', 'Steadfast Error: ' . $result['message']);
+    }
+
+    /**
+     * Handle incoming webhook from Steadfast Courier.
+     */
+    public function handleWebhook(Request $request)
+    {
+        // Extract data based on Steadfast sample payload
+        $orderId = $request->input('invoice'); // e.g., "INV-67890" or just "67890"
+        $status = strtolower($request->input('status')); // Convert to lower for easier matching
+        $consignmentId = $request->input('consignment_id');
+        $trackingMessage = $request->input('tracking_message');
+        
+        Log::info('Steadfast Webhook Received:', $request->all());
+
+        if (!$orderId) {
+            return response()->json(['message' => 'Invoice ID missing'], 400);
+        }
+
+        // Find order (stripping any non-numeric characters if necessary)
+        $cleanId = preg_replace('/[^0-9]/', '', $orderId);
+        $order = Order::find($cleanId);
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found for ID: ' . $orderId], 404);
+        }
+
+        // Map Steadfast status to our internal system status
+        $newStatus = $order->status;
+        
+        if ($status === 'delivered') {
+            $newStatus = 'delivered';
+        } elseif (in_array($status, ['cancelled', 'returned', 'failed', 'hold'])) {
+            $newStatus = 'cancelled'; // Or handle as per your requirement
+        }
+
+        if ($newStatus !== $order->status) {
+            $order->update([
+                'status' => $newStatus,
+                'courier_status' => $status
+            ]);
+
+            // Create status history log
+            \App\Models\OrderStatusHistory::create([
+                'order_id' => $order->id,
+                'status' => $newStatus,
+                'notes' => 'Steadfast Webhook Update: ' . ($trackingMessage ?? "Status changed to $status"),
+                'changed_by' => null // System update
+            ]);
+
+            // Send notification email to the customer
+            $this->sendStatusNotifications($order, $newStatus, null);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Webhook processed successfully']);
+    }
 }

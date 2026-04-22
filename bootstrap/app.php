@@ -18,7 +18,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'customerg'=> customerAuth::class,
             'admin'=> AdminMiddleware::class,
            ]
-           );
+        );
+
+        $middleware->validateCsrfTokens(except: [
+            '/payment/success',
+            '/payment/fail',
+            '/payment/cancel',
+            '/payment/ipn',
+            '/steadfast/webhook',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

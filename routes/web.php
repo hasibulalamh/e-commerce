@@ -8,6 +8,7 @@ use App\Http\Controllers\frontend\BrandController as FrontendBrandController;
 use App\Http\Controllers\frontend\CustomerController;
 use App\Http\Controllers\frontend\HomeController;
 use App\Http\Controllers\frontend\OrderController;
+use App\Http\Controllers\frontend\SslCommerzController;
 use App\Http\Controllers\frontend\PasswordResetController;
 use App\Http\Controllers\frontend\ProductController as FrontendProductController;
 use App\Http\Controllers\frontend\SocialAuthController;
@@ -89,7 +90,7 @@ Route::group(['middleware' => 'customerg'], function () {
     Route::post('/customer/addresses/set-default/{id}', [CustomerController::class, 'addressSetDefault'])->name('customer.address.default');
     
     Route::post('/placeorder/store', [OrderController::class, 'storeaddorder'])->name('placeorder.store');
-    Route::get('/order/confirmation/{id}', [OrderController::class, 'orderConfirmation'])->name('order.confirmation');
+
 
     // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('customer.wishlist');
@@ -104,7 +105,18 @@ Route::group(['middleware' => 'customerg'], function () {
     Route::post('/coupon/apply', [\App\Http\Controllers\frontend\CouponController::class, 'apply'])->name('customer.coupon.apply');
     Route::get('/coupon/remove', [\App\Http\Controllers\frontend\CouponController::class, 'remove'])->name('customer.coupon.remove');
     Route::get('/customer/vouchers', [CustomerController::class, 'vouchers'])->name('customer.vouchers');
+    // SSLCommerz
+    Route::post('/payment/sslcommerz', [SslCommerzController::class, 'initiatePayment'])->name('payment.sslcommerz');
 });
+
+Route::get('/order/confirmation/{id}', [OrderController::class, 'orderConfirmation'])->name('order.confirmation');
+
+// SSLCommerz Callbacks
+Route::post('/payment/success', [SslCommerzController::class, 'paymentSuccess'])->name('payment.success');
+Route::post('/payment/fail', [SslCommerzController::class, 'paymentFail'])->name('payment.fail');
+Route::post('/payment/cancel', [SslCommerzController::class, 'paymentCancel'])->name('payment.cancel');
+Route::post('/payment/ipn', [SslCommerzController::class, 'ipn'])->name('payment.ipn');
+
 
 // Public Search
 Route::get('/search', [FrontendProductController::class, 'search'])->name('product.search');
@@ -153,6 +165,7 @@ Route::get('/search', [FrontendProductController::class, 'search'])->name('produ
             Route::get('/view/{id}', [ProductController::class, 'view'])->name('product.view');
             Route::get('/edit/{id}', [ProductController::class, 'edit'])->name('product.edit');
             Route::post('/update/{id}', [ProductController::class, 'update'])->name('product.update');
+            Route::delete('/gallery/delete/{id}', [ProductController::class, 'deleteGalleryImage'])->name('product.gallery.delete');
             Route::post('/import', [ProductController::class, 'import'])->name('product.import');
         });
 
@@ -178,6 +191,7 @@ Route::get('/search', [FrontendProductController::class, 'search'])->name('produ
             Route::get('/bulk-update', [OrderListController::class, 'bulkUpdate'])->name('orders.bulk-update');
             Route::get('/export', [OrderListController::class, 'export'])->name('orders.export');
             Route::get('/invoice/{id}', [OrderListController::class, 'invoice'])->name('order.invoice');
+            Route::post('/send-to-steadfast/{id}', [OrderListController::class, 'sendToSteadfast'])->name('orders.send-steadfast');
         });
 
         // Banner Routes
@@ -192,5 +206,14 @@ Route::get('/search', [FrontendProductController::class, 'search'])->name('produ
 
         // Coupon Routes
         Route::resource('coupons', \App\Http\Controllers\Admin\CouponController::class);
+
+        // Setting Routes
+        Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('admin.settings.index');
+        Route::post('/settings/update', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('admin.settings.update');
     });
 });
+
+// Steadfast Webhook - Public Route (CSRF excluded in bootstrap/app.php or Middleware)
+Route::post('/steadfast/webhook', [App\Http\Controllers\OrderListController::class, 'handleWebhook'])->name('steadfast.webhook');
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

@@ -117,6 +117,7 @@ class OrderController extends Controller
             'city' => 'required|string|max:100',
             'postal_code' => 'nullable|string|max:20',
             'payment_method' => 'required|in:cod,online',
+            'delivery_zone' => 'required|in:inside_dhaka,outside_dhaka',
         ]);
 
         $mycart = Session::get('cart');
@@ -132,7 +133,16 @@ class OrderController extends Controller
             foreach ($mycart as $item) {
                 $subtotal += $item['price'] * $item['quantity'];
             }
-            $shipping_cost = 100;
+            
+            // Calculate shipping cost based on zone and coupon
+            $shipping_cost = 0;
+            $is_free_delivery = session()->get('coupon.is_free_delivery', false);
+
+            if (!$is_free_delivery) {
+                $shipping_charge_dhaka = \App\Models\Setting::get('shipping_charge_dhaka', 70);
+                $shipping_charge_outside = \App\Models\Setting::get('shipping_charge_outside', 130);
+                $shipping_cost = ($request->delivery_zone === 'inside_dhaka') ? $shipping_charge_dhaka : $shipping_charge_outside;
+            }
             
             // Coupon logic
             $discount = 0;
@@ -141,6 +151,10 @@ class OrderController extends Controller
                 $coupon_session = Session::get('coupon');
                 $coupon = \App\Models\Coupon::where('code', $coupon_session['code'])->first();
                 if ($coupon && $coupon->isValid($subtotal, $mycart)) {
+                    
+                    if ($coupon->is_free_delivery) {
+                        $shipping_cost = 0;
+                    }
                     
                     $applicableSubtotal = 0;
                     if ($coupon->product_id) {
@@ -176,6 +190,8 @@ class OrderController extends Controller
                 'receiver_mobile'  => $request->phone,
                 'receiver_address' => $request->address,
                 'receiver_city'    => $request->city,
+                'postal_code'      => $request->postal_code,
+                'delivery_zone'    => $request->delivery_zone,
                 'subtotal'         => $subtotal,
                 'shipping_cost'    => $shipping_cost,
                 'tax'              => 0,
@@ -287,11 +303,8 @@ class OrderController extends Controller
 
     public function orderConfirmation($id)
     {
-        $order = Order::where('id', $id)
-            ->where('customer_id', auth('customerg')->user()->id)
-            ->with(['orderDetails.product'])
-            ->firstOrFail();
-
+        $order = Order::with(['orderDetails.product'])->findOrFail($id);
+        
         return view('frontend.pages.order-confirmation', compact('order'));
     }
 }

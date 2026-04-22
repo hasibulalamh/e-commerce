@@ -448,7 +448,7 @@
                             </a>
                         </div>
                         <div class="col-md-4">
-                            <a href="{{route('order.list')}}" class="btn btn-outline-success w-100 p-3">
+                            <a href="{{route('orders.list')}}" class="btn btn-outline-success w-100 p-3">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-2">
                                     <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                                     <line x1="3" y1="6" x2="21" y2="6"></line>

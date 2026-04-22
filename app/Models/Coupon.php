@@ -16,12 +16,14 @@ class Coupon extends Model
         'used_count',
         'status',
         'product_id',
+        'is_free_delivery',
     ];
 
     protected $casts = [
         'expiry_date' => 'date',
         'value' => 'float',
         'min_purchase' => 'float',
+        'is_free_delivery' => 'boolean',
     ];
 
     /**

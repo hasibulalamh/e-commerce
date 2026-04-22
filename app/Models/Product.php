@@ -119,4 +119,9 @@ class Product extends Model
     {
         return round($this->price - $this->discount_amount, 2);
     }
+
+    public function productImages(): HasMany
+    {
+        return $this->hasMany(ProductImage::class);
+    }
 }

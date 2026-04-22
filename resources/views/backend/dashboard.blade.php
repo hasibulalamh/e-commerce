@@ -6,51 +6,60 @@
 @push('styles')
 <style>
     .stats-card {
-        transition: all 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         border: none;
-        border-radius: 15px;
+        border-radius: 20px;
         overflow: hidden;
         color: #fff;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
     }
 
     .stats-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    }
+
+    .bg-glass {
+        background: rgba(255, 255, 255, 0.7) !important;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    }
+
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .stat-icon {
-        width: 50px;
-        height: 50px;
+        width: 55px;
+        height: 55px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 12px;
-        background: rgba(255,255,255,0.25);
+        border-radius: 15px;
+        background: rgba(255,255,255,0.2);
+        box-shadow: inset 0 0 10px rgba(255,255,255,0.2);
     }
 
-    .bg-gradient-primary { background: linear-gradient(45deg, #4e73df 0%, #224abe 100%); }
-    .bg-gradient-success { background: linear-gradient(45deg, #1cc88a 0%, #13855c 100%); }
-    .bg-gradient-info { background: linear-gradient(45deg, #36b9cc 0%, #258391 100%); }
-    .bg-gradient-warning { background: linear-gradient(45deg, #f6c23e 0%, #dda20a 100%); }
+    .bg-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .bg-gradient-success { background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%); }
+    .bg-gradient-info { background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%); }
+    .bg-gradient-warning { background: linear-gradient(135deg, #f12711 0%, #f5af19 100%); }
 
-    .chart-card {
-        border-radius: 15px;
+    .chart-card, .table-card {
+        border-radius: 20px;
         border: none;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-    }
-
-    .table-card {
-        border-radius: 15px;
-        border: none;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
     }
 
     .product-img {
-        width: 40px;
-        height: 40px;
+        width: 45px;
+        height: 45px;
         object-fit: cover;
-        border-radius: 8px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
+
+    .smaller { font-size: 0.75rem; }
 </style>
 @endpush
 
@@ -133,10 +142,10 @@
         </div>
     </div>
 
-    <!-- Charts Row -->
+    <!-- Charts & Alerts Row -->
     <div class="row g-4 mb-4">
         <div class="col-xl-8">
-            <div class="card chart-card">
+            <div class="card chart-card bg-glass border-0 shadow-lg">
                 <div class="card-header bg-transparent border-0 pt-4 px-4">
                     <h5 class="card-title mb-0 fw-bold">Sales Overview</h5>
                     <p class="text-muted small">Revenue trends over time</p>
@@ -149,37 +158,57 @@
             </div>
         </div>
         <div class="col-xl-4">
-            <div class="card table-card h-100">
+            <!-- Low Stock Alerts -->
+            <div class="card table-card bg-glass border-0 shadow-lg mb-4">
                 <div class="card-header bg-transparent border-0 pt-4 px-4">
-                    <h5 class="card-title mb-0 fw-bold">Top Selling Products</h5>
+                    <h5 class="card-title mb-0 fw-bold text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Low Stock Alerts
+                    </h5>
                 </div>
                 <div class="card-body px-4">
+                    <div class="list-group list-group-flush">
+                        @forelse($lowStockProducts as $lp)
+                        <div class="list-group-item bg-transparent px-0 border-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ asset('uploads/products/'.$lp->image) }}" class="product-img me-3" 
+                                         onerror="this.src='{{ asset('upload/products/'.$lp->image) }}';">
+                                    <div>
+                                        <div class="fw-bold small">{{ $lp->name }}</div>
+                                        <div class="text-muted smaller">SKU: {{ $lp->id }}</div>
+                                    </div>
+                                </div>
+                                <span class="badge bg-danger rounded-pill">{{ $lp->stock }} left</span>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="text-center py-3 text-muted">All products are well-stocked.</div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top Selling (Moved below Low Stock) -->
+            <div class="card table-card bg-glass border-0 shadow-lg">
+                <div class="card-header bg-transparent border-0 pt-3 px-4">
+                    <h5 class="card-title mb-0 fw-bold">Top Selling</h5>
+                </div>
+                <div class="card-body px-4 pt-0">
                     <div class="table-responsive">
-                        <table class="table table-borderless align-middle">
-                            <thead>
-                                <tr class="text-muted small text-uppercase">
-                                    <th>Product</th>
-                                    <th class="text-end">Sales</th>
-                                </tr>
-                            </thead>
+                        <table class="table table-borderless align-middle mb-0">
                             <tbody>
-                                @forelse($topProducts as $p)
+                                @foreach($topProducts as $p)
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <img src="{{ asset('uploads/products/'.$p->image) }}" class="product-img me-3" 
-                                                 onerror="this.src='{{ asset('upload/products/'.$p->image) }}';">
-                                            <div class="text-truncate" style="max-width: 150px;">
+                                            <div class="text-truncate" style="max-width: 120px;">
                                                 <div class="fw-bold small">{{ $p->name }}</div>
-                                                <div class="text-muted smaller">৳{{ number_format($p->final_price, 2) }}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="text-end fw-bold">{{ $p->order_details_count }}</td>
+                                    <td class="text-end fw-bold text-primary">{{ $p->total_sold }}</td>
                                 </tr>
-                                @empty
-                                <tr><td colspan="2" class="text-center text-muted py-4">No sales data yet.</td></tr>
-                                @endforelse
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
