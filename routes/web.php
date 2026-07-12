@@ -1,9 +1,20 @@
 <?php
 
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\BrandController;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\DashboardController;
+// Admin Controllers (Moved inside Admin folder)
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\OrderListController;
+use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\CouponController;
+use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Delivery\DeliveryAuthController;
+use App\Http\Middleware\deliveryAuth;
+
+// Frontend Controllers
 use App\Http\Controllers\frontend\BrandController as FrontendBrandController;
 use App\Http\Controllers\frontend\CustomerController;
 use App\Http\Controllers\frontend\HomeController;
@@ -14,10 +25,11 @@ use App\Http\Controllers\frontend\ProductController as FrontendProductController
 use App\Http\Controllers\frontend\SocialAuthController;
 use App\Http\Controllers\frontend\WishlistController;
 use App\Http\Controllers\frontend\ReviewController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\OrderListController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\BannerController;
+use App\Http\Controllers\frontend\CouponController as FrontendCouponController;
+
+//Delivery
+use App\Http\Controllers\Delivery\DeliveryController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -53,8 +65,6 @@ Route::post('/customer/password/update', [PasswordResetController::class, 'reset
 // Social Login
 Route::get('/customer/auth/google', [SocialAuthController::class, 'redirectToGoogle'])->name('customer.auth.google');
 Route::get('/customer/auth/google/callback', [SocialAuthController::class, 'handleGoogleCallback']);
-// Route::get('/customer/auth/facebook', [SocialAuthController::class, 'redirectToFacebook'])->name('customer.auth.facebook');
-// Route::get('/customer/auth/facebook/callback', [SocialAuthController::class, 'handleFacebookCallback']);
 
 // Frontend pages
 Route::get('/Brand', [FrontendBrandController::class, 'brand'])->name('customer.brand');
@@ -67,20 +77,20 @@ Route::get('/product/details/{id}', [FrontendProductController::class, 'view'])-
 Route::get('/product/list', [FrontendProductController::class, 'listview'])->name('product.listview');
 
 // Customer protected routes
-Route::group(['middleware' => 'customerg'], function () {
+Route::group(['middleware' => 'customer'], function () {
     Route::get('/addtocart/{product}', [OrderController::class, 'addtocart'])->name('addto.cart');
     Route::delete('/cart/remove/{id}', [OrderController::class, 'removecart'])->name('cart.remove');
     Route::post('/cart/update', [OrderController::class, 'updatecart'])->name('cart.update');
     Route::post('/customer/logout', [CustomerController::class, 'logout'])->name('customer.logout');
     Route::get('/cart/view', [OrderController::class, 'view'])->name('cart.view');
     Route::get('cart/checkout', [OrderController::class, 'checkout'])->name('cart.checkout');
-    
+
     // Customer Profile & Orders
     Route::get('/customer/profile', [CustomerController::class, 'profile'])->name('customer.profile');
     Route::post('/customer/profile/update', [CustomerController::class, 'profileupdate'])->name('customer.profile.update');
     Route::get('/customer/orders', [OrderController::class, 'myorders'])->name('customer.orders');
     Route::get('/customer/orders/{id}', [OrderController::class, 'orderdetail'])->name('customer.order.detail');
-    
+
     // Address Management
     Route::get('/customer/addresses', [CustomerController::class, 'addresses'])->name('customer.addresses');
     Route::post('/customer/addresses/store', [CustomerController::class, 'addressStore'])->name('customer.address.store');
@@ -88,9 +98,8 @@ Route::group(['middleware' => 'customerg'], function () {
     Route::post('/customer/addresses/update/{id}', [CustomerController::class, 'addressUpdate'])->name('customer.address.update');
     Route::delete('/customer/addresses/delete/{id}', [CustomerController::class, 'addressDelete'])->name('customer.address.delete');
     Route::post('/customer/addresses/set-default/{id}', [CustomerController::class, 'addressSetDefault'])->name('customer.address.default');
-    
-    Route::post('/placeorder/store', [OrderController::class, 'storeaddorder'])->name('placeorder.store');
 
+    Route::post('/placeorder/store', [OrderController::class, 'storeaddorder'])->name('placeorder.store');
 
     // Wishlist
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('customer.wishlist');
@@ -101,10 +110,11 @@ Route::group(['middleware' => 'customerg'], function () {
     Route::post('/product/review', [ReviewController::class, 'store'])->name('customer.product.review');
 
     // Coupon Application
-    Route::post('/coupon/collect/{id}', [\App\Http\Controllers\frontend\CouponController::class, 'collect'])->name('customer.coupon.collect');
-    Route::post('/coupon/apply', [\App\Http\Controllers\frontend\CouponController::class, 'apply'])->name('customer.coupon.apply');
-    Route::get('/coupon/remove', [\App\Http\Controllers\frontend\CouponController::class, 'remove'])->name('customer.coupon.remove');
+    Route::post('/coupon/collect/{id}', [FrontendCouponController::class, 'collect'])->name('customer.coupon.collect');
+    Route::post('/coupon/apply', [FrontendCouponController::class, 'apply'])->name('customer.coupon.apply');
+    Route::get('/coupon/remove', [FrontendCouponController::class, 'remove'])->name('customer.coupon.remove');
     Route::get('/customer/vouchers', [CustomerController::class, 'vouchers'])->name('customer.vouchers');
+
     // SSLCommerz
     Route::post('/payment/sslcommerz', [SslCommerzController::class, 'initiatePayment'])->name('payment.sslcommerz');
 });
@@ -117,7 +127,6 @@ Route::post('/payment/fail', [SslCommerzController::class, 'paymentFail'])->name
 Route::post('/payment/cancel', [SslCommerzController::class, 'paymentCancel'])->name('payment.cancel');
 Route::post('/payment/ipn', [SslCommerzController::class, 'ipn'])->name('payment.ipn');
 
-
 // Public Search
 Route::get('/search', [FrontendProductController::class, 'search'])->name('product.search');
 
@@ -127,16 +136,17 @@ Route::get('/search', [FrontendProductController::class, 'search'])->name('produ
 |--------------------------------------------------------------------------
 */
 
- // Admin Authentication
-    Route::get('/login', [AuthController::class, 'login'])->name('login');
-     Route::post('/submit', [AuthController::class, 'loginsubmit'])->name('login.submit')->middleware('throttle:60,1');
+// Admin Authentication
+Route::get('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/submit', [AuthController::class, 'loginsubmit'])->name('login.submit')->middleware('throttle:60,1');
 
- Route::prefix('admin')->group(function () {
+Route::prefix('admin')->group(function () {
 
     // Protected routes
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
-        // Dashboard Routes - Multiple routes for same dashboard
+
+        // Dashboard Routes
         Route::get('/', [DashboardController::class, 'dashboard'])->name('dashboard');
 
         // Profile Routes
@@ -205,15 +215,36 @@ Route::get('/search', [FrontendProductController::class, 'search'])->name('produ
         });
 
         // Coupon Routes
-        Route::resource('coupons', \App\Http\Controllers\Admin\CouponController::class);
+        Route::resource('coupons', CouponController::class);
 
         // Setting Routes
-        Route::get('/settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('admin.settings.index');
-        Route::post('/settings/update', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('admin.settings.update');
+        Route::get('/settings', [SettingController::class, 'index'])->name('admin.settings.index');
+        Route::post('/settings/update', [SettingController::class, 'update'])->name('admin.settings.update');
     });
 });
 
-// Steadfast Webhook - Public Route (CSRF excluded in bootstrap/app.php or Middleware)
-Route::post('/steadfast/webhook', [App\Http\Controllers\OrderListController::class, 'handleWebhook'])->name('steadfast.webhook');
+// Steadfast Webhook
+Route::post('/steadfast/webhook', [OrderListController::class, 'handleWebhook'])->name('steadfast.webhook');
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', [HomeController::class, 'index'])->name('home');
+
+
+// ===== DELIVERY STAFF AUTH =====
+Route::get('/delivery/login', [DeliveryAuthController::class, 'login'])->name('delivery.login');
+Route::post('/delivery/login/submit', [DeliveryAuthController::class, 'loginSubmit'])->name('delivery.login.submit')->middleware('throttle:60,1');
+
+Route::middleware([deliveryAuth::class])->prefix('delivery')->name('delivery.')->group(function () {
+    Route::post('/logout', [DeliveryAuthController::class, 'logout'])->name('logout');
+
+    Route::get('/', [DeliveryController::class, 'dashboard'])->name('dashboard');
+    Route::get('/profile', [DeliveryController::class, 'profile'])->name('profile');
+    Route::put('/profile', [DeliveryController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/orders/{order}/send-otp', [DeliveryController::class, 'staffSendOtp'])->name('send-otp');
+    Route::post('/orders/{order}/verify-otp', [DeliveryController::class, 'staffVerifyOtp'])->name('verify-otp');
+});
+
+// ===== CUSTOMER SELF-VERIFICATION (STEADFAST) =====
+Route::middleware(['customer'])->prefix('my-orders')->name('customer.')->group(function () {
+    Route::get('/{order}/confirm-delivery', [DeliveryController::class, 'showConfirmDeliveryPage'])->name('confirm-delivery.show');
+    Route::post('/{order}/confirm-delivery', [DeliveryController::class, 'customerVerifyOtp'])->name('confirm-delivery.submit');
+});

@@ -8,7 +8,7 @@
             <div class="col-lg-6">
                 <div class="product-image-wrapper">
                     <div class="main-image shadow-sm rounded overflow-hidden mb-3" style="border: 1px solid #eee; background: #fff;">
-                        <img src="{{ asset('upload/products/'.$product->image) }}"
+                        <img src="{{ asset('uploads/'.$product->image) }}"
                             id="expandedImg"
                             alt="{{ $product->name }}"
                             class="img-fluid w-100" style="object-fit: contain; height: 500px;">
@@ -16,12 +16,12 @@
                     
                     @if($product->productImages->count() > 0)
                     <div class="product-gallery-thumbnails d-flex flex-wrap gap-2">
-                        <div class="thumbnail-item active" onclick="changeImage(this, '{{ asset('upload/products/'.$product->image) }}')">
-                            <img src="{{ asset('upload/products/'.$product->image) }}" alt="Thumbnail" class="img-fluid rounded border">
+                        <div class="thumbnail-item active" onclick="changeImage(this, '{{ asset('uploads/'.$product->image) }}')">
+                            <img src="{{ asset('uploads/'.$product->image) }}" alt="Thumbnail" class="img-fluid rounded border">
                         </div>
                         @foreach($product->productImages as $gallery)
-                        <div class="thumbnail-item" onclick="changeImage(this, '{{ asset('upload/products/gallery/'.$gallery->image) }}')">
-                            <img src="{{ asset('upload/products/gallery/'.$gallery->image) }}" alt="Thumbnail" class="img-fluid rounded border">
+                        <div class="thumbnail-item" onclick="changeImage(this, '{{ asset('uploads/products/gallery/'.$gallery->image) }}')">
+                            <img src="{{ asset('uploads/products/gallery/'.$gallery->image) }}" alt="Thumbnail" class="img-fluid rounded border">
                         </div>
                         @endforeach
                     </div>
@@ -91,7 +91,7 @@
                         <div class="d-flex flex-wrap gap-2">
                             @foreach($coupons as $coupon)
                                 @php 
-                                    $isCollected = auth('customerg')->check() && auth('customerg')->user()->coupons()->where('coupon_id', $coupon->id)->exists();
+                                    $isCollected = auth('customer')->check() && auth('customer')->user()->coupons()->where('coupon_id', $coupon->id)->exists();
                                 @endphp
                                 <div class="voucher-ticket {{ $isCollected ? 'collected' : '' }}" 
                                      id="voucher-{{ $coupon->id }}"
@@ -123,7 +123,7 @@
                         </a>
                         
                         <button class="btn btn-outline-danger wishlist-toggle-btn" data-id="{{ $product->id }}">
-                            <i class="{{ auth('customerg')->check() && auth('customerg')->user()->wishlists()->where('product_id', $product->id)->exists() ? 'fas' : 'far' }} fa-heart"></i>
+                            <i class="{{ auth('customer')->check() && auth('customer')->user()->wishlists()->where('product_id', $product->id)->exists() ? 'fas' : 'far' }} fa-heart"></i>
                             Wishlist
                         </button>
                     </div>
@@ -212,7 +212,7 @@
                         <div class="properties-img">
                             <a href="{{ route('product.details', $rp->id) }}">
                                 <div style="height: 220px; overflow: hidden; background: #fff; border-bottom: 1px solid #eee;">
-                                    <img src="{{ asset('upload/products/'.$rp->image) }}" alt="{{ $rp->name }}" style="width:100%; height:100%; object-fit:contain;">
+                                    <img src="{{ asset('uploads/'.$rp->image) }}" alt="{{ $rp->name }}" style="width:100%; height:100%; object-fit:contain;">
                                 </div>
                             </a>
                         </div>

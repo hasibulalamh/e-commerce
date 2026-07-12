@@ -41,10 +41,16 @@ return [
             'provider' => 'users',
         ],
 
-        'customerg' => [
+        'customer' => [
             'driver' => 'session',
             'provider' => 'customers',
         ],
+
+        'delivery' => [
+            'driver' => 'session',
+            'provider' => 'delivery_staff',
+        ],
+
     ],
 
     /*
@@ -77,7 +83,12 @@ return [
 
        'customers' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Customer::class, 
+            'model' => App\Models\Customer::class,
+        ],
+
+        'delivery_staff' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\DeliveryStaff::class,
         ],
     ],
 
@@ -103,6 +114,12 @@ return [
     'passwords' => [
         'users' => [
             'provider' => 'users',
+            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'expire' => 60,
+            'throttle' => 60,
+        ],
+        'delivery_staff' => [
+            'provider' => 'delivery_staff',
             'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
             'expire' => 60,
             'throttle' => 60,

@@ -9,12 +9,12 @@
                 <div style="background: white; border-radius: 16px; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.03);">
                     <div style="font-size: 16px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px;">
                         <div style="width: 50px; height: 50px; background: #e44d26; color: white; border-radius: 12px; display: flex; align-items:center; justify-content:center; font-size: 1.5rem; font-weight: 800;
-                            {{ auth('customerg')->user()->image ? "background-image: url('".asset(auth('customerg')->user()->image)."'); background-size: cover; background-position: center; color: transparent;" : "" }}">
-                            {{ substr(auth('customerg')->user()->name, 0, 1) }}
+                            {{ auth('customer')->user()->image ? "background-image: url('".asset(auth('customer')->user()->image)."'); background-size: cover; background-position: center; color: transparent;" : "" }}">
+                            {{ substr(auth('customer')->user()->name, 0, 1) }}
                         </div>
                         <div>
                             <span style="font-size: 13px; color: #888; display: block;">Hello,</span>
-                            <strong style="color: #222;">{{ explode(' ', auth('customerg')->user()->name)[0] }}</strong>
+                            <strong style="color: #222;">{{ explode(' ', auth('customer')->user()->name)[0] }}</strong>
                         </div>
                     </div>
 

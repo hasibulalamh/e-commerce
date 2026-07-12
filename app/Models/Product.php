@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Log;
 
 class Product extends Model
 {
@@ -28,7 +29,7 @@ class Product extends Model
                         try {
                             $user->notify(new \App\Notifications\BackInStockNotification($product));
                         } catch (\Exception $e) {
-                            \Log::error("Failed to notify user {$user->id} about product {$product->id}: " . $e->getMessage());
+                        Log::error("Failed to notify user {$user->id} about product {$product->id}: " . $e->getMessage());
                         }
                     }
                 }
@@ -47,7 +48,7 @@ class Product extends Model
         'image',
         'status',
     ];
-    
+
     /**
      * The attributes that should be cast.
      *
@@ -66,7 +67,7 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
-    
+
     /**
      * Get the brand that owns the product.
      */
@@ -74,7 +75,7 @@ class Product extends Model
     {
         return $this->belongsTo(Brand::class);
     }
-    
+
     public function orderDetails(): HasMany
     {
         return $this->hasMany(OrderDetail::class);

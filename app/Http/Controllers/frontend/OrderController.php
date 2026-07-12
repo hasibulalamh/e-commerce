@@ -3,18 +3,22 @@
 namespace App\Http\Controllers\frontend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
+use App\Models\Setting;
+use App\Notifications\OrderConfirmationNotification;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
 
 class OrderController extends Controller
 {
-    public function addtocart($product_id)
+    public function addtocart(int $product_id)
     {
-        $product = Product::find($product_id);
+        $product = Product::where('id', $product_id)->first();
         if (!$product) {
             if (request()->ajax()) {
                 return response()->json(['success' => false, 'message' => 'Product not found']);
@@ -72,35 +76,34 @@ class OrderController extends Controller
         return redirect()->back();
     }
 
-    public function view(){
+    public function view()
+    {
         $mycart = Session::get('cart') ?? [];
 
-        return view('frontend.shopping.cart',compact('mycart'));
-
+        return view('frontend.shopping.cart', compact('mycart'));
     }
 
-
-
-    public function checkout(){
+    public function checkout()
+    {
         $mycart = Session::get('cart') ?? [];
-        $addresses = auth('customerg')->user()->addresses()->get();
-        
+        $customer = auth('customer')->user();
+        $addresses = $customer->addresses()->get();
+
         $productIds = collect($mycart)->pluck('id')->toArray();
-        
+
         // Fetch coupons the customer has collected
-        $customer = auth('customerg')->user();
         $collectedCouponIds = $customer->coupons()->wherePivot('is_used', false)->pluck('coupons.id')->toArray();
 
         // Filter active coupons that are collected and applicable
-        $availableCoupons = \App\Models\Coupon::where('status', 'active')
+        $availableCoupons = Coupon::where('status', 'active')
             ->whereIn('id', $collectedCouponIds)
-            ->where(function($query) use ($productIds) {
+            ->where(function ($query) use ($productIds) {
                 $query->whereNull('product_id')
-                      ->orWhereIn('product_id', $productIds);
+                    ->orWhereIn('product_id', $productIds);
             })
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->whereNull('expiry_date')
-                      ->orWhereDate('expiry_date', '>=', now());
+                    ->orWhereDate('expiry_date', '>=', now());
             })
             ->get();
 
@@ -120,11 +123,13 @@ class OrderController extends Controller
             'delivery_zone' => 'required|in:inside_dhaka,outside_dhaka',
         ]);
 
-        $mycart = Session::get('cart');
+        $mycart = Session::get('cart', []);
         if (empty($mycart)) {
             toastr()->title('Order Error')->error('Your cart is empty!');
             return redirect()->back();
         }
+
+        $customer = auth('customer')->user();
 
         DB::beginTransaction();
         try {
@@ -133,29 +138,29 @@ class OrderController extends Controller
             foreach ($mycart as $item) {
                 $subtotal += $item['price'] * $item['quantity'];
             }
-            
+
             // Calculate shipping cost based on zone and coupon
             $shipping_cost = 0;
             $is_free_delivery = session()->get('coupon.is_free_delivery', false);
 
             if (!$is_free_delivery) {
-                $shipping_charge_dhaka = \App\Models\Setting::get('shipping_charge_dhaka', 70);
-                $shipping_charge_outside = \App\Models\Setting::get('shipping_charge_outside', 130);
+                $shipping_charge_dhaka = Setting::get('shipping_charge_dhaka', 70);
+                $shipping_charge_outside = Setting::get('shipping_charge_outside', 130);
                 $shipping_cost = ($request->delivery_zone === 'inside_dhaka') ? $shipping_charge_dhaka : $shipping_charge_outside;
             }
-            
+
             // Coupon logic
             $discount = 0;
             $coupon_code = null;
             if (Session::has('coupon')) {
                 $coupon_session = Session::get('coupon');
-                $coupon = \App\Models\Coupon::where('code', $coupon_session['code'])->first();
+                $coupon = Coupon::where('code', $coupon_session['code'])->first();
                 if ($coupon && $coupon->isValid($subtotal, $mycart)) {
-                    
+
                     if ($coupon->is_free_delivery) {
                         $shipping_cost = 0;
                     }
-                    
+
                     $applicableSubtotal = 0;
                     if ($coupon->product_id) {
                         foreach ($mycart as $item) {
@@ -172,14 +177,14 @@ class OrderController extends Controller
                     $coupon->increment('used_count');
 
                     // Mark as used for customer
-                    auth('customerg')->user()->coupons()->updateExistingPivot($coupon->id, ['is_used' => true]);
+                    $customer->coupons()->updateExistingPivot($coupon->id, ['is_used' => true]);
                 }
             }
 
             $total = ($subtotal + $shipping_cost) - $discount;
 
             $myorder = Order::create([
-                'customer_id'      => auth('customerg')->user()->id,
+                'customer_id'      => $customer->id,
                 'name'             => $request->name,
                 'email'            => $request->email,
                 'phone'            => $request->phone,
@@ -204,7 +209,7 @@ class OrderController extends Controller
 
             foreach ($mycart as $cartdata) {
                 $product = Product::find($cartdata['id']);
-                
+
                 // Final stock check
                 if (!$product || $product->stock < $cartdata['quantity']) {
                     throw new \Exception("Product '{$cartdata['name']}' is out of stock.");
@@ -225,15 +230,14 @@ class OrderController extends Controller
 
             // Send Order Confirmation Email
             try {
-                $myorder->customer->notify(new \App\Notifications\OrderConfirmationNotification($myorder));
+                $customer->notify(new OrderConfirmationNotification($myorder));
             } catch (\Exception $e) {
-                \Log::error('Mail Error: ' . $e->getMessage());
+                Log::error('Mail Error: ' . $e->getMessage());
             }
 
             toastr()->title('Place Order')->success('Order placed successfully!');
             Session::forget(['cart', 'coupon']);
             return redirect()->route('order.confirmation', $myorder->id);
-
         } catch (\Exception $e) {
             DB::rollBack();
             toastr()->title('Order Error')->error($e->getMessage());
@@ -241,7 +245,7 @@ class OrderController extends Controller
         }
     }
 
-    public function removecart($id)
+    public function removecart(int $id)
     {
         $cart = Session::get('cart', []);
         if (isset($cart[$id])) {
@@ -280,17 +284,17 @@ class OrderController extends Controller
 
     public function myorders()
     {
-        $orders = Order::where('customer_id', auth('customerg')->user()->id)
+        $orders = Order::where('customer_id', auth('customer')->id())
             ->with('orderDetails')
             ->latest()
             ->paginate(10);
         return view('frontend.pages.myorders', compact('orders'));
     }
 
-    public function orderdetail($id)
+    public function orderdetail(int $id)
     {
         $order = Order::where('id', $id)
-            ->where('customer_id', auth('customerg')->user()->id)
+            ->where('customer_id', auth('customer')->id())
             ->with(['orderDetails.product', 'statusHistories'])
             ->first();
 
@@ -301,10 +305,17 @@ class OrderController extends Controller
         return view('frontend.pages.orderdetail', compact('order'));
     }
 
-    public function orderConfirmation($id)
+    /**
+     * SECURITY FIX: Ownership check added — previously any customer could
+     * view another customer's order confirmation page by changing the id
+     * in the URL. Now only the order owner can view it.
+     */
+    public function orderConfirmation(int $id)
     {
-        $order = Order::with(['orderDetails.product'])->findOrFail($id);
-        
+        $order = Order::with(['orderDetails.product'])
+            ->where('customer_id', auth('customer')->id())
+            ->findOrFail($id);
+
         return view('frontend.pages.order-confirmation', compact('order'));
     }
 }

@@ -12,7 +12,7 @@ class WishlistController extends Controller
 {
     public function index()
     {
-        $wishlistItems = Wishlist::where('customer_id', auth('customerg')->id())
+        $wishlistItems = Wishlist::where('customer_id', auth('customer')->id())
             ->with('product')
             ->latest()
             ->paginate(10);
@@ -21,11 +21,11 @@ class WishlistController extends Controller
 
     public function toggle($productId)
     {
-        if (!auth('customerg')->check()) {
+        if (!auth('customer')->check()) {
             return response()->json(['success' => false, 'message' => 'Please login first.']);
         }
 
-        $customer = auth('customerg')->user();
+        $customer = auth('customer')->user();
         $wishlist = Wishlist::where('customer_id', $customer->id)
             ->where('product_id', $productId)
             ->first();
@@ -45,7 +45,7 @@ class WishlistController extends Controller
     public function remove($id)
     {
         $wishlist = Wishlist::where('id', $id)
-            ->where('customer_id', auth('customerg')->id())
+            ->where('customer_id', auth('customer')->id())
             ->firstOrFail();
         $wishlist->delete();
         toastr()->success('Item removed from wishlist.');

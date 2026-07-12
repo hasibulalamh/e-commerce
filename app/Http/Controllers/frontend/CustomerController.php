@@ -107,7 +107,7 @@ class CustomerController extends Controller
         session()->forget('otp_customer_id');
 
         // Auto login
-        auth('customerg')->login($customer);
+        auth('customer')->login($customer);
 
         toastr()->success('Email verified successfully! Welcome.');
         return redirect()->route('Home');
@@ -176,8 +176,8 @@ class CustomerController extends Controller
             'password' => $request->password
         ];
 
-        if(auth('customerg')->attempt($credentials)){
-            $customer = auth('customerg')->user();
+        if(auth('customer')->attempt($credentials)){
+            $customer = auth('customer')->user();
 
             // E2E Testing Bypass: Skip OTP for specific test account in local environment
             if (app()->environment('local') && in_array($customer->email, ['hasibulalamhimel44@gmail.com', 'himelhasib06@gmail.com'])) {
@@ -187,7 +187,7 @@ class CustomerController extends Controller
 
             // Check email verification
             if (!$customer->isEmailVerified()) {
-                auth('customerg')->logout();
+                auth('customer')->logout();
                 $otp = $customer->generateOtp();
                 Mail::to($customer->email)->send(new OtpVerificationMail($otp, $customer->name));
                 session(['otp_customer_id' => $customer->id]);
@@ -197,14 +197,14 @@ class CustomerController extends Controller
 
             // Check 2FA
             if ($customer->two_factor_enabled) {
-                auth('customerg')->logout();
+                auth('customer')->logout();
                 $code = $customer->generateTwoFactorCode();
                 Mail::to($customer->email)->send(new TwoFactorCodeMail($code, $customer->name));
                 session(['2fa_customer_id' => $customer->id]);
                 return redirect()->route('customer.2fa.verify');
             } else {
                 // Mandatory OTP for email login if 2FA is off
-                auth('customerg')->logout();
+                auth('customer')->logout();
                 $otp = $customer->generateOtp();
                 Mail::to($customer->email)->send(new OtpVerificationMail($otp, $customer->name));
                 session(['otp_customer_id' => $customer->id]);
@@ -259,27 +259,27 @@ class CustomerController extends Controller
         ]);
 
         session()->forget('2fa_customer_id');
-        auth('customerg')->login($customer);
+        auth('customer')->login($customer);
 
         toastr()->success('Successfully logged in');
         return redirect()->route('Home');
     }
 
     public function logout(){
-        auth('customerg')->logout();
+        auth('customer')->logout();
         toastr()->success('Successfully logged out');
         return redirect()->route('Home');
     }
 
     public function profile()
     {
-        $addresses = auth('customerg')->user()->addresses()->get();
+        $addresses = auth('customer')->user()->addresses()->get();
         return view('frontend.pages.profile', compact('addresses'));
     }
 
     public function vouchers()
     {
-        $vouchers = auth('customerg')->user()->coupons()
+        $vouchers = auth('customer')->user()->coupons()
             ->withPivot('collected_at', 'is_used')
             ->orderBy('collected_at', 'desc')
             ->get();
@@ -288,7 +288,7 @@ class CustomerController extends Controller
 
     public function profileupdate(Request $request)
     {
-        $customer = auth('customerg')->user();
+        $customer = auth('customer')->user();
 
         $request->validate([
             'phone' => 'nullable|string|max:20',
@@ -320,8 +320,8 @@ class CustomerController extends Controller
                 unlink(public_path($customer->image));
             }
             $fileName = time() . '_' . $request->file('image')->getClientOriginalName();
-            $request->file('image')->move(public_path('upload/customers'), $fileName);
-            $data['image'] = 'upload/customers/' . $fileName;
+            $request->file('image')->move(public_path('uploads/customers'), $fileName);
+            $data['image'] = 'uploads/customers/' . $fileName;
         }
 
         if ($request->filled('password')) {
@@ -336,13 +336,13 @@ class CustomerController extends Controller
 
     public function addresses()
     {
-        $addresses = auth('customerg')->user()->addresses()->latest()->get();
+        $addresses = auth('customer')->user()->addresses()->latest()->get();
         return view('frontend.pages.addresses', compact('addresses'));
     }
 
     public function addressStore(Request $request)
     {
-        $customer = auth('customerg')->user();
+        $customer = auth('customer')->user();
         
         if ($customer->addresses()->count() >= 5) {
             toastr()->error('You can only have up to 5 addresses.');
@@ -378,7 +378,7 @@ class CustomerController extends Controller
     public function addressEdit($id)
     {
         $address = CustomerAddress::where('id', $id)
-            ->where('customer_id', auth('customerg')->id())
+            ->where('customer_id', auth('customer')->id())
             ->firstOrFail();
             
         return view('frontend.pages.address-edit', compact('address'));
@@ -387,7 +387,7 @@ class CustomerController extends Controller
     public function addressUpdate(Request $request, $id)
     {
         $address = CustomerAddress::where('id', $id)
-            ->where('customer_id', auth('customerg')->id())
+            ->where('customer_id', auth('customer')->id())
             ->firstOrFail();
 
         $request->validate([
@@ -408,13 +408,13 @@ class CustomerController extends Controller
     public function addressDelete($id)
     {
         $address = CustomerAddress::where('id', $id)
-            ->where('customer_id', auth('customerg')->id())
+            ->where('customer_id', auth('customer')->id())
             ->firstOrFail();
 
         if ($address->is_default) {
             $address->delete();
             // Set another address as default if exists
-            $newDefault = auth('customerg')->user()->addresses()->first();
+            $newDefault = auth('customer')->user()->addresses()->first();
             if ($newDefault) {
                 $newDefault->update(['is_default' => true]);
             }
@@ -428,7 +428,7 @@ class CustomerController extends Controller
 
     public function addressSetDefault($id)
     {
-        $customer = auth('customerg')->user();
+        $customer = auth('customer')->user();
         
         // Reset all defaults
         $customer->addresses()->update(['is_default' => false]);

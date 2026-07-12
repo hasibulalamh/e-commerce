@@ -4,7 +4,6 @@
     <div class="content">
         <div class="container-fluid">
 
-            <!-- Add New Brand Button -->
             <div class="row mb-2">
                 <div class="col-12">
                     <a href="{{ route('brand.create') }}" class="btn btn-primary float-end">
@@ -13,7 +12,6 @@
                 </div>
             </div>
 
-            <!-- Brand List Table -->
             <div class="container mt-5">
                 <h2 class="mb-4">Brand List</h2>
 
@@ -36,25 +34,30 @@
                                     <tbody>
                                         @foreach($brand as $brands)
                                         <tr>
-                                            <th scope="row">{{ $brands->id }}</th>
+                                            <th scope="row">{{ $loop->iteration + ($brand->firstItem() - 1) }}</th>
                                             <td>{{ $brands->name }}</td>
                                             <td>{{ $brands->description }}</td>
+                                            
                                             <td>
-                                                @if($brands->logo)
-                                                    <img src="{{ asset('upload/brands/' . $brands->logo) }}" 
-                                                         alt="{{ $brands->name }}"
-                                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                                <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; overflow: hidden;">
+                                                    @if($brands->logo && !str_contains($brands->logo, 'default.png'))
+                                                        <img src="{{ $brands->logo }}" 
+                                                             alt="{{ $brands->name }}"
+                                                             style="width: 100%; height: 100%; object-fit: contain;">
+                                                    @else
+                                                        <i class="fas fa-image text-muted" style="font-size: 18px;"></i>
+                                                    @endif
+                                                </div>
+                                            </td>
+
+                                            <td>
+                                                @if(strtolower($brands->status) == 'active')
+                                                    <span class="badge bg-success">Active</span>
                                                 @else
-                                                    <span class="badge bg-secondary">No Logo</span>
+                                                    <span class="badge bg-danger">Inactive</span>
                                                 @endif
                                             </td>
-                                            <td>
-                                                @if($brands->status == 'active')
-                                                <span class="badge bg-success">Active</span>
-                                                @else
-                                                <span class="badge bg-danger">Inactive</span>
-                                                @endif
-                                            </td>
+
                                             <td>
                                                 <a class="btn btn-warning btn-sm" href="{{ route('brand.edit', $brands->id) }}">
                                                     <i class="fas fa-edit"></i> Edit
@@ -71,6 +74,9 @@
                                         @endforeach
                                     </tbody>
                                 </table>
+                                 <div class="d-flex justify-content-center mt-4">
+                                    {{ $brand->links('pagination::bootstrap-5') }}
+                                </div>
                             </div>
                         </div>
                     </div>

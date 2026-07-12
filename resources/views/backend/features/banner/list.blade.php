@@ -34,10 +34,10 @@
                                         <tbody>
                                             @foreach($banners as $banner)
                                             <tr>
-                                                <th scope="row">{{ $banner->id }}</th>
+                                                <th scope="row">{{ $loop->iteration + ($banners->firstItem() - 1) }}</th>
                                                 <td>
                                                     @if($banner->image)
-                                                        <img src="{{ asset('upload/banners/' . $banner->image) }}" 
+                                                        <img src="{{ asset('uploads/banners/' . $banner->image) }}" 
                                                              alt="{{ $banner->title }}"
                                                              style="width: 100px; height: 50px; object-fit: cover; border-radius: 4px;">
                                                     @else
@@ -70,6 +70,9 @@
                                             @endforeach
                                         </tbody>
                                     </table>
+                                </div>
+                                <div class="d-flex justify-content-center mt-4">
+                                    {{ $banners->links('pagination::bootstrap-5') }}
                                 </div>
                             </div>
                         </div>

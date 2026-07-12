@@ -50,7 +50,7 @@
                         @if($brand->logo)
                             <div class="mt-2">
                                 <p class="mb-1 small text-muted">Current Logo:</p>
-                                <img src="{{ asset('upload/brands/' . $brand->logo) }}" 
+                                <img src="{{ asset('uploads/' . $brand->logo) }}" 
                                      alt="Current Logo" 
                                      style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
                             </div>

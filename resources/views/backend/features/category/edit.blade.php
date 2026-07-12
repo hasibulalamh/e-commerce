@@ -60,7 +60,7 @@
                                         @if($category->image)
                                             <div class="mt-2">
                                                 <p class="mb-1 small text-muted">Current Image:</p>
-                                                <img src="{{ asset('upload/categories/' . $category->image) }}" alt="Current Image" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                                                <img src="{{ asset('uploads/' . $category->image) }}" alt="Current Image" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
                                             </div>
                                         @endif
                                     </div>

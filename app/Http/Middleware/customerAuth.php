@@ -15,13 +15,13 @@ class customerAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (auth()->guard('customerg')->check()) {
+        if (auth()->guard('customer')->check()) {
             return $next($request);
         }
        else{
             toastr()->error('please login first');
             return redirect()->route('customer.login');
        }
-       
+
     }
 }

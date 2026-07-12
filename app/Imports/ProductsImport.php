@@ -7,59 +7,87 @@ use App\Models\Category;
 use App\Models\Brand;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\SkipsOnError;
+use Maatwebsite\Excel\Concerns\SkipsErrors;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
-class ProductsImport implements ToModel, WithHeadingRow
+class ProductsImport implements ToModel, WithHeadingRow, SkipsOnError, WithChunkReading
 {
-    /**
-    * @param array $row
-    *
-    * @return \Illuminate\Database\Eloquent\Model|null
-    */
+    use SkipsErrors;
+
     public function model(array $row)
     {
-        $categoryId = Category::where('name', $row['category_name'])->value('id');
-        $brandId = Brand::where('name', $row['brand_name'])->value('id');
+        $name = trim($row['name'] ?? $row['product_name'] ?? $row['product name'] ?? '');
+        if (empty($name)) return null;
 
-        // Skip row if category or brand not found to prevent crashes
+        $categoryName = trim($row['category_name'] ?? $row['category'] ?? '');
+        $brandName = trim($row['brand_name'] ?? $row['brand'] ?? '');
+
+        $categoryId = Category::where('name', $categoryName)->value('id');
+        $brandId = Brand::where('name', $brandName)->value('id');
+
         if (!$categoryId || !$brandId) {
-            \Log::warning("Skipping product import row: Category ({$row['category_name']}) or Brand ({$row['brand_name']}) not found.");
+            \Log::warning("Skipping product import: Category ({$categoryName}) or Brand ({$brandName}) not found.");
             return null;
         }
 
-        $imageField = null;
-
-        if (!empty($row['image_url'])) {
-            try {
-                $response = Http::timeout(10)->get($row['image_url']);
-                if ($response->successful()) {
-                    $fileName = time() . '_' . uniqid() . '.jpg';
-                    $path = public_path('upload/products');
-                    
-                    if (!File::exists($path)) {
-                        File::makeDirectory($path, 0755, true);
-                    }
-                    
-                    File::put($path . '/' . $fileName, $response->body());
-                    $imageField = $fileName;
-                }
-            } catch (\Exception $e) {
-                // Keep imageField as null if download fails
-                \Log::error('Bulk Import Image Download Failed: ' . $e->getMessage());
-            }
-        }
+        $imageInput = $row['image_url'] ?? $row['image'] ?? $row['product_image'] ?? $row['product image'] ?? $row['img'] ?? $row['url'] ?? null;
+        $imageField = $this->handleImage($imageInput);
 
         return new Product([
-            'name'          => $row['name'],
+            'name'          => $name,
             'category_id'   => $categoryId,
             'brand_id'      => $brandId,
             'description'   => $row['description'] ?? '',
-            'price'         => $row['price'] ?? 0,
-            'discount'      => $row['discount'] ?? 0,
-            'stock'         => $row['stock'] ?? 0,
+            'price'         => (float) ($row['price'] ?? 0),
+            'discount'      => (float) ($row['discount'] ?? 0),
+            'stock'         => (int) ($row['stock'] ?? 0),
             'status'        => $row['status'] ?? 'active',
-            'image'         => $imageField ?? null,
+            'image'         => $imageField,
         ]);
+    }
+
+    private function handleImage(?string $input): ?string
+    {
+        if (blank($input)) return null;
+        $input = trim($input);
+
+        if (filter_var($input, FILTER_VALIDATE_URL)) {
+            return $this->downloadImage($input);
+        }
+
+        $filename = basename($input);
+        $path = 'products/' . $filename;
+        return Storage::disk('public')->exists($path) ? $path : null;
+    }
+
+    private function downloadImage(string $url): ?string
+    {
+        try {
+            $response = Http::timeout(20)->get($url);
+            if (!$response->successful()) return null;
+
+            $contentType = $response->header('Content-Type');
+            $extension = match (true) {
+                str_contains($contentType, 'jpeg') => 'jpg',
+                str_contains($contentType, 'png')  => 'png',
+                str_contains($contentType, 'webp') => 'webp',
+                default => 'jpg',
+            };
+
+            $path = 'products/' . Str::uuid() . '.' . $extension;
+            Storage::disk('public')->put($path, $response->body());
+            return $path;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    public function chunkSize(): int
+    {
+        return 50;
     }
 }

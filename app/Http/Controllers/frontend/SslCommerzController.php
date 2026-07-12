@@ -73,7 +73,7 @@ class SslCommerzController extends Controller
                     $discount = $coupon->calculateDiscount($applicableSubtotal);
                     $coupon_code = $coupon->code;
                     $coupon->increment('used_count');
-                    auth('customerg')->user()->coupons()->updateExistingPivot($coupon->id, ['is_used' => true]);
+                    auth('customer')->user()->coupons()->updateExistingPivot($coupon->id, ['is_used' => true]);
                 }
             }
 
@@ -82,7 +82,7 @@ class SslCommerzController extends Controller
 
             // Create the order with pending payment
             $order = Order::create([
-                'customer_id'      => auth('customerg')->user()->id,
+                'customer_id'      => auth('customer')->user()->id,
                 'name'             => $request->name,
                 'email'            => $request->email,
                 'phone'            => $request->phone,
@@ -208,7 +208,7 @@ class SslCommerzController extends Controller
             ]);
 
             // Re-login the user to ensure session is active
-            auth('customerg')->loginUsingId($order->customer_id);
+            auth('customer')->loginUsingId($order->customer_id);
 
             // Send confirmation email
             try {

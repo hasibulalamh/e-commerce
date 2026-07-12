@@ -11,7 +11,7 @@ class CouponController extends Controller
 {
     public function collect($id)
     {
-        if (!auth('customerg')->check()) {
+        if (!auth('customer')->check()) {
             return response()->json(['success' => false, 'message' => 'Please login to collect vouchers.']);
         }
 
@@ -20,7 +20,7 @@ class CouponController extends Controller
             return response()->json(['success' => false, 'message' => 'Voucher not found or inactive.']);
         }
 
-        $customer = auth('customerg')->user();
+        $customer = auth('customer')->user();
         
         // Check if already collected
         if ($customer->coupons()->where('coupon_id', $id)->exists()) {
@@ -46,7 +46,7 @@ class CouponController extends Controller
             return response()->json(['success' => false, 'message' => 'Invalid coupon code.']);
         }
 
-        $customer = auth('customerg')->user();
+        $customer = auth('customer')->user();
         if (!$customer || !$customer->coupons()->where('coupon_id', $coupon->id)->exists()) {
             return response()->json(['success' => false, 'message' => 'You must collect this voucher first.']);
         }

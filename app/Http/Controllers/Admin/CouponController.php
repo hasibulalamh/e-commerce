@@ -16,13 +16,13 @@ class CouponController extends Controller
 
     public function create()
     {
-        $products = \App\Models\Product::orderBy('name')->get();
+        $products = \App\Models\Product::orderBy('name', 'asc')->get();
         return view('backend.features.coupon.create', compact('products'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $coupon = Coupon::create($request->validate([
             'code' => 'required|unique:coupons,code',
             'type' => 'required|in:fixed,percent',
             'value' => 'required|numeric|min:0',
@@ -31,9 +31,7 @@ class CouponController extends Controller
             'usage_limit' => 'nullable|integer|min:1',
             'status' => 'required|in:active,inactive',
             'product_id' => 'nullable|exists:products,id',
-        ]);
-
-        Coupon::create($request->all());
+        ]));
 
         toastr()->success('Coupon created successfully!');
         return redirect()->route('coupons.index');
@@ -41,13 +39,13 @@ class CouponController extends Controller
 
     public function edit(Coupon $coupon)
     {
-        $products = \App\Models\Product::orderBy('name')->get();
+        $products = \App\Models\Product::orderBy('name', 'asc')->get();
         return view('backend.features.coupon.edit', compact('coupon', 'products'));
     }
 
     public function update(Request $request, Coupon $coupon)
     {
-        $request->validate([
+        $coupon->update($request->validate([
             'code' => 'required|unique:coupons,code,' . $coupon->id,
             'type' => 'required|in:fixed,percent',
             'value' => 'required|numeric|min:0',
@@ -56,9 +54,7 @@ class CouponController extends Controller
             'usage_limit' => 'nullable|integer|min:1',
             'status' => 'required|in:active,inactive',
             'product_id' => 'nullable|exists:products,id',
-        ]);
-
-        $coupon->update($request->all());
+        ]));
 
         toastr()->success('Coupon updated successfully!');
         return redirect()->route('coupons.index');
@@ -66,7 +62,7 @@ class CouponController extends Controller
 
     public function destroy(Coupon $coupon)
     {
-        $coupon->delete();
+        $coupon->forceDelete();
         toastr()->success('Coupon deleted successfully!');
         return redirect()->route('coupons.index');
     }

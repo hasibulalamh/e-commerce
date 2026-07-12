@@ -50,7 +50,7 @@
                     <div style="width: 60px; height: 60px; border-radius: 10px;
                                 overflow: hidden; background: #f5f5f5; flex-shrink: 0;">
                         @if($detail->product && $detail->product->image)
-                            <img src="{{ asset('upload/products/' . $detail->product->image) }}"
+                            <img src="{{ asset('uploads/' . $detail->product->image) }}"
                                  alt="{{ $detail->product->name ?? 'Product' }}"
                                  style="width: 100%; height: 100%; object-fit: cover;">
                         @else

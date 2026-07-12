@@ -92,7 +92,7 @@
                                     @if($product->image)
                                         <div class="mt-2">
                                             <p class="mb-1 small text-muted">Current Main Image:</p>
-                                            <img src="{{ asset('upload/products/' . $product->image) }}" alt="Main Image" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                                            <img src="{{ asset('uploads/' . $product->image) }}" alt="Main Image" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
                                         </div>
                                     @endif
                                 </div>
@@ -108,7 +108,7 @@
                                             <div class="d-flex flex-wrap gap-2">
                                                 @foreach($product->productImages as $image)
                                                     <div class="gallery-image-container position-relative" id="gallery-image-{{ $image->id }}">
-                                                        <img src="{{ asset('upload/products/gallery/' . $image->image) }}" alt="Gallery Image" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
+                                                        <img src="{{ asset('uploads/gallery/' . $image->image) }}" alt="Gallery Image" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; border: 1px solid #ddd;">
                                                         <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 rounded-circle delete-gallery-image" data-id="{{ $image->id }}" style="padding: 2px 6px; font-size: 10px;">
                                                             <i class="fas fa-times"></i>
                                                         </button>

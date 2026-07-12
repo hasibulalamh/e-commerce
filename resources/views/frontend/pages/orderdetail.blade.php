@@ -19,10 +19,10 @@
                         <div style="width: 70px; height: 70px; background: #e44d26; color: white; 
                                     border-radius: 50%; display: flex; align-items:center; justify-content:center;
                                     margin: 0 auto 15px; font-size: 1.8rem; font-weight: 700;">
-                            {{ substr(auth('customerg')->user()->name, 0, 1) }}
+                            {{ substr(auth('customer')->user()->name, 0, 1) }}
                         </div>
-                        <h5 style="margin: 0; font-weight: 700; color: #333;">{{ auth('customerg')->user()->name }}</h5>
-                        <p style="margin: 5px 0 0; font-size: 13px; color: #888;">{{ auth('customerg')->user()->email }}</p>
+                        <h5 style="margin: 0; font-weight: 700; color: #333;">{{ auth('customer')->user()->name }}</h5>
+                        <p style="margin: 5px 0 0; font-size: 13px; color: #888;">{{ auth('customer')->user()->email }}</p>
                     </div>
                     
                     <div style="padding: 15px 0;">
@@ -145,7 +145,7 @@
                                             <td style="padding: 20px 0;">
                                                 <div style="display: flex; align-items: center; gap: 15px;">
                                                     <div style="position: relative;">
-                                                        <img src="{{ asset('upload/products/' . ($item->product->image ?? 'default.jpg')) }}" 
+                                                        <img src="{{ asset('uploads/' . ($item->product->image ?? 'default.jpg')) }}" 
                                                              style="width: 60px; height: 60px; border-radius: 10px; object-fit: cover; background: #f9f9f9; border: 1px solid #eee;">
                                                     </div>
                                                     <div>

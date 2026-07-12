@@ -171,8 +171,8 @@
                         <div class="list-group-item bg-transparent px-0 border-light">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
-                                    <img src="{{ asset('uploads/products/'.$lp->image) }}" class="product-img me-3" 
-                                         onerror="this.src='{{ asset('upload/products/'.$lp->image) }}';">
+                                    <img src="{{ asset('uploads/'.$lp->image) }}" class="product-img me-3" 
+                                         onerror="this.src='{{ asset('uploads/'.$lp->image) }}';">
                                     <div>
                                         <div class="fw-bold small">{{ $lp->name }}</div>
                                         <div class="text-muted smaller">SKU: {{ $lp->id }}</div>

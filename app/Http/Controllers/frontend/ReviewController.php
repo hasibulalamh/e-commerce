@@ -12,7 +12,7 @@ class ReviewController extends Controller
 {
     public function store(Request $request)
     {
-        if (!auth('customerg')->check()) {
+        if (!auth('customer')->check()) {
             toastr()->error('Please login to submit a review.');
             return redirect()->back();
         }
@@ -30,7 +30,7 @@ class ReviewController extends Controller
 
         /* 
         // TEMPORARILY DISABLED FOR TESTING: Check if customer bought the product and it is delivered
-        $hasBought = Order::where('customer_id', auth('customerg')->id())
+        $hasBought = Order::where('customer_id', auth('customer')->id())
             ->whereHas('orderDetails', function($q) use ($request) {
                 $q->where('product_id', $request->product_id);
             })->where('status', 'delivered')->exists();
@@ -42,7 +42,7 @@ class ReviewController extends Controller
         */
 
         // Check if already reviewed
-        $exists = Review::where('customer_id', auth('customerg')->id())
+        $exists = Review::where('customer_id', auth('customer')->id())
             ->where('product_id', $request->product_id)
             ->exists();
 
@@ -52,7 +52,7 @@ class ReviewController extends Controller
         }
 
         Review::create([
-            'customer_id' => auth('customerg')->id(),
+            'customer_id' => auth('customer')->id(),
             'product_id' => $request->product_id,
             'rating' => $request->rating,
             'comment' => $request->comment,

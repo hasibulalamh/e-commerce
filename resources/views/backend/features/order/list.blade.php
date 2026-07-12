@@ -100,7 +100,7 @@
                     onmouseout="this.style.background='white'">
                     
                     <td style="padding:15px 20px;">
-                        <span style="font-weight:700; color:#e44d26;">#{{ $order->id }}</span>
+                        <span style="font-weight:700; color:#e44d26;">{{ $loop->iteration + ($orders->firstItem() - 1) }}</span>
                     </td>
                     
                     <td style="padding:15px 20px;">
@@ -204,8 +204,8 @@
         </div>
 
         {{-- Pagination --}}
-        <div style="padding:15px 25px; border-top:1px solid #f0f0f0;">
-            {{ $orders->links() }}
+        <div class="d-flex justify-content-center mt-4" style="padding:15px 25px; border-top:1px solid #f0f0f0;">
+            {{ $orders->links('pagination::bootstrap-5') }}
         </div>
     </div>
 </div>

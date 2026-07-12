@@ -15,7 +15,7 @@
                     display: flex;
                     align-items: center;
                     @if($banner->image)
-                        background-image: url('{{ asset('upload/banners/' . $banner->image) }}');
+                        background-image: url('{{ asset('uploads/banners/' . $banner->image) }}');
                         background-size: cover;
                         background-position: center;
                     @else
@@ -99,46 +99,47 @@
             <div class="row">
                 @foreach($featuredCategories as $index => $cat)
                 <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 mb-4">
-                    <div style="
-                        height: 300px; 
+                    <div class="category-card" style="
+                        height: 320px; 
                         position: relative; 
                         overflow: hidden;
                         background: {{ $cat->image ? 'transparent' : $catColors[$index % 5] }};
-                        border-radius: 8px;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                    ">
+                        border-radius: 12px;
+                        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+                        transition: all 0.3s ease;
+                    " onmouseenter="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.15)'"
+                       onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)'">
+                        
                         @if($cat->image)
-                            <img src="{{ asset('upload/categories/' . $cat->image) }}"
-                                 loading="lazy" width="400" height="300"
+                            <img src="{{ asset('uploads/' . $cat->image) }}"
+                                 loading="lazy"
                                  style="width:100%; height:100%; object-fit:cover;">
                         @endif
                         
-                        {{-- Overlay --}}
+                        {{-- Dark Gradient Overlay --}}
                         <div style="position:absolute; inset:0; 
-                                    background:rgba(0,0,0,0.35); transition: background 0.3s ease;"
-                             onmouseenter="this.style.background='rgba(0,0,0,0.2)'"
-                             onmouseleave="this.style.background='rgba(0,0,0,0.35)'">
+                                    background:linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 70%);">
                         </div>
-
+ 
                         {{-- Details --}}
-                        <div style="position:absolute; bottom:25px; left:25px; right:25px;">
-                            <h5 style="color:white; font-size:1.4rem; 
-                                       font-weight:700; margin:0 0 5px 0;
-                                       text-shadow:1px 1px 4px rgba(0,0,0,0.6);">
+                        <div style="position:absolute; bottom:30px; left:30px; right:30px;">
+                            <h3 style="color:white; font-size:1.6rem; 
+                                       font-weight:800; margin:0 0 8px 0;
+                                       letter-spacing: -0.5px;">
                                 {{ $cat->name }}
-                            </h5>
+                            </h3>
                             <a href="{{ route('product.listview', ['category' => $cat->id]) }}"
                                style="color:rgba(255,255,255,0.9); 
-                                      font-size:0.9rem; text-decoration:none;
-                                      display:inline-block; border-bottom:1px solid rgba(255,255,255,0.5);
-                                      padding-bottom:2px; font-weight:500; transition:all 0.3s ease;"
+                                      font-size:1rem; text-decoration:none;
+                                      display:inline-block; border-bottom:1.5px solid rgba(255,255,255,0.6);
+                                      padding-bottom:2px; font-weight:600; transition:all 0.3s ease;"
                                onmouseenter="this.style.color='#fff'; this.style.borderBottomColor='#fff'"
-                               onmouseleave="this.style.color='rgba(255,255,255,0.9)'; this.style.borderBottomColor='rgba(255,255,255,0.5)'">
+                               onmouseleave="this.style.color='rgba(255,255,255,0.9)'; this.style.borderBottomColor='rgba(255,255,255,0.6)'">
                                 Shop Now →
                             </a>
                         </div>
                         
-                        {{-- Hidden Link for the whole card --}}
+                        {{-- Clickable Area --}}
                         <a href="{{ route('product.listview', ['category' => $cat->id]) }}" 
                            style="position:absolute; inset:0; z-index:1;"></a>
                     </div>
@@ -176,66 +177,78 @@
             <div class="tab-content" id="nav-tabContent">
                 <div class="tab-pane fade show active" id="nav-one" role="tabpanel" aria-labelledby="nav-one-tab">
                     <!-- Tab 1 -->
-                    <div class="latest-items-active">
-                        <!-- Single -->
-                        
+                    <div class="row">
                         @foreach($trendingProducts as $products)
-
-                        <div class="properties pb-30">
-                            <div class="properties-card">
-
-                                <div class="properties-img">
-
-                                    <a href="{{route('product.details',$products->id)}}">
-                                        <div style="height: 250px; overflow: hidden; position: relative; background: #f5f5f5;">
-                                            @if($products->image)
-                                                <img src="{{ asset('upload/products/' . $products->image) }}" 
-                                                     alt="{{ $products->name }}"
-                                                     loading="lazy" width="400" height="250"
-                                                     style="width:100%; height:100%; object-fit:cover;">
-                                            @else
-                                                <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f0f0f0; color:#999;">
-                                                    <span>No Image</span>
-                                                </div>
-                                            @endif
-
-                                            {{-- Action Buttons --}}
-                                            <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: row; align-items: center; gap: 6px; white-space: nowrap;">
-                                                <a href="{{ route('addto.cart', $products->id) }}" class="ajax-cart-btn" title="Add to Cart" style="background:#e44d26; color:white; padding:8px 16px; border-radius:4px; text-decoration:none; font-size:13px; font-weight:600; display:inline-block;">
-                                                    🛒 Add to Cart
-                                                </a>
-                                                {{-- Wishlist --}}
-                                                <button class="wishlist-toggle-btn" data-id="{{ $products->id }}" 
-                                                        style="background: white; 
-                                                               color: #e44d26;
-                                                               padding: 8px 12px; 
-                                                               border-radius: 4px;
-                                                               border: 2px solid #e44d26;
-                                                               line-height: 1;
-                                                               cursor: pointer;
-                                                               transition: 0.3s;"
-                                                        onmouseover="this.style.background='#e44d26'; this.querySelector('i').style.color='white';"
-                                                        onmouseleave="this.style.background='white'; this.querySelector('i').style.color='#e44d26';">
-                                                    <i class="{{ auth('customerg')->check() && auth('customerg')->user()->wishlists()->where('product_id', $products->id)->exists() ? 'fas' : 'far' }} fa-heart"></i>
-                                                </button>
-                                            </div>
-                                        </div>
+                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
+                            <div class="product-card" style="
+                                height: 320px; 
+                                position: relative; 
+                                overflow: hidden;
+                                background: #f5f5f5;
+                                border-radius: 12px;
+                                box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+                                transition: all 0.3s ease;
+                            " onmouseenter="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.15)'"
+                               onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)'">
+                                
+                                {{-- Product Image --}}
+                                @if($products->image)
+                                    <img src="{{ asset('uploads/' . $products->image) }}" 
+                                         alt="{{ $products->name }}"
+                                         style="width:100%; height:100%; object-fit:cover;">
+                                @else
+                                    <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f8f9fa; color:#ccc; border-radius:12px;">
+                                        <i class="fas fa-image" style="font-size:3rem; margin-bottom:10px; opacity:0.5;"></i>
+                                        <span style="font-size:0.9rem; font-weight:600; text-transform:uppercase; letter-spacing:1px;">No Image</span>
+                                    </div>
+                                @endif
+                                
+                                {{-- Dark Gradient Overlay --}}
+                                <div style="position:absolute; inset:0; 
+                                            background:linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 70%);">
+                                </div>
+ 
+                                {{-- Badges (Top Left) --}}
+                                @if($products->discount > 0)
+                                    <div style="position:absolute; top:15px; left:15px; background:#e44d26; color:white; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; z-index:2;">
+                                        {{ round(($products->discount / $products->price) * 100) }}% OFF
+                                    </div>
+                                @endif
+ 
+                                {{-- Icons (Top Right) --}}
+                                <div style="position:absolute; top:15px; right:15px; display:flex; flex-direction:column; gap:8px; z-index:2;">
+                                    <a href="{{ route('addto.cart', $products->id) }}" class="ajax-cart-btn" 
+                                       style="background:white; color:#333; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); text-decoration:none; transition:0.3s;"
+                                       onmouseenter="this.style.background='#e44d26'; this.style.color='#fff'"
+                                       onmouseleave="this.style.background='#fff'; this.style.color='#333'">
+                                        <i class="fas fa-shopping-cart" style="font-size:12px;"></i>
                                     </a>
                                 </div>
-                                <div class="properties-caption properties-caption2">
-                                    <h3><a href="{{route('product.details',$products->id)}}"><span>{{$products->name}}</span></a></h3>
-                                    <div class="properties-footerproduct.view">
-                                        <div class="price">
-                                            <span>৳{{ number_format($products->final_price, 2) }}</span>
-                                            @if($products->discount > 0)
-                                                <span style="text-decoration: line-through; color: #888; margin-left: 10px; font-size: 0.9em;">৳{{ number_format($products->price, 2) }}</span>
-                                            @endif
-                                        </div>
+ 
+                                {{-- Product Details (Bottom) --}}
+                                <div style="position:absolute; bottom:25px; left:25px; right:25px; z-index:2;">
+                                    <h3 style="color:white; font-weight:800; font-size:1.4rem; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.5px;">
+                                        {{ $products->name }}
+                                    </h3>
+                                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                        <span style="color:#FFD700; font-weight:800; font-size:1.2rem;">৳{{ number_format($products->final_price, 0) }}</span>
+                                        @if($products->discount > 0)
+                                            <span style="color:rgba(255,255,255,0.6); text-decoration:line-through; font-size:0.9rem;">৳{{ number_format($products->price, 0) }}</span>
+                                        @endif
                                     </div>
+                                    <a href="{{ route('product.details', $products->id) }}" 
+                                       style="color:rgba(255,255,255,0.9); font-size:1rem; text-decoration:none; display:inline-block; border-bottom:1.5px solid rgba(255,255,255,0.6); padding-bottom:2px; font-weight:600; transition:0.3s;"
+                                       onmouseenter="this.style.color='#fff'; this.style.borderBottomColor='#fff'">
+                                        View Details →
+                                    </a>
                                 </div>
+                                
+                                {{-- Invisible Full Link --}}
+                                <a href="{{ route('product.details', $products->id) }}" style="position:absolute; inset:0; z-index:1;"></a>
                             </div>
                         </div>
                         @endforeach
+                    </div>
 
                     </div>
                 </div>
@@ -304,59 +317,67 @@
             </div>
         </div>
         <div class="container">
-            <div class="latest-items-active">
+            <div class="row">
                 @foreach($youMayLike as $item)
-                <!-- Single -->
-                <div class="properties pb-30">
-                    <div class="properties-card">
-                        <div class="properties-img">
-                            <a href="{{ route('product.details', $item->id) }}">
-                                <div style="height: 250px; overflow: hidden; position: relative; background: #f5f5f5;">
-                                    @if($item->image)
-                                        <img src="{{ asset('upload/products/' . $item->image) }}" 
-                                             alt="{{ $item->name }}"
-                                             loading="lazy" width="400" height="250"
-                                             style="width:100%; height:100%; object-fit:cover;">
-                                    @else
-                                        <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f0f0f0; color:#999;">
-                                            <span>No Image</span>
-                                        </div>
-                                    @endif
-
-                                    {{-- Action Buttons --}}
-                                    <div style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: row; align-items: center; gap: 6px; white-space: nowrap;">
-                                        <a href="{{ route('addto.cart', $item->id) }}" title="Add to Cart" style="background:#e44d26; color:white; padding:8px 16px; border-radius:4px; text-decoration:none; font-size:13px; font-weight:600; display:inline-block;">
-                                            🛒 Add to Cart
-                                        </a>
-                                        {{-- Wishlist --}}
-                                        <button class="wishlist-toggle-btn" data-id="{{ $item->id }}" 
-                                                style="background: white; 
-                                                       color: #e44d26;
-                                                       padding: 8px 12px; 
-                                                       border-radius: 4px;
-                                                       border: 2px solid #e44d26;
-                                                       line-height: 1;
-                                                       cursor: pointer;
-                                                       transition: 0.3s;"
-                                                onmouseover="this.style.background='#e44d26'; this.querySelector('i').style.color='white';"
-                                                onmouseleave="this.style.background='white'; this.querySelector('i').style.color='#e44d26';">
-                                            <i class="{{ auth('customerg')->check() && auth('customerg')->user()->wishlists()->where('product_id', $item->id)->exists() ? 'fas' : 'far' }} fa-heart"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
+                    <div class="product-card" style="
+                        height: 320px; 
+                        position: relative; 
+                        overflow: hidden;
+                        background: #f5f5f5;
+                        border-radius: 12px;
+                        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+                        transition: all 0.3s ease;
+                    " onmouseenter="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 12px 30px rgba(0,0,0,0.15)'"
+                       onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.1)'">
+                        
+                        {{-- Product Image --}}
+                        @if($item->image)
+                            <img src="{{ asset('uploads/' . $item->image) }}" 
+                                 alt="{{ $item->name }}"
+                                 style="width:100%; height:100%; object-fit:cover;">
+                        @else
+                            <div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f8f9fa; color:#ccc; border-radius:12px;">
+                                <i class="fas fa-image" style="font-size:3rem; margin-bottom:10px; opacity:0.5;"></i>
+                                <span style="font-size:0.9rem; font-weight:600; text-transform:uppercase; letter-spacing:1px;">No Image</span>
+                            </div>
+                        @endif
+                        
+                        {{-- Dark Gradient Overlay --}}
+                        <div style="position:absolute; inset:0; 
+                                    background:linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 70%);">
+                        </div>
+ 
+                        {{-- Icons (Top Right) --}}
+                        <div style="position:absolute; top:15px; right:15px; display:flex; flex-direction:column; gap:8px; z-index:2;">
+                            <a href="{{ route('addto.cart', $item->id) }}" class="ajax-cart-btn" 
+                               style="background:white; color:#333; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); text-decoration:none; transition:0.3s;"
+                               onmouseenter="this.style.background='#e44d26'; this.style.color='#fff'"
+                               onmouseleave="this.style.background='#fff'; this.style.color='#333'">
+                                <i class="fas fa-shopping-cart" style="font-size:12px;"></i>
                             </a>
                         </div>
-                        <div class="properties-caption properties-caption2">
-                            <h3><a href="{{ route('product.details', $item->id) }}">{{ $item->name }}</a></h3>
-                            <div class="properties-footer">
-                                <div class="price">
-                                    <span>৳{{ number_format($item->final_price, 2) }}</span>
-                                    @if($item->discount > 0)
-                                        <span style="text-decoration: line-through; color: #888; font-size: 0.8em;">৳{{ number_format($item->price, 2) }}</span>
-                                    @endif
-                                </div>
+ 
+                        {{-- Product Details (Bottom) --}}
+                        <div style="position:absolute; bottom:25px; left:25px; right:25px; z-index:2;">
+                            <h3 style="color:white; font-weight:800; font-size:1.4rem; margin-bottom:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; letter-spacing:-0.5px;">
+                                {{ $item->name }}
+                            </h3>
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                <span style="color:#FFD700; font-weight:800; font-size:1.2rem;">৳{{ number_format($item->final_price, 0) }}</span>
+                                @if($item->discount > 0)
+                                    <span style="color:rgba(255,255,255,0.6); text-decoration:line-through; font-size:0.9rem;">৳{{ number_format($item->price, 0) }}</span>
+                                @endif
                             </div>
+                            <a href="{{ route('product.details', $item->id) }}" 
+                               style="color:rgba(255,255,255,0.9); font-size:1rem; text-decoration:none; display:inline-block; border-bottom:1.5px solid rgba(255,255,255,0.6); padding-bottom:2px; font-weight:600; transition:0.3s;"
+                               onmouseenter="this.style.color='#fff'; this.style.borderBottomColor='#fff'">
+                                View Details →
+                            </a>
                         </div>
+                        
+                        {{-- Invisible Full Link --}}
+                        <a href="{{ route('product.details', $item->id) }}" style="position:absolute; inset:0; z-index:1;"></a>
                     </div>
                 </div>
                 @endforeach

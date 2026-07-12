@@ -50,7 +50,7 @@
                                     border-radius:8px; overflow:hidden;
                                     background:#f5f5f5;">
                             @if(isset($cartData['image']) && $cartData['image'])
-                                <img src="{{ asset('upload/products/' . $cartData['image']) }}"
+                                <img src="{{ asset('uploads/' . $cartData['image']) }}"
                                      style="width:100%; height:100%; object-fit:cover;">
                             @else
                                 <div style="width:100%; height:100%; display:flex;

@@ -66,7 +66,7 @@
                 <div class="card h-100 border-0 shadow-sm" style="transition: transform 0.3s ease;">
                 <div style="height: 120px; display: flex; align-items: center; justify-content: center; background: #fff;">
                     @if($brands->logo)
-                        <img src="{{ asset('upload/brands/' . $brands->logo) }}" 
+                        <img src="{{ asset('uploads/' . $brands->logo) }}" 
                             alt="{{ $brands->name }}"
                             style="width:100%; height:120px; object-fit:contain; padding:10px;">
                     @else

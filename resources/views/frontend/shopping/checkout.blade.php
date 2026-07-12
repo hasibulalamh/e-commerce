@@ -230,7 +230,7 @@
                             <div class="col-md-6">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">FULL NAME</label>
-                                    <input type="text" name="name" class="form-control-modern" value="{{ old('name', Auth::guard('customerg')->user()->name) }}" placeholder="Enter your full name" required>
+                                    <input type="text" name="name" class="form-control-modern" value="{{ old('name', Auth::guard('customer')->user()->name) }}" placeholder="Enter your full name" required>
                                     @error('name') <small class="text-danger">{{ $message }}</small> @enderror
                                 </div>
                             </div>
@@ -244,7 +244,7 @@
                             <div class="col-12">
                                 <div class="form-group-modern">
                                     <label class="form-label-modern">EMAIL ADDRESS</label>
-                                    <input type="email" name="email" class="form-control-modern" value="{{ old('email', Auth::guard('customerg')->user()->email) }}" placeholder="yourname@example.com" required>
+                                    <input type="email" name="email" class="form-control-modern" value="{{ old('email', Auth::guard('customer')->user()->email) }}" placeholder="yourname@example.com" required>
                                     @error('email') <small class="text-danger">{{ $message }}</small> @enderror
                                 </div>
                             </div>
@@ -373,7 +373,7 @@
                                         @php $subtotal += $item['price'] * $item['quantity']; @endphp
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="position-relative">
-                                                <img src="{{ asset('upload/products/' . ($item['image'] ?? 'default.jpg')) }}" 
+                                                <img src="{{ asset('uploads/' . ($item['image'] ?? 'default.jpg')) }}" 
                                                      style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
                                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" style="font-size: 9px;">
                                                     {{ $item['quantity'] }}

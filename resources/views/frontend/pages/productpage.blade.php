@@ -69,7 +69,7 @@
                                             <a href="{{route('product.details',$product->id)}}">
                                                 <div style="height: 250px; overflow: hidden; position: relative; background: #f5f5f5;">
                                                     @if($product->image)
-                                                        <img src="{{ asset('upload/products/' . $product->image) }}" 
+                                                        <img src="{{ asset('uploads/' . $product->image) }}" 
                                                              alt="{{ $product->name }}"
                                                              loading="lazy"
                                                              style="width:100%; height:100%; object-fit:cover;">
@@ -96,7 +96,7 @@
                                                                        transition: 0.3s;"
                                                                 onmouseover="this.style.background='#e44d26'; this.querySelector('i').style.color='white';"
                                                                 onmouseleave="this.style.background='white'; this.querySelector('i').style.color='#e44d26';">
-                                                            <i class="{{ auth('customerg')->check() && auth('customerg')->user()->wishlists()->where('product_id', $product->id)->exists() ? 'fas' : 'far' }} fa-heart"></i>
+                                                            <i class="{{ auth('customer')->check() && auth('customer')->user()->wishlists()->where('product_id', $product->id)->exists() ? 'fas' : 'far' }} fa-heart"></i>
                                                         </button>
                                                     </div>
                                                 </div>

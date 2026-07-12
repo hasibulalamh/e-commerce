@@ -30,10 +30,10 @@
                                     <a href="{{ route('product.details', $p->id) }}">
                                         <div style="height: 250px; overflow: hidden; background: #fff;">
                                             @if($p->image)
-                                                <img src="{{ asset('uploads/products/'.$p->image) }}" 
+                                                <img src="{{ asset('uploads/'.$p->image) }}" 
                                                      alt="{{ $p->name }}" 
                                                      style="width: 100%; height: 100%; object-fit: cover;"
-                                                     onerror="this.src='{{ asset('upload/products/'.$p->image) }}'; this.onerror=null;">
+                                                     onerror="this.src='{{ asset('uploads/'.$p->image) }}'; this.onerror=null;">
                                             @else
                                                 <div class="h-100 d-flex align-items-center justify-content-center bg-secondary text-white">
                                                     No Image

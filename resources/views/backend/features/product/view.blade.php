@@ -19,7 +19,7 @@
                                     </div>
                                     <div class="card-body text-center">
 
-                                        <img src="{{ asset('upload/products/' . $product->image) }}"
+                                        <img src="{{ asset('uploads/' . $product->image) }}"
                                             alt="{{ $product->name }}"
                                             class="img-fluid" style="max-height: 300px; border-radius: 8px; border: 1px solid #ddd;">
 

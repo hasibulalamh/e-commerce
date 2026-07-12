@@ -30,3 +30,6 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 e2e/.auth/
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php

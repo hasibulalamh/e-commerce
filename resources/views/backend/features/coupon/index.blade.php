@@ -37,7 +37,7 @@
                                             <td class="font-weight-bold text-primary">{{ $coupon->code }}</td>
                                             <td>
                                                 @if($coupon->product_id)
-                                                    <span class="badge bg-primary">{{ $coupon->product->name }}</span>
+                                                    <span class="badge bg-primary">{{ $coupon->product->name ?? 'Deleted/Unknown Product' }}</span>
                                                 @else
                                                     <span class="badge bg-dark">Entire Cart</span>
                                                 @endif
@@ -69,15 +69,15 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <div class="btn-group">
-                                                    <a href="{{ route('coupons.edit', $coupon->id) }}" class="btn btn-sm btn-outline-warning">
-                                                        <i class="fas fa-edit"></i>
+                                                <div class="d-flex align-items-center" style="gap: 5px;">
+                                                    <a href="{{ route('coupons.edit', $coupon->id) }}" class="btn btn-sm btn-warning text-white">
+                                                        <i class="fas fa-edit"></i> Edit
                                                     </a>
-                                                    <form action="{{ route('coupons.destroy', $coupon->id) }}" method="POST" onsubmit="return confirm('Delete this coupon?')">
+                                                    <form action="{{ route('coupons.destroy', $coupon->id) }}" method="POST" onsubmit="return confirm('Delete this coupon?')" style="margin: 0;">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger ml-1">
-                                                            <i class="fas fa-trash"></i>
+                                                        <button type="submit" class="btn btn-sm btn-danger">
+                                                            <i class="fas fa-trash"></i> Delete
                                                         </button>
                                                     </form>
                                                 </div>
@@ -85,14 +85,14 @@
                                         </tr>
                                         @empty
                                         <tr>
-                                            <td colspan="8" class="text-center py-4 text-muted">No coupons found. Click "Create New Coupon" to start.</td>
+                                            <td colspan="9" class="text-center py-4 text-muted">No coupons found. Click "Create New Coupon" to start.</td>
                                         </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
                             </div>
-                            <div class="mt-3">
-                                {{ $coupons->links() }}
+                            <div class="d-flex justify-content-center mt-4">
+                                {{ $coupons->links('pagination::bootstrap-5') }}
                             </div>
                         </div>
                     </div>

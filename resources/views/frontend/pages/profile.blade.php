@@ -9,12 +9,12 @@
                 <div style="background: white; border-radius: 16px; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.03);">
                     <div style="font-size: 16px; margin-bottom: 30px; display: flex; align-items: center; gap: 15px;">
                         <div style="width: 55px; height: 55px; flex-shrink: 0; background: #e44d26; color: white; border-radius: 12px; display: flex; align-items:center; justify-content:center; font-size: 1.5rem; font-weight: 800;
-                            {{ auth('customerg')->user()->image ? "background-image: url('".asset(auth('customerg')->user()->image)."'); background-size: cover; background-position: top center; color: transparent;" : "" }}">
-                            {{ substr(auth('customerg')->user()->name, 0, 1) }}
+                            {{ auth('customer')->user()->image ? "background-image: url('".asset(auth('customer')->user()->image)."'); background-size: cover; background-position: top center; color: transparent;" : "" }}">
+                            {{ substr(auth('customer')->user()->name, 0, 1) }}
                         </div>
                         <div>
                             <span style="font-size: 13px; color: #888; display: block;">Hello,</span>
-                            <strong style="color: #222;">{{ explode(' ', auth('customerg')->user()->name)[0] }}</strong>
+                            <strong style="color: #222;">{{ explode(' ', auth('customer')->user()->name)[0] }}</strong>
                         </div>
                     </div>
 
@@ -69,8 +69,8 @@
                             @csrf
                             <div style="width: 100px; height: 100px; flex-shrink: 0; background: #e44d26; border-radius: 16px; display: flex; align-items:center; justify-content:center;
                                         font-size: 2.5rem; font-weight: 800; color: white; background-size: cover; background-position: top center; box-shadow: 0 8px 20px rgba(228, 77, 38, 0.2);
-                                        {{ auth('customerg')->user()->image ? "background-image: url('".asset(auth('customerg')->user()->image)."'); color: transparent;" : "" }}">
-                                {{ substr(auth('customerg')->user()->name, 0, 1) }}
+                                        {{ auth('customer')->user()->image ? "background-image: url('".asset(auth('customer')->user()->image)."'); color: transparent;" : "" }}">
+                                {{ substr(auth('customer')->user()->name, 0, 1) }}
                             </div>
                             <div style="flex-grow: 1;">
                                 <input type="file" name="image" accept="image/*" required
@@ -98,7 +98,7 @@
                                         FULL NAME
                                         <span style="color: #dc3545; font-size: 10px; background: rgba(220,53,69,0.1); padding: 2px 6px; border-radius: 4px;">🔒 LOCKED</span>
                                     </label>
-                                    <input type="text" name="name" value="{{ auth('customerg')->user()->name }}" readonly
+                                    <input type="text" name="name" value="{{ auth('customer')->user()->name }}" readonly
                                            style="width: 100%; padding: 14px 18px; border: 2px solid #e0e0e0; border-radius: 12px; outline: none; font-weight: 600; font-size: 15px; color: #888; background: #f5f5f5; cursor: not-allowed;">
                                 </div>
                                 <div class="col-md-6 mb-4">
@@ -106,12 +106,12 @@
                                         EMAIL ADDRESS
                                         <span style="color: #dc3545; font-size: 10px; background: rgba(220,53,69,0.1); padding: 2px 6px; border-radius: 4px;">🔒 LOCKED</span>
                                     </label>
-                                    <input type="email" name="email" value="{{ auth('customerg')->user()->email }}" readonly
+                                    <input type="email" name="email" value="{{ auth('customer')->user()->email }}" readonly
                                            style="width: 100%; padding: 14px 18px; border: 2px solid #e0e0e0; border-radius: 12px; outline: none; font-weight: 600; font-size: 15px; color: #888; background: #f5f5f5; cursor: not-allowed;">
                                 </div>
                                 <div class="col-md-6 mb-4">
                                     <label style="font-weight: 700; font-size: 13px; color: #666; margin-bottom: 8px; display: block;">MOBILE NUMBER</label>
-                                    <input type="text" name="phone" value="{{ old('phone', auth('customerg')->user()->phone) }}"
+                                    <input type="text" name="phone" value="{{ old('phone', auth('customer')->user()->phone) }}"
                                            style="width: 100%; padding: 14px 18px; border: 2px solid #f0f0f0; border-radius: 12px; outline: none; transition: 0.3s; font-weight: 600; font-size: 15px; color: #333; background: #fafafa;"
                                            onfocus="this.style.border='2px solid #e44d26'; this.style.background='white';">
                                     @error('phone') <span style="color: #dc3545; font-size: 13px; font-weight: 600; margin-top: 5px; display: block;">{{ $message }}</span> @enderror
@@ -186,8 +186,8 @@
                             </div>
                             <form action="{{ route('customer.profile.update') }}" method="POST">
                                 @csrf
-                                <input type="hidden" name="two_factor_enabled" value="{{ auth('customerg')->user()->two_factor_enabled ? '0' : '1' }}">
-                                @if(auth('customerg')->user()->two_factor_enabled)
+                                <input type="hidden" name="two_factor_enabled" value="{{ auth('customer')->user()->two_factor_enabled ? '0' : '1' }}">
+                                @if(auth('customer')->user()->two_factor_enabled)
                                     <button type="submit" 
                                             style="background: #dc3545; color: white; border: none; padding: 12px 25px; 
                                                    border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.3s;"
@@ -204,7 +204,7 @@
                                 @endif
                             </form>
                         </div>
-                        @if(auth('customerg')->user()->two_factor_enabled)
+                        @if(auth('customer')->user()->two_factor_enabled)
                             <div style="margin-top: 15px; background: rgba(40,167,69,0.08); padding: 12px 18px; border-radius: 8px; border-left: 4px solid #28a745;">
                                 <span style="color: #28a745; font-weight: 700; font-size: 14px;">✅ 2FA is currently ENABLED</span>
                             </div>
