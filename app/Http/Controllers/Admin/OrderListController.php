@@ -453,7 +453,7 @@ class OrderListController extends Controller
                 'order_id' => $order->id,
                 'status' => 'shipped',
                 'notes' => 'Order sent to Steadfast Courier. Tracking ID: ' . $result['tracking_id'],
-                'changed_by' => auth()->id()
+                'changed_by' => Auth::id ()
             ]);
 
             return redirect()->back()->with('success', 'Order successfully sent to Steadfast! Tracking ID: ' . $result['tracking_id']);
