@@ -38,6 +38,10 @@ class Order extends Model
         'rider_name',
         'rider_phone',
         'status',
+        'delivery_channel',
+        'delivery_staff_id',
+        'delivered_at',
+        'delivery_fee',
     ];
 
     /**
@@ -50,6 +54,7 @@ class Order extends Model
         'updated_at' => 'datetime',
         'order_date' => 'datetime',
         'payment_date' => 'datetime',
+        'delivered_at' => 'datetime',
     ];
 
     /**
@@ -84,7 +89,7 @@ class Order extends Model
     {
         return $this->hasMany(OrderDetail::class, 'order_id')->with('product');
     }
-    
+
     /**
      * Get the user that placed the order.
      */
@@ -195,5 +200,10 @@ class Order extends Model
     public function isCancelled(): bool
     {
         return $this->status === self::STATUS_CANCELLED;
+    }
+
+    public function deliveryStaff()
+    {
+        return $this->belongsTo(DeliveryStaff::class, 'delivery_staff_id');
     }
 }

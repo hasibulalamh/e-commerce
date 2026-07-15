@@ -31,13 +31,18 @@ class ProfileController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
-            'current_password' => ['nullable', 'required_with:new_password', 'current_password'],
-            'new_password' => ['nullable', 'min:8', 'different:current_password'],
-        ]);
+        try {
+            $validated = $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+                'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+                'current_password' => ['nullable', 'required_with:new_password', 'current_password'],
+                'new_password' => ['nullable', 'min:8', 'different:current_password'],
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            notify()->error('Validation failed. Please check the form.');
+            throw $e;
+        }
 
         // Handle avatar upload
         if ($request->hasFile('avatar')) {

@@ -86,10 +86,16 @@
         </div>
         <div style="text-align:right;">
             <div style="font-weight:700; color:#333; margin-bottom:8px;">Payment Info:</div>
-            <div style="color:#555; line-height:1.8;">
+            <div style="color:#555; line-height:1.8; margin-bottom:15px;">
                 Method: {{ $order->payment_method ?? 'CASH' }}<br>
                 Status: {{ ucfirst($order->pay_status ?? 'unpaid') }}
             </div>
+            @if($order->delivery_channel === 'steadfast')
+                <div style="text-align:right; display:inline-block;">
+                    <div style="font-size:11px; font-weight:700; color:#e44d26; margin-bottom:5px;">SCAN TO CONFIRM DELIVERY</div>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ urlencode(route('customer.confirm-delivery.show', $order->id)) }}" alt="QR Code" style="border:1px solid #eee; padding:2px; border-radius:5px;">
+                </div>
+            @endif
         </div>
     </div>
 

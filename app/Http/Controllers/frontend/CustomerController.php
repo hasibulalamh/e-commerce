@@ -48,7 +48,12 @@ class CustomerController extends Controller
 
         // Generate and send OTP
         $otp = $customer->generateOtp();
-        Mail::to($customer->email)->send(new OtpVerificationMail($otp, $customer->name));
+        try {
+            Mail::to($customer->email)->send(new OtpVerificationMail($otp, $customer->name));
+        } catch (\Exception $e) {
+            \Log::error('Registration OTP Mail Error: ' . $e->getMessage());
+            toastr()->warning('We could not send the verification email immediately. Please click resend to try again.');
+        }
 
         // Store customer ID in session for OTP verification
         session(['otp_customer_id' => $customer->id]);
@@ -129,9 +134,14 @@ class CustomerController extends Controller
         }
 
         $otp = $customer->generateOtp();
-        Mail::to($customer->email)->send(new OtpVerificationMail($otp, $customer->name));
+        try {
+            Mail::to($customer->email)->send(new OtpVerificationMail($otp, $customer->name));
+            toastr()->success('New OTP sent to your email!');
+        } catch (\Exception $e) {
+            \Log::error('Resend OTP Mail Error: ' . $e->getMessage());
+            toastr()->error('Failed to send verification email. Please check your network connection.');
+        }
 
-        toastr()->success('New OTP sent to your email!');
         return redirect()->back();
     }
 
@@ -290,12 +300,17 @@ class CustomerController extends Controller
     {
         $customer = auth('customer')->user();
 
-        $request->validate([
-            'phone' => 'nullable|string|max:20',
-            'default_address_id' => 'nullable|exists:customer_addresses,id',
-            'password' => 'nullable|string|min:6|confirmed',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-        ]);
+        try {
+            $request->validate([
+                'phone' => 'nullable|string|max:20',
+                'default_address_id' => 'nullable|exists:customer_addresses,id',
+                'password' => 'nullable|string|min:6|confirmed',
+                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            toastr()->error('Validation failed. Please check the form.');
+            throw $e;
+        }
 
         $data = [];
         if ($request->has('phone')) $data['phone'] = $request->phone;

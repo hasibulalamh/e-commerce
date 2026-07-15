@@ -29,7 +29,7 @@ class DeliveryOtp extends Model
 
     public function verifiedByStaff()
     {
-        return $this->belongsTo(User::class, 'verified_by_staff_id');
+        return $this->belongsTo(DeliveryStaff::class, 'verified_by_staff_id');
     }
 
     public function isExpired(): bool

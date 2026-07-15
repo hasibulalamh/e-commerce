@@ -77,6 +77,17 @@
         </li>
 
         <li class="nav-item my-1">
+            <a class="nav-link {{ request()->routeIs('orders.delivery-reports') ? 'active' : '' }}" href="{{route('orders.delivery-reports')}}">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+                Delivery Reports
+            </a>
+        </li>
+
+        <li class="nav-item my-1">
             <a class="nav-link {{ request()->routeIs('coupons.*') ? 'active' : '' }}" href="{{route('coupons.index')}}">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M15 5v2"></path>
@@ -85,6 +96,19 @@
                     <path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z"></path>
                 </svg>
                 Coupons
+            </a>
+        </li>
+
+
+               <li class="nav-item my-1">
+            <a class="nav-link {{ request()->routeIs('deliverystaff.*') ? 'active' : '' }}" href="{{route('deliverystaff.list')}}">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 5v2"></path>
+                    <path d="M15 11v2"></path>
+                    <path d="M15 17v2"></path>
+                    <path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4V7a2 2 0 0 1 2-2z"></path>
+                </svg>
+                Delivery Staff
             </a>
         </li>
 
@@ -111,7 +135,7 @@
         </li>
     </ul>
 
-    
+
 </div>
 
 <style>

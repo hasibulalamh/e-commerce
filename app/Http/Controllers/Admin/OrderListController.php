@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 
+use App\Models\DeliveryStaff;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\OrderStatusHistory;
@@ -111,7 +112,7 @@ class OrderListController extends Controller
     public function show($id)
     {
         try {
-            $order = Order::with(['orderDetails.product.category', 'orderDetails.product.brand', 'statusHistories.changedBy', 'user', 'customer'])
+            $order = Order::with(['orderDetails.product.category', 'orderDetails.product.brand', 'statusHistories.changedBy', 'user', 'customer', 'deliveryStaff'])
                 ->findOrFail($id);
 
             // Calculate order totals
@@ -165,7 +166,9 @@ class OrderListController extends Controller
         $order = Order::findOrFail($id);
         $order->update(['status' => 'confirmed']);
 
-        return redirect()->back()->with('success', 'Order confirmed successfully!');
+        $this->autoAssignDelivery($order);
+
+        return redirect()->back()->with('success', 'Order confirmed and assigned for delivery successfully!');
     }
 
     public function cancel($id)
@@ -243,6 +246,9 @@ class OrderListController extends Controller
             case 'confirmed':
                 // Stock already decremented at order placement (OrderController@storeaddorder)
                 // No additional stock changes needed here
+                if (!$order->delivery_staff_id && !$order->tracking_id) {
+                    $this->autoAssignDelivery($order);
+                }
                 break;
 
             case 'cancelled':
@@ -422,6 +428,15 @@ class OrderListController extends Controller
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
+    public function deliveryReports()
+    {
+        $reports = \App\Models\DeliveryReport::with(['order', 'deliveryStaff'])
+            ->latest()
+            ->paginate(15);
+            
+        return view('backend.features.order.delivery-reports', compact('reports'));
+    }
+
     public function invoice($id)
     {
         $order = Order::with(['orderDetails.product', 'customer'])
@@ -429,37 +444,105 @@ class OrderListController extends Controller
         return view('backend.features.order.invoice', compact('order'));
     }
 
+    /**
+     * Assign delivery for an order: in-house staff if someone is free,
+     * otherwise falls back to Steadfast automatically.
+     */
+    public function assignDelivery($id)
+    {
+        $order = Order::findOrFail($id);
+
+        if ($order->delivery_staff_id || $order->tracking_id) {
+            return redirect()->back()->with('error', 'This order has already been assigned for delivery.');
+        }
+
+        $this->autoAssignDelivery($order);
+
+        // Check if it was assigned to in_house or steadfast
+        if ($order->delivery_channel === 'in_house') {
+            return redirect()->back()->with('success', "Order assigned to {$order->deliveryStaff->name} for in-house delivery.");
+        } else if ($order->tracking_id) {
+            return redirect()->back()->with('success', 'Order successfully sent to Steadfast! Tracking ID: ' . $order->tracking_id);
+        } else {
+            return redirect()->back()->with('error', 'Failed to assign delivery. Please try again.');
+        }
+    }
+
     // Send order to Steadfast Courier
     public function sendToSteadfast($id)
     {
         $order = Order::findOrFail($id);
-
+        $this->executeSteadfastAssignment($order);
+        
         if ($order->tracking_id) {
-            return redirect()->back()->with('error', 'Order already sent to Steadfast. Tracking ID: ' . $order->tracking_id);
+            return redirect()->back()->with('success', 'Order successfully sent to Steadfast! Tracking ID: ' . $order->tracking_id);
         }
+        
+        return redirect()->back()->with('error', 'Failed to send order to Steadfast. Please check the logs and try again.');
+    }
+
+    /**
+     * Internal auto-assignment logic
+     */
+    protected function autoAssignDelivery(Order $order)
+    {
+        if ($order->delivery_staff_id || $order->tracking_id) {
+            return;
+        }
+
+        // Search for a free staff member (less than 10 pending orders)
+        $freeStaff = DeliveryStaff::withCount(['assignedOrders' => function ($q) {
+            $q->where('delivery_channel', 'in_house')
+              ->whereNull('delivered_at')
+              ->where('status', '!=', 'cancelled');
+        }])->having('assigned_orders_count', '<', 10)->first();
+
+        if ($freeStaff) {
+            $order->update([
+                'delivery_channel'  => 'in_house',
+                'delivery_staff_id' => $freeStaff->id,
+            ]);
+
+            OrderStatusHistory::create([
+                'order_id'   => $order->id,
+                'status'     => $order->status,
+                'notes'      => 'Assigned to in-house delivery staff: ' . $freeStaff->name,
+                'changed_by' => Auth::id(),
+            ]);
+            return;
+        }
+
+        // If no free staff, auto assign to Steadfast
+        $this->executeSteadfastAssignment($order);
+    }
+
+    /**
+     * Internal Steadfast execution logic
+     */
+    protected function executeSteadfastAssignment(Order $order)
+    {
+        if ($order->tracking_id) return;
 
         $steadfast = new \App\Services\SteadfastCourier();
         $result = $steadfast->createOrder($order);
 
         if ($result['success']) {
             $order->update([
-                'tracking_id' => $result['tracking_id'],
-                'courier_status' => $result['status'],
-                'status' => 'shipped' // Automatically mark as shipped
+                'tracking_id'      => $result['tracking_id'],
+                'courier_status'   => $result['status'],
+                'delivery_channel' => 'steadfast',
+                'status'           => 'shipped'
             ]);
 
-            // Log history
             \App\Models\OrderStatusHistory::create([
                 'order_id' => $order->id,
                 'status' => 'shipped',
                 'notes' => 'Order sent to Steadfast Courier. Tracking ID: ' . $result['tracking_id'],
-                'changed_by' => Auth::id ()
+                'changed_by' => Auth::id() ?? null
             ]);
-
-            return redirect()->back()->with('success', 'Order successfully sent to Steadfast! Tracking ID: ' . $result['tracking_id']);
+        } else {
+            \Log::error('Steadfast Error for Order #'.$order->id.': ' . $result['message']);
         }
-
-        return redirect()->back()->with('error', 'Steadfast Error: ' . $result['message']);
     }
 
     /**
@@ -497,10 +580,16 @@ class OrderListController extends Controller
         }
 
         if ($newStatus !== $order->status) {
-            $order->update([
+            $updateData = [
                 'status' => $newStatus,
                 'courier_status' => $status
-            ]);
+            ];
+            
+            if ($newStatus === 'delivered' && !$order->delivered_at) {
+                $updateData['delivered_at'] = now();
+            }
+
+            $order->update($updateData);
 
             // Create status history log
             \App\Models\OrderStatusHistory::create([

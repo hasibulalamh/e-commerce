@@ -16,20 +16,20 @@ class DeliveryAuthController extends Controller
 
     public function loginSubmit(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
-
-        if ($validator->fails()) {
-            notify()->error($validator->getMessageBag());
-            return redirect()->back();
+        try {
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|string|min:6',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            notify()->error('Validation failed. Please check your credentials.');
+            throw $e;
         }
 
         $credentials = $request->only('email', 'password');
 
         if (Auth::guard('delivery')->attempt($credentials)) {
-            notify()->success('Successfully login');
+            notify()->success('Successfully logged in');
             return redirect()->route('delivery.dashboard');
         }
 

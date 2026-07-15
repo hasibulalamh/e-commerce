@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Delivery\DeliveryAuthController;
 use App\Http\Middleware\deliveryAuth;
+use App\Http\Controllers\Admin\DeliveryStaffController;
 
 // Frontend Controllers
 use App\Http\Controllers\frontend\BrandController as FrontendBrandController;
@@ -201,6 +202,8 @@ Route::prefix('admin')->group(function () {
             Route::get('/bulk-update', [OrderListController::class, 'bulkUpdate'])->name('orders.bulk-update');
             Route::get('/export', [OrderListController::class, 'export'])->name('orders.export');
             Route::get('/invoice/{id}', [OrderListController::class, 'invoice'])->name('order.invoice');
+            Route::post('/assign-delivery/{id}', [OrderListController::class, 'assignDelivery'])->name('orders.assign-delivery');
+            Route::get('/delivery-reports', [OrderListController::class, 'deliveryReports'])->name('orders.delivery-reports');
             Route::post('/send-to-steadfast/{id}', [OrderListController::class, 'sendToSteadfast'])->name('orders.send-steadfast');
         });
 
@@ -220,6 +223,18 @@ Route::prefix('admin')->group(function () {
         // Setting Routes
         Route::get('/settings', [SettingController::class, 'index'])->name('admin.settings.index');
         Route::post('/settings/update', [SettingController::class, 'update'])->name('admin.settings.update');
+
+
+
+        // Delivery Staff Management Routes
+        Route::prefix('delivery-staff')->group(function () {
+            Route::get('/', [DeliveryStaffController::class, 'list'])->name('deliverystaff.list');
+            Route::get('/create', [DeliveryStaffController::class, 'create'])->name('deliverystaff.create');
+            Route::post('/store', [DeliveryStaffController::class, 'store'])->name('deliverystaff.store');
+            Route::get('/edit/{id}', [DeliveryStaffController::class, 'edit'])->name('deliverystaff.edit');
+            Route::post('/update/{id}', [DeliveryStaffController::class, 'update'])->name('deliverystaff.update');
+            Route::delete('/delete/{id}', [DeliveryStaffController::class, 'delete'])->name('deliverystaff.delete');
+        });
     });
 });
 
@@ -236,15 +251,36 @@ Route::post('/delivery/login/submit', [DeliveryAuthController::class, 'loginSubm
 Route::middleware([deliveryAuth::class])->prefix('delivery')->name('delivery.')->group(function () {
     Route::post('/logout', [DeliveryAuthController::class, 'logout'])->name('logout');
 
+    // Dashboard
     Route::get('/', [DeliveryController::class, 'dashboard'])->name('dashboard');
+
+    // Assigned Orders (pending deliveries)
+    Route::get('/assigned-orders', [DeliveryController::class, 'assignedOrders'])->name('assigned-orders');
+
+    // Delivery History (completed)
+    Route::get('/history', [DeliveryController::class, 'deliveryHistory'])->name('history');
+
+    // Order Details
+    Route::get('/orders/{order}', [DeliveryController::class, 'orderShow'])->name('order.show');
+
+    // Wallet
+    Route::get('/wallet', [DeliveryController::class, 'wallet'])->name('wallet');
+
+    // Profile
     Route::get('/profile', [DeliveryController::class, 'profile'])->name('profile');
     Route::put('/profile', [DeliveryController::class, 'updateProfile'])->name('profile.update');
+
+    // OTP Actions
     Route::post('/orders/{order}/send-otp', [DeliveryController::class, 'staffSendOtp'])->name('send-otp');
     Route::post('/orders/{order}/verify-otp', [DeliveryController::class, 'staffVerifyOtp'])->name('verify-otp');
+
+    // Report Issue / Cancel Order
+    Route::post('/orders/{order}/report-issue', [DeliveryController::class, 'reportIssue'])->name('report-issue');
 });
 
 // ===== CUSTOMER SELF-VERIFICATION (STEADFAST) =====
 Route::middleware(['customer'])->prefix('my-orders')->name('customer.')->group(function () {
     Route::get('/{order}/confirm-delivery', [DeliveryController::class, 'showConfirmDeliveryPage'])->name('confirm-delivery.show');
     Route::post('/{order}/confirm-delivery', [DeliveryController::class, 'customerVerifyOtp'])->name('confirm-delivery.submit');
+    Route::post('/{order}/send-otp', [DeliveryController::class, 'triggerSteadfastOtp'])->name('confirm-delivery.send-otp');
 });

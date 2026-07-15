@@ -333,6 +333,38 @@
                         </div>
                     </div>
 
+                    <!-- Delivery Assignment -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Delivery Assignment</h5>
+
+                            @if($order->delivery_staff_id && $order->deliveryStaff)
+                                <div class="alert alert-info mb-0">
+                                    <i class="mdi mdi-account"></i> Assigned to: <strong>{{ $order->deliveryStaff->name }}</strong>
+                                    <br>
+                                    @if($order->delivered_at)
+                                        <span class="badge bg-success mt-2">Delivered</span>
+                                    @else
+                                        <span class="badge bg-warning text-dark mt-2">Pending Delivery</span>
+                                    @endif
+                                </div>
+                            @elseif($order->tracking_id)
+                                <div class="alert alert-info mb-0">
+                                    <i class="mdi mdi-truck-fast"></i> Sent via Steadfast<br>
+                                    Tracking: <strong>{{ $order->tracking_id }}</strong>
+                                </div>
+                            @else
+                                <form action="{{ route('orders.assign-delivery', $order->id) }}" method="POST" class="d-grid">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary" onclick="return confirm('Assign delivery? A free in-house staff will be used if available, otherwise it will be sent to Steadfast automatically.')">
+                                        <i class="mdi mdi-truck-delivery-outline me-1"></i>
+                                        Assign Delivery
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+
                     <!-- Order Actions -->
                     <div class="card">
                         <div class="card-body">
@@ -376,16 +408,6 @@
                                     <i class="mdi mdi-history me-1"></i>
                                     View Status History
                                 </a>
-
-                                @if(!$order->tracking_id && in_array($order->status, ['confirmed', 'shipped']))
-                                <form action="{{ route('orders.send-steadfast', $order->id) }}" method="POST" class="d-grid mt-2">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="mdi mdi-truck-fast me-1"></i>
-                                        Send to Steadfast
-                                    </button>
-                                </form>
-                                @endif
                             </div>
                         </div>
                     </div>
