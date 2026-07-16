@@ -19,7 +19,7 @@ class DashboardController extends Controller
     {
         try {
             // Dashboard statistics - include all non-cancelled orders for revenue to show progress
-            $totalRevenue = Order::query()->where('status', '<>', 'cancelled', 'and')->sum('total');
+            $totalRevenue = Order::query()->where('status', '<>', 'cancelled')->sum('total');
             $totalOrders = Order::query()->count('id');
             $totalProducts = Product::query()->count('id');
             $totalCustomers = Customer::query()->count('id');
@@ -33,18 +33,18 @@ class DashboardController extends Controller
                 ->get();
 
             // Top selling products (by quantity)
-            $topProducts = Product::select('products.*')
+            $topProducts = Product::select('products.id', 'products.name')
                 ->join('orderdetails', 'products.id', '=', 'orderdetails.product_id')
                 ->selectRaw('SUM(orderdetails.quantity) as total_sold')
-                ->groupBy('products.id')
+                ->groupBy('products.id', 'products.name')
                 ->orderBy('total_sold', 'desc')
                 ->take(5)
                 ->get();
 
             // Monthly revenue data for chart
-            $monthlyRevenue = Order::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, SUM(total) as total', [])
-                ->where('status', '!=', 'cancelled', 'and')
-                ->groupBy('year', 'month')
+            $monthlyRevenue = Order::selectRaw('YEAR(created_at) as year, MONTH(created_at) as month, SUM(total) as total')
+                ->where('status', '!=', 'cancelled')
+                ->groupByRaw('YEAR(created_at), MONTH(created_at)')
                 ->orderBy('year', 'asc')
                 ->orderBy('month', 'asc')
                 ->get();
@@ -60,7 +60,7 @@ class DashboardController extends Controller
             }
 
             // Low stock products (stock < 5)
-            $lowStockProducts = Product::where('stock', '<', 5, 'and')
+            $lowStockProducts = Product::where('stock', '<', 5)
                 ->orderBy('stock', 'asc')
                 ->take(5)
                 ->get();
@@ -93,6 +93,7 @@ class DashboardController extends Controller
                 'totalBrands' => 0,
                 'recentOrders' => collect(),
                 'topProducts' => collect(),
+                'lowStockProducts' => collect(),
                 'monthlyLabels' => [],
                 'monthlyData' => [],
                 'error' => 'Unable to load dashboard data. Please try again later.'
