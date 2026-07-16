@@ -38,7 +38,7 @@
                              <div class="single-footer-caption mb-20">
                                  <!-- logo -->
                                  <div class="footer-logo mb-35">
-                                     <a href="index.html"><img src="assets/img/logo/logo2_footer.png" alt=""></a>
+                                     <a href="{{ route('Home') }}"><img src="{{ asset('assets/img/logo/logo2_footer.png') }}" alt=""></a>
                                  </div>
                              </div>
                          </div>
