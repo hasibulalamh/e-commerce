@@ -100,7 +100,8 @@
             color: #fff;
             background: var(--dp-sidebar-hover);
         }
-
++
+.
         .nav-link.active {
             color: #fff;
             background: var(--dp-sidebar-active);
